@@ -1,0 +1,23 @@
+{
+  "name": "negotiating-platform-for-youth-diplomacy",
+  "version": "1.0.0",
+  "description": "111 test",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kevinxyk/Negotiating-Platform-for-Youth-Diplomacy.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kevinxyk/Negotiating-Platform-for-Youth-Diplomacy/issues"
+  },
+  "homepage": "https://github.com/Kevinxyk/Negotiating-Platform-for-Youth-Diplomacy#readme",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
