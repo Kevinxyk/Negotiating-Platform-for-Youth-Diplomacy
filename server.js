@@ -14,6 +14,7 @@ const scoringRoutes      = require('./routes/scoringRoutes');
 const aiAnalysisRoutes   = require('./routes/aiAnalysisRoutes');
 const imageRoutes        = require('./routes/imageRoutes');
 const timezoneRoutes = require('./routes/timezoneRoutes');
+const eventBus = require('./services/eventBus');
 
 // 支持 JSON 请求体
 app.use(express.json());
@@ -35,4 +36,9 @@ app.get('/', (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server started at http://localhost:${PORT}`);
+});
+
+eventBus.on('timeEnd', (eventKey) => {
+  console.log(`⏰ Event '${eventKey}' ended at`, new Date().toISOString());
+  // TODO: notify clients via WebSocket or other mechanism
 });
