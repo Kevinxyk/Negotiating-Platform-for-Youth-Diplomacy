@@ -10,8 +10,14 @@ async function getParticipants(roomId) {
 
 // 向某房间添加参会者
 async function addParticipant(roomId, participant) {
-  if (!participants[roomId]) participants[roomId] = [];
+  if (!participants[roomId]) {
+    participants[roomId] = [];
+  }
   participants[roomId].push(participant);
+  return participant;
 }
 
-module.exports = { getParticipants, addParticipant };
+module.exports = {
+  getParticipants,
+  addParticipant
+};

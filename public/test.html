@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API 测试页</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    section { margin-bottom: 40px; }
+    textarea { width: 100%; height: 150px; }
+    input, select { margin: 0 5px; }
+  </style>
+</head>
+<body>
+
+  <h1>后端 API 测试</h1>
+
+  <!-- 文本聊天模块 -->
+  <section id="chat">
+    <h2>Text Chat 模块</h2>
+    <div>
+      Room: <input id="chat-room" value="room1">
+      Limit: <input id="chat-limit" type="number" value="50">
+      Offset: <input id="chat-offset" type="number" value="0">
+      <button onclick="loadChat()">获取消息</button>
+    </div>
+    <pre id="chat-history"></pre>
+
+    <div>
+      Send &gt;&gt;
+      Username: <input id="chat-username" value="u1">
+      Country: <input id="chat-country" value="C1">
+      Role: <input id="chat-role" value="r1">
+      Text: <input id="chat-text" value="hello">
+      <button onclick="sendChat()">发送</button>
+    </div>
+
+    <div>
+      Revoke &gt;&gt;
+      Message ID: <input id="chat-revoke-id">
+      <button onclick="revokeChat()">撤回</button>
+    </div>
+
+    <div>
+      Summary User: <button onclick="summChatUser()">按用户统计</button>
+      <pre id="chat-summary-user"></pre>
+    </div>
+    <div>
+      Summary Time: <button onclick="summChatTime()">按小时统计</button>
+      <pre id="chat-summary-time"></pre>
+    </div>
+
+    <div>
+      Search &gt;&gt;
+      Keyword: <input id="chat-keyword" value="hello">
+      <button onclick="searchChat()">搜索</button>
+      <pre id="chat-search"></pre>
+    </div>
+  </section>
+
+
+  <!-- 评分模块 -->
+  <section id="score">
+    <h2>Scoring 模块</h2>
+    <div>
+      Room: <input id="score-room" value="testRoom">
+      Judge ID: <input id="score-judge" value="judge1">
+      Target User: <input id="score-user" value="user1">
+      Comments: <input id="score-comments" value="Excellent">
+      Score: <input id="score-value" type="number" value="10">
+      <button onclick="submitScore()">提交评分</button>
+    </div>
+    <pre id="score-submit"></pre>
+
+    <div>
+      <button onclick="loadAgg()">聚合 Avg</button>
+      <pre id="score-agg"></pre>
+    </div>
+    <div>
+      <button onclick="loadHistory()">历史 History</button>
+      <pre id="score-history"></pre>
+    </div>
+    <div>
+      <button onclick="loadRanking()">排名 Ranking</button>
+      <pre id="score-ranking"></pre>
+    </div>
+    <div>
+      <button onclick="loadAI()">AI 评分</button>
+      <pre id="score-ai"></pre>
+    </div>
+  </section>
+
+
+  <script>
+    // --- Text Chat ---
+    async function loadChat(){
+      const room   = document.getElementById("chat-room").value;
+      const limit  = document.getElementById("chat-limit").value;
+      const offset = document.getElementById("chat-offset").value;
+      const res = await fetch(`/api/chat/${room}/messages?limit=${limit}&offset=${offset}`);
+      document.getElementById("chat-history").innerText = await res.text();
+    }
+    async function sendChat(){
+      const room = document.getElementById("chat-room").value;
+      const body = {
+        username: document.getElementById("chat-username").value,
+        country:  document.getElementById("chat-country").value,
+        role:     document.getElementById("chat-role").value,
+        text:     document.getElementById("chat-text").value
+      };
+      const res = await fetch(`/api/chat/${room}/send`, {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify(body)
+      });
+      document.getElementById("chat-history").innerText = "Send → " + await res.text();
+    }
+    async function revokeChat(){
+      const room = document.getElementById("chat-room").value;
+      const id   = document.getElementById("chat-revoke-id").value;
+      const res  = await fetch(`/api/chat/${room}/message/${id}/revoke`, {
+        method: "POST"
+      });
+      document.getElementById("chat-history").innerText = "Revoke → " + await res.text();
+    }
+    async function summChatUser(){
+      const room = document.getElementById("chat-room").value;
+      const res  = await fetch(`/api/chat/${room}/summary/user`);
+      document.getElementById("chat-summary-user").innerText = await res.text();
+    }
+    async function summChatTime(){
+      const room = document.getElementById("chat-room").value;
+      const res  = await fetch(`/api/chat/${room}/summary/time`);
+      document.getElementById("chat-summary-time").innerText = await res.text();
+    }
+    async function searchChat(){
+      const room    = document.getElementById("chat-room").value;
+      const keyword = document.getElementById("chat-keyword").value;
+      const res     = await fetch(`/api/chat/${room}/search?keyword=${encodeURIComponent(keyword)}`);
+      document.getElementById("chat-search").innerText = await res.text();
+    }
+
+    // --- Scoring ---
+    async function submitScore(){
+      const room = document.getElementById("score-room").value;
+      const judge = document.getElementById("score-judge").value;
+      const body = {
+        judgeId: judge,
+        targetUserId: document.getElementById("score-user").value,
+        comments: document.getElementById("score-comments").value,
+        score:    +document.getElementById("score-value").value
+      };
+      const res = await fetch(`/api/score/${room}`, {
+        method: "POST",
+        headers: {
+          "Content-Type":"application/json",
+          "x-user-role": judge
+        },
+        body: JSON.stringify(body)
+      });
+      document.getElementById("score-submit").innerText = await res.text();
+    }
+    async function loadAgg(){
+      const room = document.getElementById("score-room").value;
+      const res = await fetch(`/api/score/${room}`);
+      document.getElementById("score-agg").innerText = await res.text();
+    }
+    async function loadHistory(){
+      const room = document.getElementById("score-room").value;
+      const user = document.getElementById("score-user").value;
+      const res  = await fetch(`/api/score/${room}/history/${user}`);
+      document.getElementById("score-history").innerText = await res.text();
+    }
+    async function loadRanking(){
+      const room = document.getElementById("score-room").value;
+      const res  = await fetch(`/api/score/${room}/ranking`);
+      document.getElementById("score-ranking").innerText = await res.text();
+    }
+    async function loadAI(){
+      const room = document.getElementById("score-room").value;
+      const res  = await fetch(`/api/score/${room}/ai`, {
+        headers: { "x-user-role": document.getElementById("score-judge").value === "" ? "sys" : "sys" }
+      });
+      document.getElementById("score-ai").innerText = await res.text();
+    }
+  </script>
+</body>
+</html>

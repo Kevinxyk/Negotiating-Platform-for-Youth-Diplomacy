@@ -1,35 +1,53 @@
 // File: my-backend/controllers/audioChatController.js
 "use strict";
-const { saveRecording, controlAudio, listRecordings } = require('../services/audioChatService');
+const audioChatService = require('../services/audioChatService');
+const multer = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 // Upload audio recording
-async function uploadRecording(req, res) {
-  const { roomId } = req.params;
-  const file = req.file;
-  const username = req.body.username;
-  if (!file || !username) {
-    return res.status(400).json({ error: 'file and username required' });
+async function saveRecording(req, res) {
+  try {
+    const { roomId } = req.params;
+    const { username } = req.body;
+    const file = req.file;
+    
+    if (!file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    
+    const recording = await audioChatService.saveRecording(roomId, file, username);
+    res.json(recording);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  const rec = await saveRecording(roomId, file, username);
-  res.status(201).json(rec);
 }
 
 // Control audio: mute/unmute/hangup/resume
-async function controlAudioHandler(req, res) {
-  const { roomId } = req.params;
-  const { username, action } = req.body;
-  if (!username || !action) {
-    return res.status(400).json({ error: 'username and action required' });
+async function controlAudio(req, res) {
+  try {
+    const { roomId, username } = req.params;
+    const { action } = req.body;
+    
+    const state = await audioChatService.controlAudio(roomId, username, action);
+    res.json(state);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  const state = await controlAudio(roomId, username, action);
-  res.json(state);
 }
 
 // List recordings
-async function listAudioHandler(req, res) {
-  const { roomId } = req.params;
-  const recs = await listRecordings(roomId);
-  res.json(recs);
+async function listRecordings(req, res) {
+  try {
+    const { roomId } = req.params;
+    const recordings = await audioChatService.listRecordings(roomId);
+    res.json(recordings);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
-module.exports = { uploadRecording, controlAudioHandler, listAudioHandler };
+module.exports = {
+  saveRecording: [upload.single('audio'), saveRecording],
+  controlAudio,
+  listRecordings
+};

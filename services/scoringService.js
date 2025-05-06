@@ -7,61 +7,64 @@ const { dimensions, roleWeights } = require('../data/scoreConfig');
  * Submit or update a judge's multi-dimensional score for a target user
  */
 async function submitScore(roomId, judgeId, role, targetUserId, dimensionScores, comments) {
-  let rec = scores.find(r => r.roomId === roomId && r.judgeId === judgeId && r.targetUserId === targetUserId);
-  const now = new Date().toISOString();
-  if (rec) {
-    rec.dimensionScores = dimensionScores;
-    rec.comments = comments;
-    rec.timestamp = now;
-    rec.role = role;
-  } else {
-    rec = {
-      id: uuidv4(),
-      roomId,
-      judgeId,
-      role,
-      targetUserId,
-      dimensionScores,
-      comments,
-      timestamp: now
-    };
-    scores.push(rec);
-  }
-  return rec;
+  const score = {
+    id: uuidv4(),
+    roomId,
+    judgeId,
+    targetUserId,
+    dimensionScores,
+    comments,
+    timestamp: new Date().toISOString(),
+    role
+  };
+  scores.push(score);
+  return score;
 }
 
 /**
  * Aggregate scores by target user using dimension and role weights
  */
 async function getScores(roomId) {
-  const agg = {};
-  scores.filter(r => r.roomId === roomId).forEach(r => {
-    const rw = roleWeights[r.role] || 1;
-    // compute weighted sum for this record
-    let total = 0;
-    dimensions.forEach(d => {
-      const v = r.dimensionScores[d.id] || 0;
-      total += v * d.weight;
-    });
-    total *= rw;
-    if (!agg[r.targetUserId]) agg[r.targetUserId] = { sum: 0, weightSum: 0 };
-    agg[r.targetUserId].sum += total;
-    agg[r.targetUserId].weightSum += rw;
-  });
-  return Object.entries(agg).map(([userId, { sum, weightSum }]) => ({
-    targetUserId: userId,
-    avgScore: weightSum ? (sum / weightSum).toFixed(2) : 0,
-    judgeCount: scores.filter(r => r.roomId === roomId && r.targetUserId === userId).length
-  }));
+  return scores.filter(s => s.roomId === roomId);
 }
 
-async function getScoreHistory(roomId, targetUserId) {
-  return scores.filter(r => r.roomId === roomId && r.targetUserId === targetUserId);
+async function getScoreHistory(roomId, userId) {
+  return scores
+    .filter(s => s.roomId === roomId && s.targetUserId === userId)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 }
 
 async function getRanking(roomId) {
-  const list = await getScores(roomId);
-  return list.sort((a, b) => b.avgScore - a.avgScore);
+  const userScores = {};
+  scores
+    .filter(s => s.roomId === roomId)
+    .forEach(s => {
+      if (!userScores[s.targetUserId]) {
+        userScores[s.targetUserId] = {
+          total: 0,
+          count: 0,
+          dimensions: {}
+        };
+      }
+      
+      Object.entries(s.dimensionScores).forEach(([dim, score]) => {
+        if (!userScores[s.targetUserId].dimensions[dim]) {
+          userScores[s.targetUserId].dimensions[dim] = 0;
+        }
+        userScores[s.targetUserId].dimensions[dim] += score;
+      });
+      
+      userScores[s.targetUserId].total += Object.values(s.dimensionScores).reduce((a, b) => a + b, 0);
+      userScores[s.targetUserId].count++;
+    });
+
+  return Object.entries(userScores).map(([userId, data]) => ({
+    userId,
+    averageScore: data.total / data.count,
+    dimensionAverages: Object.fromEntries(
+      Object.entries(data.dimensions).map(([dim, total]) => [dim, total / data.count])
+    )
+  })).sort((a, b) => b.averageScore - a.averageScore);
 }
 
 async function computeAIScore(roomId) {

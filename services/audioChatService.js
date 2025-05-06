@@ -8,7 +8,7 @@ async function saveRecording(roomId, file, username) {
     id: uuidv4(),
     roomId,
     username,
-    filename: file.originalname,
+    filename: file.filename,
     path: file.path,
     timestamp: new Date().toISOString()
   };
@@ -18,18 +18,33 @@ async function saveRecording(roomId, file, username) {
 
 /** Control audio state for a user */
 async function controlAudio(roomId, username, action) {
-  if (!userAudioStates[roomId]) userAudioStates[roomId] = {};
-  if (!userAudioStates[roomId][username]) {
-    userAudioStates[roomId][username] = { muted: false, microphoneOn: true, hangup: false };
+  if (!userAudioStates[roomId]) {
+    userAudioStates[roomId] = {};
   }
+  if (!userAudioStates[roomId][username]) {
+    userAudioStates[roomId][username] = {
+      muted: false,
+      microphoneOn: true,
+      hangup: false
+    };
+  }
+
   const state = userAudioStates[roomId][username];
   switch (action) {
-    case 'mute': state.muted = true; break;
-    case 'unmute': state.muted = false; break;
-    case 'hangup': state.hangup = true; break;
-    case 'resume': state.hangup = false; break;
+    case 'mute':
+      state.muted = true;
+      break;
+    case 'unmute':
+      state.muted = false;
+      break;
+    case 'hangup':
+      state.hangup = true;
+      break;
+    case 'resume':
+      state.hangup = false;
+      break;
   }
-  return { username, ...state };
+  return state;
 }
 
 /** List all recordings for a room */
@@ -37,4 +52,8 @@ async function listRecordings(roomId) {
   return recordings.filter(r => r.roomId === roomId);
 }
 
-module.exports = { saveRecording, controlAudio, listRecordings };
+module.exports = {
+  saveRecording,
+  controlAudio,
+  listRecordings
+};

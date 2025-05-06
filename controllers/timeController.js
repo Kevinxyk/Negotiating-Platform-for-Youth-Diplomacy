@@ -1,69 +1,79 @@
 // File: my-backend/controllers/timeController.js
 "use strict";
+const timeService = require('../services/timeService');
 
-const {
-  getNow,
+// GET /api/time/now
+async function getCurrentTime(req, res) {
+  try {
+    const now = timeService.getNow();
+    res.json({ now });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// GET /api/time/:event/state
+async function getEventState(req, res) {
+  try {
+    const { eventKey } = req.params;
+    const state = timeService.getEventState(eventKey);
+    res.json(state);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// POST /api/time/:event/schedule  body {label,durationSec}
+async function scheduleEvent(req, res) {
+  try {
+    const { eventKey } = req.params;
+    const { label, durationSec } = req.body;
+    const event = timeService.scheduleEvent(eventKey, label, durationSec);
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// POST /api/time/:event/pause
+async function pauseEvent(req, res) {
+  try {
+    const { eventKey } = req.params;
+    const event = timeService.pauseEvent(eventKey);
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// POST /api/time/:event/resume
+async function resumeEvent(req, res) {
+  try {
+    const { eventKey } = req.params;
+    const event = timeService.resumeEvent(eventKey);
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// POST /api/time/:event/edit body {durationSec}
+async function editEvent(req, res) {
+  try {
+    const { eventKey } = req.params;
+    const { durationSec } = req.body;
+    const event = timeService.editEvent(eventKey, durationSec);
+    res.json(event);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+module.exports = {
+  getCurrentTime,
   getEventState,
   scheduleEvent,
   pauseEvent,
   resumeEvent,
   editEvent
-} = require('../services/timeService');
-
-// GET /api/time/now
-function nowHandler(req, res) {
-  res.json({ now: getNow() });
-}
-
-// GET /api/time/:event/state
-function stateHandler(req, res) {
-  const eventKey = req.params.event;
-  const state = getEventState(eventKey);
-  if (!state) return res.status(404).json({ error: 'Event not found' });
-  res.json(state);
-}
-
-// POST /api/time/:event/schedule  body {label,durationSec}
-function scheduleHandler(req, res) {
-  // TODO: 校验 req.user.role
-  const eventKey = req.params.event;
-  const { label, durationSec } = req.body;
-  if (!label || !durationSec) return res.status(400).json({ error: 'label and durationSec required' });
-  scheduleEvent(eventKey, label, durationSec);
-  res.status(201).json({ status: 'scheduled' });
-}
-
-// POST /api/time/:event/pause
-function pauseHandler(req, res) {
-  // TODO: 校验 req.user.role
-  const eventKey = req.params.event;
-  pauseEvent(eventKey);
-  res.json({ status: 'paused' });
-}
-
-// POST /api/time/:event/resume
-function resumeHandler(req, res) {
-  // TODO: 校验 req.user.role
-  const eventKey = req.params.event;
-  resumeEvent(eventKey);
-  res.json({ status: 'running' });
-}
-
-// POST /api/time/:event/edit body {durationSec}
-function editHandler(req, res) {
-  // TODO: 校验 req.user.role
-  const eventKey = req.params.event;
-  const { durationSec } = req.body;
-  if (!durationSec) return res.status(400).json({ error: 'durationSec required' });
-  editEvent(eventKey, durationSec);
-  res.json({ status: 'edited' });
-}
-
-module.exports = {
-  nowHandler,
-  stateHandler,
-  scheduleHandler,
-  pauseHandler,
-  resumeHandler,
-  editHandler
 };

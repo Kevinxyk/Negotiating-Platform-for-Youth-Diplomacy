@@ -1,44 +1,71 @@
 // File: my-backend/controllers/scoringController.js
 "use strict";
-const svc = require('../services/scoringService');
+const scoringService = require('../services/scoringService');
 
 // POST /api/score/:roomId
-async function submitScoreHandler(req, res) {
-  const { roomId } = req.params;
-  const { judgeId, role, targetUserId, dimensionScores, comments } = req.body;
-  if (!judgeId || !role || !targetUserId || !dimensionScores) {
-    return res.status(400).json({ error: 'judgeId, role, targetUserId, dimensionScores required' });
+async function submitScore(req, res) {
+  try {
+    const { roomId } = req.params;
+    const { judgeId, role, targetUserId, dimensionScores, comments } = req.body;
+    
+    const score = await scoringService.submitScore(
+      roomId,
+      judgeId,
+      role,
+      targetUserId,
+      dimensionScores,
+      comments
+    );
+    res.json(score);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
-  const rec = await svc.submitScore(roomId, judgeId, role, targetUserId, dimensionScores, comments || '');
-  res.status(201).json(rec);
 }
 
 // GET /api/score/:roomId
-async function getScoresHandler(req, res) {
-  const { roomId } = req.params;
-  const list = await svc.getScores(roomId);
-  res.json(list);
+async function getScores(req, res) {
+  try {
+    const { roomId } = req.params;
+    const scores = await scoringService.getScores(roomId);
+    res.json(scores);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
 // GET /api/score/:roomId/history/:userId
-async function getScoreHistoryHandler(req, res) {
-  const { roomId, userId } = req.params;
-  const history = await svc.getScoreHistory(roomId, userId);
-  res.json(history);
+async function getScoreHistory(req, res) {
+  try {
+    const { roomId, userId } = req.params;
+    const history = await scoringService.getScoreHistory(roomId, userId);
+    res.json(history);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
 // GET /api/score/:roomId/ranking
-async function getRankingHandler(req, res) {
-  const { roomId } = req.params;
-  const ranking = await svc.getRanking(roomId);
-  res.json(ranking);
+async function getRanking(req, res) {
+  try {
+    const { roomId } = req.params;
+    const ranking = await scoringService.getRanking(roomId);
+    res.json(ranking);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 }
 
 // POST /api/score/:roomId/ai
 async function computeAIHandler(req, res) {
   const { roomId } = req.params;
-  const aiResult = await svc.computeAIScore(roomId);
+  const aiResult = await scoringService.computeAIScore(roomId);
   res.json(aiResult);
 }
 
-module.exports = { submitScoreHandler, getScoresHandler, getScoreHistoryHandler, getRankingHandler, computeAIHandler };
+module.exports = {
+  submitScore,
+  getScores,
+  getScoreHistory,
+  getRanking,
+  computeAIHandler
+};

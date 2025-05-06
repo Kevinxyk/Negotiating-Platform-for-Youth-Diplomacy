@@ -1,75 +1,101 @@
-// File: my-backend/services/textChatService.js
 "use strict";
-const { v4: uuidv4 } = require('uuid');
-const { messages } = require('../data/messages');
+const { v4: uuidv4 } = require("uuid");
+const { messages: defaults } = require("../data/messages");
 
-async function getHistory(roomId, limit = 50, offset = 0) {
-  const active = messages.filter(m => m.roomId === roomId && m.status === 'active');
-  // Return slice: from offset to offset+limit
-  return active.slice(offset, offset + limit);
-}
+// 全局消息存储
+const messages = [];
+module.exports.messages = messages;
 
-async function saveMessage(roomId, msg) {
-  messages.push({
-    id: msg.id || uuidv4(),
-    roomId,
-    ...msg,
-    status: 'active',
-    createdAt: new Date().toISOString()
-  });
-}
-
-async function revokeMessage(roomId, messageId) {
-  const msg = messages.find(m => m.id === messageId && m.roomId === roomId);
-  if (!msg) throw new Error('Message not found');
-  msg.status = 'revoked';
-  msg.revokedAt = new Date().toISOString();
-  return msg;
-}
-
-async function summarizeByUser(roomId) {
-  const count = {};
-  messages.forEach(m => {
-    if (m.roomId === roomId && m.status === 'active') {
-      count[m.username] = (count[m.username] || 0) + 1;
+// 记录哪些 room 已经清空过
+const _clearedRooms = new Set();
+async function clearRoomMessages(room) {
+  if (!_clearedRooms.has(room)) {
+    // 只在第一次调用时，移除所有该 room 的历史消息
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].room === room) messages.splice(i, 1);
     }
-  });
-  return count;
+    _clearedRooms.add(room);
+  }
 }
 
-async function summarizeByTime(roomId, interval = 'hour') {
-  const buckets = {};
-  messages.forEach(m => {
-    if (m.roomId === roomId && m.status === 'active') {
-      const date = new Date(m.createdAt);
-      let key;
-      if (interval === 'minute') {
-        key = `${date.getHours()}:${date.getMinutes()}`;
-      } else { // hour
-        key = `${date.getHours()}:00`;
-      }
-      buckets[key] = (buckets[key] || 0) + 1;
-    }
-  });
-  return buckets;
+// 获取／种子系统消息
+async function getHistory(room, limit = 50, offset = 0) {
+  let roomMsgs = messages.filter(m => m.room === room);
+  if (roomMsgs.length === 0) {
+    defaults.forEach(dm => {
+      messages.push({
+        id:        dm.id || uuidv4(),
+        room,
+        username:  dm.username,
+        text:      dm.text,
+        timestamp: dm.timestamp,
+        revoked:   false
+      });
+    });
+    roomMsgs = messages.filter(m => m.room === room);
+  }
+  return roomMsgs.slice(offset, offset + limit);
 }
 
-async function searchMessages(roomId, { keyword, username, from, to }) {
-  return messages.filter(m => {
-    if (m.roomId !== roomId || m.status !== 'active') return false;
-    if (keyword && !m.text.includes(keyword)) return false;
-    if (username && m.username !== username) return false;
-    if (from && new Date(m.createdAt) < new Date(from)) return false;
-    if (to && new Date(m.createdAt) > new Date(to)) return false;
-    return true;
+// 保存消息
+async function saveMessage(room, { username, country, role, text }) {
+  const entry = {
+    id:        uuidv4(),
+    room,
+    username,
+    country,
+    role,
+    text,
+    timestamp: new Date().toISOString(),
+    revoked:   false
+  };
+  messages.push(entry);
+  return entry;
+}
+
+// 撤回
+async function revokeMessage(id) {
+  const msg = messages.find(m => m.id === id);
+  if (!msg) return false;
+  msg.revoked = true;
+  return true;
+}
+
+// 按用户汇总
+async function getUserSummary(room) {
+  const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
+  const byUser = {};
+  roomMsgs.forEach(m => {
+    byUser[m.username] = (byUser[m.username] || 0) + 1;
   });
+  return byUser;
+}
+
+// 按时间汇总
+async function getTimeSummary(room) {
+  const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
+  const byHour = {};
+  roomMsgs.forEach(m => {
+    const h = new Date(m.timestamp).getHours();
+    byHour[h] = (byHour[h] || 0) + 1;
+  });
+  return byHour;
+}
+
+// 搜索
+async function searchMessages(room, keyword) {
+  return messages.filter(
+    m => m.room === room && !m.revoked && m.text.includes(keyword)
+  );
 }
 
 module.exports = {
+  messages,
   getHistory,
   saveMessage,
   revokeMessage,
-  summarizeByUser,
-  summarizeByTime,
+  clearRoomMessages,
+  getUserSummary,
+  getTimeSummary,
   searchMessages
 };
