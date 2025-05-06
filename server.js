@@ -34,9 +34,15 @@ app.get('/', (req, res) => {
   res.send('🚀 Server is up and running!');
 });
 
-app.listen(PORT, () => {
-  console.log(`Server started at http://localhost:${PORT}`);
-});
+ if (require.main === module) {
+     // 直接运行时才启动监听
+     app.listen(PORT, () => {
+       console.log(`Server started at http://localhost:${PORT}`);
+     });
+   }
+  
+   // 导出 app 供测试使用
+   module.exports = app;
 
 eventBus.on('timeEnd', (eventKey) => {
   console.log(`⏰ Event '${eventKey}' ended at`, new Date().toISOString());
