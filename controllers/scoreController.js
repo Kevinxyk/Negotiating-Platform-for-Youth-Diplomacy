@@ -1,22 +1,28 @@
 "use strict";
-const scoreSvc = require("../services/scoreService");
+const scoreService = require("../services/scoreService");
 
 /**
- * judge 提分
+ * POST /api/score/:room
+ * 提交评分（需要 admin 或 host 角色）
  */
 async function submitScore(req, res) {
   try {
-    const roomId      = req.params.room;
-    const judgeId     = req.headers["x-user-role"];
-    const { targetUserId, comments, score } = req.body;
-    const entry = await scoreSvc.addScore(roomId, {
-      judgeId,
-      targetUserId,
-      comments,
-      score
+    const room = req.params.room;
+    const { targetUser, score, comment } = req.body;
+    
+    // 验证评分者身份
+    const scoreData = await scoreService.submitScore(room, {
+      targetUser,
+      score,
+      comment,
+      judge: req.user.username,  // 使用认证用户作为评分者
+      judgeRole: req.user.role   // 记录评分者角色
     });
-    // 按测试期望回传 judgeId / targetUserId / comments / score / timestamp / id
-    res.status(201).json(entry);
+
+    res.status(201).json({
+      message: "评分已提交",
+      score: scoreData
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -24,12 +30,13 @@ async function submitScore(req, res) {
 
 /**
  * GET /api/score/:room
+ * 获取汇总分数（所有登录用户可查看）
  */
 async function getAggregatedScores(req, res) {
   try {
-    const roomId = req.params.room;
-    const data   = await scoreSvc.getAggregatedScores(roomId);
-    res.json(data);
+    const room = req.params.room;
+    const scores = await scoreService.getAggregatedScores(room);
+    res.json(scores);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -37,13 +44,20 @@ async function getAggregatedScores(req, res) {
 
 /**
  * GET /api/score/:room/history/:user
+ * 获取用户评分历史（所有登录用户可查看）
  */
 async function getUserScoreHistory(req, res) {
   try {
-    const roomId = req.params.room;
-    const user   = req.params.user;
-    const data   = await scoreSvc.getUserScoreHistory(roomId, user);
-    res.json(data);
+    const room = req.params.room;
+    const user = req.params.user;
+    
+    // 检查权限：只能查看自己的评分历史，除非是管理员
+    if (user !== req.user.username && req.user.role !== 'admin') {
+      return res.status(403).json({ error: '没有权限查看此用户的评分历史' });
+    }
+
+    const history = await scoreService.getUserScoreHistory(room, user);
+    res.json(history);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -51,12 +65,13 @@ async function getUserScoreHistory(req, res) {
 
 /**
  * GET /api/score/:room/ranking
+ * 获取排名（所有登录用户可查看）
  */
 async function getRanking(req, res) {
   try {
-    const roomId = req.params.room;
-    const data   = await scoreSvc.getRanking(roomId);
-    res.json(data);
+    const room = req.params.room;
+    const ranking = await scoreService.getRanking(room);
+    res.json(ranking);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -64,12 +79,16 @@ async function getRanking(req, res) {
 
 /**
  * GET /api/score/:room/ai
+ * AI评分计算（仅管理员可用）
  */
 async function computeAIScore(req, res) {
   try {
-    const roomId = req.params.room;
-    const { avg } = await scoreSvc.computeAIScore(roomId);
-    res.json({ roomId, aiScore: avg });
+    const room = req.params.room;
+    const aiScores = await scoreService.computeAIScore(room);
+    res.json({
+      message: "AI评分已计算",
+      scores: aiScores
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

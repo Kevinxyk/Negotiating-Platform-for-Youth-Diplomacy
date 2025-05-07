@@ -1,44 +1,80 @@
 const express       = require("express");
 const router        = express.Router();
-const { checkRole } = require("../middleware/auth");
+const { checkRole, verifyToken } = require("../middleware/auth");
 
 // Controllers
 const textChatCtrl  = require("../controllers/textChatController");
 const scoreCtrl     = require("../controllers/scoreController");
-const timeService   = require("../services/timeService");
+const timeCtrl      = require("../controllers/timeController");
+const audioCtrl     = require("../controllers/audioController");
 
 // Chat 模块
-router.get(  "/chat/:room/messages",                       textChatCtrl.getChatHistory);
-router.post( "/chat/:room/send",                           textChatCtrl.sendMessage);
+router.get(  "/chat/:room/messages",                       verifyToken, textChatCtrl.getChatHistory);
+router.post( "/chat/:room/send",                           verifyToken, textChatCtrl.sendMessage);
 router.post( "/chat/:room/message/:messageId/revoke", 
+             verifyToken,
              checkRole("admin"),                          textChatCtrl.revokeMessage);
-router.get(  "/chat/:room/summary/user",                   textChatCtrl.getUserSummary);
-router.get(  "/chat/:room/summary/time",                   textChatCtrl.getTimeSummary);
-router.get(  "/chat/:room/search",                         textChatCtrl.searchChat);
+router.get(  "/chat/:room/summary/user",                   verifyToken, textChatCtrl.getUserSummary);
+router.get(  "/chat/:room/summary/time",                   verifyToken, textChatCtrl.getTimeSummary);
+router.get(  "/chat/:room/search",                         verifyToken, textChatCtrl.searchChat);
+router.get("/chat/:room/summary/user/details", verifyToken, textChatCtrl.getUserSummaryDetail);
+router.get("/chat/:room/summary/time/details", verifyToken, textChatCtrl.getTimeSummaryDetail);
 
 // Scoring 模块
-router.post( "/score/:room",                                 scoreCtrl.submitScore);
-router.get(  "/score/:room",                                 scoreCtrl.getAggregatedScores);
-router.get(  "/score/:room/history/:user",                   scoreCtrl.getUserScoreHistory);
-router.get(  "/score/:room/ranking",                         scoreCtrl.getRanking);
-router.get(  "/score/:room/ai",         checkRole("sys"),     scoreCtrl.computeAIScore);
+router.post( "/score/:room",                                 verifyToken, checkRole(["admin", "host"]), scoreCtrl.submitScore);
+router.get(  "/score/:room",                                 verifyToken, scoreCtrl.getAggregatedScores);
+router.get(  "/score/:room/history/:user",                   verifyToken, scoreCtrl.getUserScoreHistory);
+router.get(  "/score/:room/ranking",                         verifyToken, scoreCtrl.getRanking);
+router.get(  "/score/:room/ai",         verifyToken, checkRole("admin"),     scoreCtrl.computeAIScore);
 
-// Time 模拟
-router.post("/time/schedule", (req, res) => {
-  const { name, timeInfo } = req.body;
-  timeService.scheduleEvent(name, timeInfo, () => {});
-  res.json({ status: "scheduled" });
-});
-router.post("/time/pause", (req, res) => {
-  timeService.pauseEvent(req.body.name);
-  res.json({ status: "paused" });
-});
-router.post("/time/resume",(req, res) => {
-  timeService.resumeEvent(req.body.name);
-  res.json({ status: "resumed" });
-});
-router.get( "/time/fixed", (req, res) => {
-  res.json(timeService.getFixedTimeData());
-});
+// Time 模块
+router.post("/time/:event/schedule", 
+  verifyToken, 
+  checkRole(["admin", "host"]), 
+  timeCtrl.scheduleEvent
+);
+
+router.post("/time/:event/pause", 
+  verifyToken, 
+  checkRole(["admin", "host"]), 
+  timeCtrl.pauseEvent
+);
+
+router.post("/time/:event/resume", 
+  verifyToken, 
+  checkRole(["admin", "host"]), 
+  timeCtrl.resumeEvent
+);
+
+router.get("/time/:event/state", 
+  verifyToken, 
+  timeCtrl.getEventState
+);
+
+router.get("/time/fixed", 
+  verifyToken, 
+  timeCtrl.getFixedTimeData
+);
+
+// Audio 模块
+router.post("/audio/:room/upload", 
+  verifyToken, 
+  audioCtrl.uploadRecording
+);
+
+router.post("/audio/:room/control", 
+  verifyToken, 
+  audioCtrl.controlRecording
+);
+
+router.get("/audio/:room/recordings", 
+  verifyToken, 
+  audioCtrl.getRecordings
+);
+
+router.delete("/audio/:room/recording/:recordingId", 
+  verifyToken, 
+  audioCtrl.deleteRecording
+);
 
 module.exports = router; 

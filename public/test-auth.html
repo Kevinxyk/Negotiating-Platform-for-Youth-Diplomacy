@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>认证测试</title>
+    <style>
+        .container { max-width: 600px; margin: 20px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        .result { margin-top: 20px; padding: 10px; background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>注册测试</h2>
+        <div class="form-group">
+            <label>用户名：</label>
+            <input type="text" id="reg-username" value="testuser">
+        </div>
+        <div class="form-group">
+            <label>密码：</label>
+            <input type="password" id="reg-password" value="testpass">
+        </div>
+        <div class="form-group">
+            <label>角色：</label>
+            <select id="reg-role">
+                <option value="student">学生</option>
+                <option value="host">主持人</option>
+                <option value="admin">管理员</option>
+                <option value="observer">观察员</option>
+            </select>
+        </div>
+        <button onclick="register()">注册</button>
+        <div id="reg-result" class="result"></div>
+
+        <h2>登录测试</h2>
+        <div class="form-group">
+            <label>用户名：</label>
+            <input type="text" id="login-username" value="testuser">
+        </div>
+        <div class="form-group">
+            <label>密码：</label>
+            <input type="password" id="login-password" value="testpass">
+        </div>
+        <button onclick="login()">登录</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <script>
+        // 注册函数
+        async function register() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password, role })
+                });
+
+                const data = await response.json();
+                document.getElementById('reg-result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('reg-result').innerHTML = 
+                    `<pre style="color: red">${error.message}</pre>`;
+            }
+        }
+
+        // 登录函数
+        async function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+                document.getElementById('login-result').innerHTML = 
+                    `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            } catch (error) {
+                document.getElementById('login-result').innerHTML = 
+                    `<pre style="color: red">${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html> 

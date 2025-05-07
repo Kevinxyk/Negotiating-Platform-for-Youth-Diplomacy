@@ -61,23 +61,36 @@ async function revokeMessage(id) {
   return true;
 }
 
-// 按用户汇总
+// 添加：根据消息 ID 获取消息
+async function getMessageById(id) {
+  return messages.find(m => m.id === id);
+}
+
+// 按用户汇总：不仅返回数量，也返回消息列表
 async function getUserSummary(room) {
   const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
   const byUser = {};
   roomMsgs.forEach(m => {
-    byUser[m.username] = (byUser[m.username] || 0) + 1;
+    if (!byUser[m.username]) {
+      byUser[m.username] = { count: 0, messages: [] };
+    }
+    byUser[m.username].count++;
+    byUser[m.username].messages.push(m);
   });
   return byUser;
 }
 
-// 按时间汇总
+// 按小时汇总
 async function getTimeSummary(room) {
   const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
   const byHour = {};
   roomMsgs.forEach(m => {
     const h = new Date(m.timestamp).getHours();
-    byHour[h] = (byHour[h] || 0) + 1;
+    if (!byHour[h]) {
+      byHour[h] = { count: 0, messages: [] };
+    }
+    byHour[h].count++;
+    byHour[h].messages.push(m);
   });
   return byHour;
 }
@@ -94,6 +107,7 @@ module.exports = {
   getHistory,
   saveMessage,
   revokeMessage,
+  getMessageById,
   clearRoomMessages,
   getUserSummary,
   getTimeSummary,

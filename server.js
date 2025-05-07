@@ -1,4 +1,3 @@
 // File: my-backend/server.js
 const app = require("./app");
-const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Listening on port ${port}`));
+// 服务器启动代码已移至app.js

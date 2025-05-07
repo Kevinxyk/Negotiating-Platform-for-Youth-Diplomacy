@@ -17,7 +17,10 @@ router.get('/:roomId/messages', getChatHistory);
 // Send message
 router.post('/:roomId/send', sendChatMessage);
 // Revoke message (author or admin)
-router.post('/:roomId/message/:messageId/revoke', requireRoles(['sys','admin','host']), revokeChatMessage);
+router.post('/:roomId/message/:messageId/revoke', 
+  requireRoles(['sys', 'admin', 'host']),
+  revokeChatMessage
+);
 // User summary
 router.get('/:roomId/summary/user', getSummaryByUser);
 // Time summary (interval=hour|minute)
