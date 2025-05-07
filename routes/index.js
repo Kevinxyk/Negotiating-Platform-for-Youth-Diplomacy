@@ -1,6 +1,9 @@
 const express       = require("express");
 const router        = express.Router();
 const { checkRole, verifyToken } = require("../middleware/auth");
+const voiceChatCtrl = require("../controllers/voiceChatController");
+const upload        = require("../middleware/upload");
+const { requireRoles } = require("../middleware/roleMiddleware");
 
 // Controllers
 const textChatCtrl  = require("../controllers/textChatController");
@@ -75,6 +78,14 @@ router.get("/audio/:room/recordings",
 router.delete("/audio/:room/recording/:recordingId", 
   verifyToken, 
   audioCtrl.deleteRecording
+);
+
+// Voice Chat 模块
+router.post("/voice/chat/:room", 
+  verifyToken, 
+  requireRoles(['delegate','sys','admin','host']), 
+  upload.single('audio'), 
+  voiceChatCtrl.handleVoiceChat
 );
 
 module.exports = router; 

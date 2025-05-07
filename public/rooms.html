@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>我的研讨室 - 研讨系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { padding-top: 56px; }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">研讨系统</a>
+    </div>
+  </nav>
+  <div class="container my-5">
+    <h2 class="mb-4">我的研讨室</h2>
+    <div id="alertPlaceholder"></div>
+    <div id="roomList" class="list-group"></div>
+    <a href="/rooms/create" class="btn btn-success mt-3">创建新研讨室</a>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    async function loadRooms() {
+      const alertPlaceholder = document.getElementById('alertPlaceholder');
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          window.location.href = '/login';
+          return;
+        }
+        const res = await fetch('/api/rooms', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        if (res.status === 401) {
+          window.location.href = '/login';
+          return;
+        }
+        const rooms = await res.json();
+        const container = document.getElementById('roomList');
+        if (rooms.length === 0) {
+          container.innerHTML = '<p>暂无研讨室，去创建一个吧！</p>';
+        } else {
+          rooms.forEach(r => {
+            const a = document.createElement('a');
+            a.href = `/rooms/${encodeURIComponent(r.id)}`;
+            a.className = 'list-group-item list-group-item-action';
+            a.textContent = r.name + (r.description ? ' - ' + r.description : '');
+            container.appendChild(a);
+          });
+        }
+      } catch (err) {
+        alertPlaceholder.innerHTML = `<div class="alert alert-danger" role="alert">加载失败：${err.message}</div>`;
+      }
+    }
+    document.addEventListener('DOMContentLoaded', loadRooms);
+  </script>
+</body>
+</html> 

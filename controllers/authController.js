@@ -2,6 +2,8 @@
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { generateToken } = require('../middleware/auth');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // 注册
 async function register(req, res) {
@@ -14,7 +16,7 @@ async function register(req, res) {
     }
 
     // 验证角色是否合法
-    const validRoles = ['student', 'host', 'admin', 'observer'];
+    const validRoles = ['student', 'host', 'admin', 'observer', 'sys', 'judge', 'delegate'];
     if (!validRoles.includes(role)) {
       return res.status(400).json({ error: '无效的角色' });
     }
@@ -89,7 +91,44 @@ async function login(req, res) {
   }
 }
 
+// 忘记密码：发送重置链接
+async function forgotPassword(req, res) {
+  try {
+    const { username } = req.body;
+    const user = store.findUserByUsername(username);
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
+    }
+    // 生成重置 token，有效期 1 小时
+    const resetToken = jwt.sign({ userId: user.userId }, JWT_SECRET, { expiresIn: '1h' });
+    // TODO: 发送邮件，包含重置链接
+    console.log(`Password reset link: http://<你的域名>/reset-password?token=${resetToken}`);
+    res.json({ message: '重置密码邮件已发送，请检查邮箱' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// 重置密码：提交新密码
+async function resetPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+    const payload = jwt.verify(token, JWT_SECRET);
+    const user = store.findUserById(payload.userId);
+    if (!user) {
+      return res.status(404).json({ error: '用户不存在' });
+    }
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    user.passwordHash = passwordHash;
+    res.json({ message: '密码已重置，请使用新密码登录' });
+  } catch (err) {
+    res.status(400).json({ error: '无效或过期的重置令牌' });
+  }
+}
+
 module.exports = {
   register,
-  login
+  login,
+  forgotPassword,
+  resetPassword
 }; 

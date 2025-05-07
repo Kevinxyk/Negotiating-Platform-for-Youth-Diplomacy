@@ -6,8 +6,11 @@
  */
 function requireRoles(allowedRoles) {
   return (req, res, next) => {
-    const role = req.header('x-user-role');
-    if (!role || !allowedRoles.includes(role)) {
+    if (!req.user) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    const role = req.user.role;
+    if (!allowedRoles.includes(role)) {
       return res.status(403).json({ error: 'Forbidden: insufficient role' });
     }
     next();

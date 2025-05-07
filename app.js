@@ -63,20 +63,35 @@ wss.on('connection', (ws, req) => {
   ws.on('pong', heartbeat);
   
   // 消息处理
-  ws.on('message', (message) => {
+  ws.on('message', (message, isBinary) => {
+    // 如果是二进制数据，则当作音频帧转发给同房间的其他客户端
+    if (isBinary) {
+      if (userInfo && userInfo.room && rooms.has(userInfo.room)) {
+        rooms.get(userInfo.room).forEach(client => {
+          if (client !== ws && client.readyState === WebSocket.OPEN) {
+            client.send(message, { binary: true });
+          }
+        });
+      }
+      return;
+    }
     try {
       const data = JSON.parse(message);
       console.log('Received message:', data); // 添加日志
       
       switch (data.type) {
         case 'join':
-          // 用户加入
+          // 用户加入房间
+          const roomId = data.room;
+          if (!rooms.has(roomId)) rooms.set(roomId, new Set());
+          rooms.get(roomId).add(ws);
           userInfo = {
             id: userId,
             name: data.name,
             role: data.role,
             country: data.country,
-            ws: ws
+            ws: ws,
+            room: roomId
           };
           onlineUsers.set(userId, userInfo);
           
@@ -209,6 +224,12 @@ wss.on('connection', (ws, req) => {
   // 连接关闭处理
   ws.on('close', () => {
     if (userInfo) {
+      // 移除房间成员
+      if (userInfo.room && rooms.has(userInfo.room)) {
+        const set = rooms.get(userInfo.room);
+        set.delete(ws);
+        if (set.size === 0) rooms.delete(userInfo.room);
+      }
       onlineUsers.delete(userId);
       broadcastUserList();
     }
@@ -339,6 +360,29 @@ app.use(bodyParser.json());
 
 // 静态文件服务配置
 app.use(express.static(path.join(__dirname, "public")));
+
+// 前端页面路由
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'register.html'));
+});
+app.get('/forgot-password', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'));
+});
+app.get('/reset-password', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
+});
+
+// 研讨室列表与创建页面
+app.get('/rooms', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'rooms.html'));
+});
+app.get('/rooms/create', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'create-room.html'));
+});
+
 app.use('/frontend', express.static(path.join(__dirname, "..", "frontend")));
 
 // 在 /api 之前加一个根路由
@@ -351,12 +395,19 @@ app.use('/api', routes);
 // 认证路由
 app.use('/api/auth', require('./routes/authRoutes'));
 
+// 研讨室管理 API
+app.use('/api/rooms', require('./routes/roomRoutes'));
+
 // 404 & 错误中间件
 app.use((req, res) => res.status(404).json({ error: "Not found" }));
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).json({ error: "Internal server error" });
 });
+app.use(
+  '/debateroom2',
+  express.static(path.join(__dirname, 'frontend', 'debateroom2'))
+);
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
