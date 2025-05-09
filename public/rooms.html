@@ -23,6 +23,21 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // 登录检查：未登录则跳转到登录页
+    (function() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+      }
+    })();
+    // 根据角色隐藏创建按钮
+    (function() {
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const btn = document.querySelector('a[href="/rooms/create"]');
+      if (btn && !['host','admin','sys'].includes(user.role)) {
+        btn.style.display = 'none';
+      }
+    })();
     async function loadRooms() {
       const alertPlaceholder = document.getElementById('alertPlaceholder');
       try {

@@ -44,6 +44,18 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    // 登录检查：未登录则跳转到登录页
+    (function() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        window.location.href = '/login';
+      }
+    })();
+    // 角色检查：仅允许 host, admin, sys 创建房间
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (!['host','admin','sys'].includes(user.role)) {
+      document.querySelector('.form-container').innerHTML = '<div class="alert alert-danger text-center">您无权创建研讨室</div>';
+    }
     const form = document.getElementById('createForm');
     const alertPlaceholder = document.getElementById('alertPlaceholder');
     function showAlert(message, type='danger') {

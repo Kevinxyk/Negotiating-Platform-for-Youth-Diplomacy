@@ -21,8 +21,8 @@
     <div id="alertPlaceholder"></div>
     <form id="registerForm">
       <div class="mb-3">
-        <label for="email" class="form-label">邮箱</label>
-        <input type="email" class="form-control" id="email" required>
+        <label for="username" class="form-label">用户名</label>
+        <input type="text" class="form-control" id="username" required>
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">密码</label>
@@ -59,7 +59,7 @@
     form.addEventListener('submit', async e => {
       e.preventDefault();
       alertPlaceholder.innerHTML = '';
-      const email = document.getElementById('email').value;
+      const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirmPassword').value;
       const role = document.getElementById('role').value;
@@ -70,14 +70,15 @@
         const res = await fetch('/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: email, password, role })
+          body: JSON.stringify({ username, password, role })
         });
         const data = await res.json();
         if (!res.ok) {
           throw new Error(data.error || '注册失败');
         }
-        // 保存 token 并跳转
+        // 保存 token 和用户信息，并跳转
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         window.location.href = '/rooms';
       } catch (err) {
         showAlert(err.message);

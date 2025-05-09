@@ -27,7 +27,38 @@ async function createRoom(req, res) {
   }
 }
 
+// 获取单个研讨室
+async function getRoom(req, res) {
+  try {
+    const { roomId } = req.params;
+    const room = roomService.getRoomById(roomId);
+    if (!room) {
+      return res.status(404).json({ error: '研讨室不存在' });
+    }
+    res.json(room);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// 加入现有研讨室
+async function joinRoom(req, res) {
+  try {
+    const { name } = req.body;
+    const room = roomService.getRoomByName(name);
+    if (!room) {
+      return res.status(404).json({ error: '研讨室不存在' });
+    }
+    roomService.addMember(room.id, req.user.userId);
+    res.json(room);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   getRooms,
-  createRoom
+  createRoom,
+  getRoom,
+  joinRoom
 }; 

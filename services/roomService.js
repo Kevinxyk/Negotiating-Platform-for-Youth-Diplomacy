@@ -50,8 +50,24 @@ function getRoomById(roomId) {
   return rooms.find(r => r.id === roomId);
 }
 
+// 根据名称查找房间
+function getRoomByName(name) {
+  return rooms.find(r => r.name === name);
+}
+
+// 添加用户到房间成员
+function addMember(roomId, userId) {
+  const room = getRoomById(roomId);
+  if (room && !room.members.includes(userId)) {
+    room.members.push(userId);
+  }
+  return room;
+}
+
 module.exports = {
   getRoomsByUser,
   createRoom,
-  getRoomById
+  getRoomById,
+  getRoomByName,
+  addMember
 }; 

@@ -16,6 +16,36 @@ const store = {
       username: 'host',
       passwordHash: bcrypt.hashSync('host123', 10),
       role: 'host'
+    },
+    {
+      userId: '3',
+      username: 'sys',
+      passwordHash: bcrypt.hashSync('sys123', 10),
+      role: 'sys'
+    },
+    {
+      userId: '4',
+      username: 'student',
+      passwordHash: bcrypt.hashSync('student123', 10),
+      role: 'student'
+    },
+    {
+      userId: '5',
+      username: 'observer',
+      passwordHash: bcrypt.hashSync('observer123', 10),
+      role: 'observer'
+    },
+    {
+      userId: '6',
+      username: 'judge',
+      passwordHash: bcrypt.hashSync('judge123', 10),
+      role: 'judge'
+    },
+    {
+      userId: '7',
+      username: 'delegate',
+      passwordHash: bcrypt.hashSync('delegate123', 10),
+      role: 'delegate'
     }
   ],
 

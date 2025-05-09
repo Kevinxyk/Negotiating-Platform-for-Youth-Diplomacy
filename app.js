@@ -207,6 +207,22 @@ wss.on('connection', (ws, req) => {
           }
           break;
           
+        case 'raiseHand':
+          // 用户举手，通知房间中所有主持人/管理员
+          if (userInfo && userInfo.room) {
+            onlineUsers.forEach(info => {
+              if (info.room === userInfo.room && ['host','admin','sys'].includes(info.role)) {
+                info.ws.send(JSON.stringify({
+                  type: 'raiseHand',
+                  from: userInfo.name,
+                  userId: userInfo.id,
+                  timestamp: new Date().toISOString()
+                }));
+              }
+            });
+          }
+          break;
+          
         case 'timer':
           // 处理计时器相关消息
           handleTimerMessage(data, ws);
@@ -238,68 +254,89 @@ wss.on('connection', (ws, req) => {
 
 // 处理计时器消息
 function handleTimerMessage(data, ws) {
+  const key = 'main';
+  let timerData = timers.get(key);
   switch (data.action) {
-    case 'start':
-      // 启动计时器
-      if (!timers.has('main')) {
-        const timer = {
-          remainingTime: data.time || 300,
-          interval: setInterval(() => {
-            const timerData = timers.get('main');
-            if (timerData.remainingTime > 0) {
-              timerData.remainingTime--;
-              broadcastMessage({
-                type: 'timer',
-                time: timerData.remainingTime
-              });
-            } else {
-              clearInterval(timerData.interval);
-              timers.delete('main');
-              // 时间到时的提示
-              broadcastMessage({
-                type: 'system',
-                message: '时间到！'
-              });
-            }
-          }, 1000)
-        };
-        timers.set('main', timer);
+    case 'start': {
+      // 如果不存在，则创建，否则更新，且记录初始时间
+      const t = data.time || (timerData? timerData.initialTime : 300);
+      if (!timerData) {
+        timerData = { remainingTime: t, initialTime: t, interval: null };
+        timers.set(key, timerData);
+      } else {
+        // 更新剩余时间与初始时间
+        timerData.remainingTime = t;
+        timerData.initialTime = t;
+        if (timerData.interval) clearInterval(timerData.interval);
+      }
+      
+      // 启动定时器
+      timerData.interval = setInterval(() => {
+        timerData.remainingTime--;
+        if (timerData.remainingTime > 0) {
+          broadcastMessage({ type: 'timer', time: timerData.remainingTime });
+        } else {
+          clearInterval(timerData.interval);
+          timers.delete(key);
+          broadcastMessage({ type: 'timer', time: 0 });
+          // 时间到时的提示，包含时间戳
+          broadcastMessage({ type: 'system', message: '时间到！', timestamp: new Date().toISOString() });
+        }
+      }, 1000);
+      // 立即推送当前值
+      broadcastMessage({ type: 'timer', time: timerData.remainingTime });
+      break;
+    }
+    case 'pause': {
+      if (timerData && timerData.interval) {
+        clearInterval(timerData.interval);
+        timerData.interval = null;
       }
       break;
-      
-    case 'pause':
-      // 暂停计时器
-      const timer = timers.get('main');
-      if (timer) {
-        clearInterval(timer.interval);
-        timers.delete('main');
+    }
+    case 'resume': {
+      if (timerData && !timerData.interval && timerData.remainingTime > 0) {
+        timerData.interval = setInterval(() => {
+          timerData.remainingTime--;
+          if (timerData.remainingTime > 0) {
+            broadcastMessage({ type: 'timer', time: timerData.remainingTime });
+          } else {
+            clearInterval(timerData.interval);
+            timers.delete(key);
+            broadcastMessage({ type: 'timer', time: 0 });
+            broadcastMessage({ type: 'system', message: '时间到！', timestamp: new Date().toISOString() });
+          }
+        }, 1000);
+      }
+      // 立即推送当前剩余时间
+      if (timerData) {
+        broadcastMessage({ type: 'timer', time: timerData.remainingTime });
       }
       break;
-      
-    case 'reset':
-      // 重置计时器
-      const existingTimer = timers.get('main');
-      if (existingTimer) {
-        clearInterval(existingTimer.interval);
+    }
+    case 'reset': {
+      // 清除定时器
+      if (timerData && timerData.interval) {
+        clearInterval(timerData.interval);
       }
-      timers.delete('main');
-      broadcastMessage({
-        type: 'timer',
-        time: 300 // 默认5分钟
-      });
+      // 计算恢复到的时间
+      const resetTime = data.time != null ? data.time : (timerData? timerData.initialTime : 300);
+      timers.delete(key);
+      broadcastMessage({ type: 'timer', time: resetTime });
       break;
-      
-    case 'set':
-      // 设置计时器时间
-      const currentTimer = timers.get('main');
-      if (currentTimer) {
-        clearInterval(currentTimer.interval);
+    }
+    case 'set': {
+      // 清除旧定时器
+      if (timerData && timerData.interval) {
+        clearInterval(timerData.interval);
       }
-      timers.delete('main');
-      broadcastMessage({
-        type: 'timer',
-        time: data.time
-      });
+      // 设置新时间
+      timerData = { remainingTime: data.time, initialTime: data.time, interval: null };
+      timers.set(key, timerData);
+      broadcastMessage({ type: 'timer', time: data.time });
+      break;
+    }
+    default:
       break;
   }
 }
@@ -382,6 +419,9 @@ app.get('/rooms', (req, res) => {
 app.get('/rooms/create', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'create-room.html'));
 });
+app.get('/rooms/:roomId', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'room.html'));
+});
 
 app.use('/frontend', express.static(path.join(__dirname, "..", "frontend")));
 
@@ -397,6 +437,16 @@ app.use('/api/auth', require('./routes/authRoutes'));
 
 // 研讨室管理 API
 app.use('/api/rooms', require('./routes/roomRoutes'));
+
+// 保留原 /test 路由，指向原始 API 测试页面
+app.get('/test', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'test.html'));
+});
+
+// 新增测试路由 /test-room，指向前端研讨室登录测试页面
+app.get('/test-room', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'test-room.html'));
+});
 
 // 404 & 错误中间件
 app.use((req, res) => res.status(404).json({ error: "Not found" }));

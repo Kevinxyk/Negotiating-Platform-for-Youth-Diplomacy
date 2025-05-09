@@ -21,8 +21,8 @@
     <div id="alertPlaceholder"></div>
     <form id="loginForm">
       <div class="mb-3">
-        <label for="email" class="form-label">邮箱</label>
-        <input type="email" class="form-control" id="email" required>
+        <label for="username" class="form-label">用户名</label>
+        <input type="text" class="form-control" id="username" required>
       </div>
       <div class="mb-3">
         <label for="password" class="form-label">密码</label>
@@ -44,20 +44,21 @@
     form.addEventListener('submit', async e => {
       e.preventDefault();
       alertPlaceholder.innerHTML = '';
-      const email = document.getElementById('email').value;
+      const username = document.getElementById('username').value;
       const password = document.getElementById('password').value;
       try {
         const res = await fetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: email, password })
+          body: JSON.stringify({ username, password })
         });
         const data = await res.json();
         if (!res.ok) {
           throw new Error(data.error || '登录失败');
         }
-        // 保存 token
+        // 保存 token 和用户信息
         localStorage.setItem('token', data.token);
+        localStorage.setItem('user', JSON.stringify(data.user));
         // 重定向到房间列表
         window.location.href = '/rooms';
       } catch (err) {
