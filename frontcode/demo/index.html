@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>外交谈判模拟会场</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="chat.js"></script>
+  <script type="module">
+    import { currentConfig } from './config.js';
+    import { addAuthHeader, handleError } from './utils.js';
+    
+    // 全局配置
+    window.roomId = 'your-room-id'; // 从URL或配置中获取
+    window.currentUser = 'your-user-id'; // 从登录信息中获取
+    window.API_BASE_URL = currentConfig.apiUrl;
+    window.WS_URL = currentConfig.wsUrl;
+  </script>
+  <script type="module">
+    import { currentConfig } from './config.js';
+    window.API_BASE_URL = currentConfig.apiUrl;
+    window.WS_URL = currentConfig.wsUrl;
+  </script>
+</head>
+<body>
+  <!-- 左侧导航栏 -->
+  <div class="sidebar">
+    <button class="icon-button">⌂</button>
+    <button class="icon-button">📹</button>
+    <button class="icon-button">🖋️</button>
+    <button class="icon-button">⚙️</button>
+  </div>
+
+  <!-- 中间主区域 -->
+  <div class="main">
+    <!-- 顶部信息栏 -->
+    <div class="top-bar">
+      <div class="left-info">
+        <h2>国际商务谈判大赛 校内赛</h2>
+        <p>2023年4月3日</p>
+      </div>
+      <div class="right-info">
+        <span>参会者：<span id="participantCount">28</span></span>
+        <span>缺席者：<span id="absentCount">7</span></span>
+      </div>
+    </div>
+
+    <!-- 屏幕区域 -->
+    <div class="screen">
+      <div class="main-image-area">
+        <img src="tanpan.jpg" alt="外交谈判" class="main-negotiation-img">
+      </div>
+      <div class="center-widgets">
+        <div class="timer-area">
+          <span id="timer-label">剩余时间：</span>
+          <span id="timer-value">00:00</span>
+          <button id="pauseBtn">暂停</button>
+          <button id="resumeBtn" style="display:none;">恢复</button>
+        </div>
+        <div class="score-area">
+          <h3>评分展示</h3>
+          <div>总分：<span id="total-score">0</span></div>
+          <div>排名：<span id="ranking">-</span></div>
+        </div>
+      </div>
+      <!-- 上半区（70%） -->
+      <div class="upper-section">
+        <!-- 音量控制 -->
+        <div class="left-audio-control">
+          <div class="volume-slider">
+            <div class="volume-knob"></div>
+          </div>
+          <div class="speaker-icon">🔊</div>
+        </div>
+        <!-- 录音 / 全屏 -->
+        <div class="right-controls">
+          <button id="recordBtn">录音</button>
+          <button id="fullscreenBtn">⤢</button>
+        </div>
+        <!-- 麦克风 / 摄像头 / 挂断 -->
+        <div class="controls">
+          <button id="micBtn" class="control-btn mic-btn">
+            <span class="icon">🎤</span><span class="label">麦克风</span>
+          </button>
+          <button id="camBtn" class="control-btn cam-btn">
+            <span class="icon">✖</span><span class="label">关闭摄像头</span>
+          </button>
+          <button class="control-btn hangup-btn">
+            <span class="label">挂断</span>
+          </button>
+        </div>
+      </div>
+      <!-- 下半区（30%） -->
+      <div class="lower-section">
+        <div class="participants">
+          <img src="picture1.jpg" alt="">
+          <img src="picture2.jpg" alt="">
+          <img src="picture3.jpg" alt="">
+          <img src="picture4.jpg" alt="">
+          <img src="picture5.jpg" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右侧"谈话 + 聊天"面板 -->
+  <div class="chat-panel">
+    <!-- 谈话区 -->
+    <div class="section talk-section">
+      <div class="section-header">
+        <span>谈话 (<span id="talkCount">28</span>)</span>
+        <a href="#">查看所有</a>
+      </div>
+      <ul class="talk-list">
+        <li class="talk-item">
+          <img src="https://randomuser.me/api/portraits/men/11.jpg" class="avatar" />
+          <div class="talk-info">
+            <strong>本尼 · m · 兰德里</strong>
+            <span class="email">BennyMLandry@rh...</span>
+          </div>
+          <div class="talk-status">
+            <span class="icon mic-on">🎤</span>
+          </div>
+        </li>
+        <li class="talk-item">
+          <img src="https://randomuser.me/api/portraits/women/12.jpg" class="avatar" />
+          <div class="talk-info">
+            <strong>艾伯特 · c · 罗伯</strong>
+            <span class="email">ertCRoberts@dayrep...</span>
+          </div>
+          <div class="talk-status">
+            <span class="icon mic-off">🔇</span>
+          </div>
+        </li>
+      </ul>
+    </div>
+    <!-- 聊天区 -->
+    <div class="section chat-section">
+      <div class="section-header">聊天 (<span id="chatCount">0</span>)</div>
+      <div class="chat-messages" id="chatBox">
+        <!-- 消息会在这里动态添加 -->
+      </div>
+      <div class="chat-input">
+        <button class="emoji-btn">😊</button>
+        <button class="upload-btn">📎</button>
+        <input type="text" id="chatInput" placeholder="输入你的消息...">
+        <button class="send-btn" id="sendBtn">➤</button>
+      </div>
+    </div>
+    
+    <!-- 在 body 标签结束前添加脚本 -->
+    <script>
+    // 全局函数
+    function sendMsg() {
+      const input = document.getElementById('chatInput');
+      const chatBox = document.getElementById('chatBox');
+      const value = input.value.trim();
+      
+      if (value) {
+        // 创建消息元素
+        const p = document.createElement('p');
+        p.classList.add('me');
+        p.innerHTML = `<strong>我:</strong> ${value}`;
+        
+        // 添加到聊天框
+        chatBox.appendChild(p);
+        
+        // 清空输入框
+        input.value = '';
+        
+        // 滚动到底部
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        // 更新消息计数
+        const chatCount = document.getElementById('chatCount');
+        chatCount.textContent = chatBox.children.length;
+      }
+    }
+    
+    // 页面加载完成后初始化
+    document.addEventListener('DOMContentLoaded', function() {
+      // 绑定发送按钮点击事件
+      document.getElementById('sendBtn').addEventListener('click', sendMsg);
+      
+      // 绑定回车发送
+      document.getElementById('chatInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          sendMsg();
+        }
+      });
+    });
+    </script>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>外交谈判平台登录</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">青年外交谈判平台</div>
+        <div class="menu">
+            <a href="#">首页</a>
+            <a href="#">谈判赛</a>
+            <a href="#">社区交流</a>
+            <a href="#">在线学习</a>
+            <button>一起谈判吧！</button>
+        </div>
+    </div>
+    <div class="container">
+        <div class="login-section">
+            <h2>青年外交谈判平台</h2>
+            <form>
+                <input type="text" placeholder="请输入邮箱/学号/邀请码">
+                <input type="password" placeholder="请输入密码">
+                <div class="remember-me">
+                    <input type="checkbox" id="remember">
+                    <label for="remember">记住密码</label>
+                </div>
+                <button type="submit">登录</button>
+                <a href="#">没有账号？用户免费注册</a>
+            </form>
+        </div>
+        <div class="welcome-section">
+            <h1>Hi,欢迎回来</h1>
+            <p>今天准备好谈判了吗？</p>
+            <div class="role-selection">
+                <select>
+                    <option>请选择你的身份</option>
+                    <option>学生代表</option>
+                    <option>主席/主持</option>
+                    <option>管理员</option>
+                    <option>观察员</option>
+                </select>
+                <div class="roles">
+                    <div class="role">
+                        学生代表 
+                        <button onclick="toggleRole(this)">未开启</button>
+                    </div>
+                    <div class="role">
+                        主席/主持 
+                        <button onclick="toggleRole(this)">未开启</button>
+                    </div>
+                    <div class="role">
+                        管理员 
+                        <button onclick="toggleRole(this)">未开启</button>
+                    </div>
+                    <div class="role">
+                        观察员 
+                        <button onclick="toggleRole(this)">未开启</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function toggleRole(button) {
+            if (button.innerText === "未开启") {
+                button.innerText = "已开启";
+                button.classList.add("active");
+            } else {
+                button.innerText = "未开启";
+                button.classList.remove("active");
+            }
+        }
+    </script>
+</body>
+</html>
