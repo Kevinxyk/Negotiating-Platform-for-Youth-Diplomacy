@@ -2,6 +2,9 @@
 import { currentConfig } from './config.js';
 import { addAuthHeader, handleError } from './utils.js';
 
+window.WS_URL = currentConfig.wsUrl;
+window.API_BASE_URL = currentConfig.apiUrl;
+
 // 全局变量
 let ws = null;
 
@@ -113,7 +116,7 @@ async function sendMsg() {
         'Content-Type': 'application/json'
       });
       
-      const response = await fetch(`${window.API_BASE_URL}/rooms/${window.roomId}/chat`, {
+      const response = await fetch(`${window.API_BASE_URL}/chat/${window.roomId}/send`, {
         method: 'POST',
         headers,
         body: JSON.stringify({
@@ -156,15 +159,19 @@ async function loadChatHistory() {
     chatBox.appendChild(loadingIndicator);
     
     const headers = addAuthHeader({});
-    const response = await fetch(`${window.API_BASE_URL}/rooms/${window.roomId}/chat?limit=50&offset=0`, { headers });
+    const response = await fetch(`${window.API_BASE_URL}/chat/${window.roomId}/messages?limit=50&offset=0`, { headers });
     const messages = await response.json();
     
     loadingIndicator.remove();
     chatBox.innerHTML = '';
     
-    messages.forEach(msg => {
-      showMessage(msg.sender, msg.content);
-    });
+    if (Array.isArray(messages)) {
+      messages.forEach(msg => {
+        showMessage(msg.username || msg.sender, msg.text || msg.content);
+      });
+    } else {
+      console.error('消息数据格式错误', messages);
+    }
   } catch (error) {
     handleError(error);
   }
@@ -246,38 +253,44 @@ function toggleFullscreen() {
   }
 }
 
-// 加载参会者列表
+// 加载参会者列表（静态渲染）
 async function loadParticipants() {
-  try {
-    const headers = addAuthHeader({});
-    const response = await fetch(`${window.API_BASE_URL}/participants/${window.roomId}`, { headers });
-    const participants = await response.json();
-    
-    // 更新参会者数量
-    document.getElementById('participantCount').textContent = participants.length;
-    
-    // 更新谈话列表
-    const talkList = document.querySelector('.talk-list');
-    talkList.innerHTML = '';
-    
-    participants.forEach(participant => {
-      const li = document.createElement('li');
-      li.className = 'talk-item';
-      li.innerHTML = `
-        <img src="${participant.avatar}" class="avatar" />
-        <div class="talk-info">
-          <strong>${participant.name}</strong>
-          <span class="email">${participant.email}</span>
-        </div>
-        <div class="talk-status">
-          <span class="icon ${participant.micOn ? 'mic-on' : 'mic-off'}">${participant.micOn ? '🎤' : '🔇'}</span>
-        </div>
-      `;
-      talkList.appendChild(li);
-    });
-  } catch (error) {
-    handleError(error);
-  }
+  // 静态内容
+  const talkList = document.querySelector('.talk-list');
+  talkList.innerHTML = `
+    <li class="talk-item">
+      <img src="https://randomuser.me/api/portraits/men/11.jpg" class="avatar" />
+      <div class="talk-info">
+        <strong>本尼 · m · 兰德里</strong>
+        <span class="email">BennyMLandry@rhyta.com</span>
+      </div>
+      <div class="talk-status">
+        <span class="icon mic-on">🎤</span>
+      </div>
+    </li>
+    <li class="talk-item">
+      <img src="https://randomuser.me/api/portraits/women/12.jpg" class="avatar" />
+      <div class="talk-info">
+        <strong>艾伯特 · c · 罗伯茨</strong>
+        <span class="email">ertCRoberts@dayrep.com</span>
+      </div>
+      <div class="talk-status">
+        <span class="icon mic-off">🔇</span>
+      </div>
+    </li>
+    <li class="talk-item">
+      <img src="https://randomuser.me/api/portraits/men/13.jpg" class="avatar" />
+      <div class="talk-info">
+        <strong>斯坦利 · a · 巴克利</strong>
+        <span class="email">StanleyABuckley@jourrapide.com</span>
+      </div>
+      <div class="talk-status">
+        <span class="icon mic-on">🎤</span>
+      </div>
+    </li>
+  `;
+  // 静态数量
+  document.getElementById('participantCount').textContent = 28;
 }
 
 // 初始化音量控制
