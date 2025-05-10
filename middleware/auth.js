@@ -5,9 +5,9 @@ const store = require('../data/store');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // 生成 JWT token
-function generateToken(user) {
+const generateToken = (user) => {
   return jwt.sign(
-    {
+    { 
       userId: user.userId,
       username: user.username,
       role: user.role
@@ -15,17 +15,10 @@ function generateToken(user) {
     JWT_SECRET,
     { expiresIn: '24h' }
   );
-}
+};
 
 // 验证 JWT token
-function verifyToken(req, res, next) {
-  // Testing bypass: allow x-user-role header to set req.user without JWT
-  const testRole = req.headers['x-user-role'];
-  if (testRole) {
-    // set a dummy user based on role header
-    req.user = { userId: testRole, username: testRole, role: testRole };
-    return next();
-  }
+const verifyToken = (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
   
   if (!token) {
@@ -40,30 +33,68 @@ function verifyToken(req, res, next) {
       return res.status(401).json({ error: '用户不存在' });
     }
 
-    req.user = user;
+    req.user = {
+      userId: user.userId,
+      username: user.username,
+      role: user.role
+    };
     next();
   } catch (err) {
     return res.status(401).json({ error: '无效的认证令牌' });
   }
-}
+};
 
-// 角色验证中间件
-function checkRole(role) {
+// 检查用户角色
+const requireRoles = (roles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ error: '未认证' });
     }
 
-    if (req.user.role !== role) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({ error: '权限不足' });
     }
 
     next();
   };
-}
+};
+
+// 检查用户是否是房间创建者或管理员
+const requireRoomAdmin = async (req, res, next) => {
+  const roomId = req.params.id;
+  const room = store.findRoomById(roomId);
+
+  if (!room) {
+    return res.status(404).json({ error: '房间不存在' });
+  }
+
+  if (room.createdBy !== req.user.userId && !['admin', 'sys'].includes(req.user.role)) {
+    return res.status(403).json({ error: '没有权限执行此操作' });
+  }
+
+  next();
+};
+
+// 检查用户是否是房间参与者
+const requireRoomParticipant = async (req, res, next) => {
+  const roomId = req.params.id;
+  const room = store.findRoomById(roomId);
+
+  if (!room) {
+    return res.status(404).json({ error: '房间不存在' });
+  }
+
+  if (!room.participants.some(p => p.userId === req.user.userId)) {
+    return res.status(403).json({ error: '您不是此房间的参与者' });
+  }
+
+  next();
+};
 
 module.exports = {
   generateToken,
   verifyToken,
-  checkRole
+  requireRoles,
+  requireRoomAdmin,
+  requireRoomParticipant
 }; 

@@ -1,9 +1,8 @@
 const express       = require("express");
 const router        = express.Router();
-const { checkRole, verifyToken } = require("../middleware/auth");
+const { verifyToken, requireRoles } = require("../middleware/auth");
 const voiceChatCtrl = require("../controllers/voiceChatController");
 const upload        = require("../middleware/upload");
-const { requireRoles } = require("../middleware/roleMiddleware");
 
 // Controllers
 const textChatCtrl  = require("../controllers/textChatController");
@@ -16,7 +15,7 @@ router.get(  "/chat/:room/messages",                       verifyToken, textChat
 router.post( "/chat/:room/send",                           verifyToken, textChatCtrl.sendMessage);
 router.post( "/chat/:room/message/:messageId/revoke", 
              verifyToken,
-             checkRole("admin"),                          textChatCtrl.revokeMessage);
+             requireRoles(['admin']),                      textChatCtrl.revokeMessage);
 router.get(  "/chat/:room/summary/user",                   verifyToken, textChatCtrl.getUserSummary);
 router.get(  "/chat/:room/summary/time",                   verifyToken, textChatCtrl.getTimeSummary);
 router.get(  "/chat/:room/search",                         verifyToken, textChatCtrl.searchChat);
@@ -24,28 +23,28 @@ router.get("/chat/:room/summary/user/details", verifyToken, textChatCtrl.getUser
 router.get("/chat/:room/summary/time/details", verifyToken, textChatCtrl.getTimeSummaryDetail);
 
 // Scoring 模块
-router.post( "/score/:room",                                 verifyToken, checkRole(["admin", "host"]), scoreCtrl.submitScore);
+router.post( "/score/:room",                                 verifyToken, requireRoles(['admin', 'host']), scoreCtrl.submitScore);
 router.get(  "/score/:room",                                 verifyToken, scoreCtrl.getAggregatedScores);
 router.get(  "/score/:room/history/:user",                   verifyToken, scoreCtrl.getUserScoreHistory);
 router.get(  "/score/:room/ranking",                         verifyToken, scoreCtrl.getRanking);
-router.get(  "/score/:room/ai",         verifyToken, checkRole("admin"),     scoreCtrl.computeAIScore);
+router.get(  "/score/:room/ai",         verifyToken, requireRoles(['admin']),     scoreCtrl.computeAIScore);
 
 // Time 模块
 router.post("/time/:event/schedule", 
   verifyToken, 
-  checkRole(["admin", "host"]), 
+  requireRoles(['admin', 'host']), 
   timeCtrl.scheduleEvent
 );
 
 router.post("/time/:event/pause", 
   verifyToken, 
-  checkRole(["admin", "host"]), 
+  requireRoles(['admin', 'host']), 
   timeCtrl.pauseEvent
 );
 
 router.post("/time/:event/resume", 
   verifyToken, 
-  checkRole(["admin", "host"]), 
+  requireRoles(['admin', 'host']), 
   timeCtrl.resumeEvent
 );
 

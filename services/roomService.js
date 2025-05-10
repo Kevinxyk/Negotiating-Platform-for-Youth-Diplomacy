@@ -64,10 +64,71 @@ function addMember(roomId, userId) {
   return room;
 }
 
+/**
+ * Delete a room
+ * @param {string} roomId
+ * @param {string} userId - ID of the user requesting deletion
+ * @returns {boolean} success status
+ */
+function deleteRoom(roomId, userId) {
+  const roomIndex = rooms.findIndex(r => r.id === roomId);
+  if (roomIndex === -1) return false;
+  
+  const room = rooms[roomIndex];
+  // Only creator or admin can delete the room
+  if (room.createdBy !== userId) return false;
+  
+  rooms.splice(roomIndex, 1);
+  return true;
+}
+
+/**
+ * Update room parameters
+ * @param {string} roomId
+ * @param {string} userId - ID of the user requesting update
+ * @param {Object} updates - Object containing fields to update
+ * @returns {Object|null} updated room or null if update failed
+ */
+function updateRoom(roomId, userId, updates) {
+  const room = rooms.find(r => r.id === roomId);
+  if (!room) return null;
+  
+  // Only creator or admin can update the room
+  if (room.createdBy !== userId) return null;
+  
+  // Update allowed fields
+  if (updates.name) room.name = updates.name;
+  if (updates.description) room.description = updates.description;
+  if (updates.maxParticipants) room.maxParticipants = updates.maxParticipants;
+  if (typeof updates.isPrivate === 'boolean') room.isPrivate = updates.isPrivate;
+  
+  return room;
+}
+
+/**
+ * Join room by invite code
+ * @param {string} inviteCode
+ * @param {string} userId
+ * @returns {Object|null} room object or null if not found
+ */
+function joinRoomByInviteCode(inviteCode, userId) {
+  const room = rooms.find(r => r.inviteCode === inviteCode);
+  if (!room) return null;
+  
+  if (!room.members.includes(userId)) {
+    room.members.push(userId);
+  }
+  
+  return room;
+}
+
 module.exports = {
   getRoomsByUser,
   createRoom,
   getRoomById,
   getRoomByName,
-  addMember
+  addMember,
+  deleteRoom,
+  updateRoom,
+  joinRoomByInviteCode
 }; 

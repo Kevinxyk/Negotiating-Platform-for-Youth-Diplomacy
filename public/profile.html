@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>个人资料 - 研讨系统</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body { 
+      padding-top: 56px;
+      min-height: 100vh;
+    }
+    .container { 
+      margin-top: 2rem;
+      padding-top: 1rem;
+    }
+    .navbar { 
+      z-index: 1030;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .profile-header {
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      padding: 2rem 1rem;
+      margin-bottom: 2rem;
+      text-align: center;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      margin-bottom: 1rem;
+      object-fit: cover;
+      border: 5px solid white;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    .profile-role {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+      border-radius: 0.25rem;
+      background-color: #e9ecef;
+      margin-top: 0.5rem;
+    }
+    .profile-stats {
+      display: flex;
+      justify-content: center;
+      margin-top: 1.5rem;
+      gap: 2rem;
+    }
+    .profile-stat {
+      text-align: center;
+    }
+    .profile-stat-value {
+      font-weight: bold;
+      font-size: 1.5rem;
+    }
+    .profile-stat-label {
+      color: #6c757d;
+      font-size: 0.875rem;
+    }
+    .card-header-tab {
+      display: flex;
+      padding: 0;
+    }
+    .nav-link-header {
+      padding: 1rem;
+      flex: 1;
+      text-align: center;
+      border-bottom: 2px solid transparent;
+    }
+    .nav-link-header.active {
+      border-bottom-color: #007bff;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">研讨系统</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="/rooms">研讨室列表</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item" id="userInfoNav">
+            <span class="nav-link" id="userDisplayName"></span>
+          </li>
+          <li class="nav-item dropdown" id="userDropdown">
+            <a class="nav-link dropdown-toggle active" href="#" id="userDropdownLink" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item active" href="/profile">个人资料</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="logoutBtn">退出登录</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="profile-header">
+      <img src="https://via.placeholder.com/150" alt="用户头像" class="profile-avatar" id="profileAvatar">
+      <h2 id="profileName">加载中...</h2>
+      <div class="profile-role" id="profileRole">角色: 加载中...</div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="roomsCount">0</div>
+          <div class="profile-stat-label">研讨室</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="messagesCount">0</div>
+          <div class="profile-stat-label">消息</div>
+        </div>
+        <div class="profile-stat">
+          <div class="profile-stat-value" id="joinDateValue">-</div>
+          <div class="profile-stat-label">加入时间</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header card-header-tab">
+        <a class="nav-link-header active" href="#info" data-bs-toggle="tab">基本信息</a>
+        <a class="nav-link-header" href="#settings" data-bs-toggle="tab">账号设置</a>
+        <a class="nav-link-header" href="#security" data-bs-toggle="tab">安全设置</a>
+      </div>
+      <div class="tab-content">
+        <!-- 基本信息 -->
+        <div class="tab-pane fade show active" id="info">
+          <div class="card-body">
+            <form id="profileInfoForm">
+              <div class="row mb-3">
+                <label for="username" class="col-sm-3 col-form-label">用户名</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="username" readonly>
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label for="email" class="col-sm-3 col-form-label">邮箱</label>
+                <div class="col-sm-9">
+                  <input type="email" class="form-control" id="email">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label for="country" class="col-sm-3 col-form-label">国家/地区</label>
+                <div class="col-sm-9">
+                  <input type="text" class="form-control" id="country">
+                </div>
+              </div>
+              <div class="row mb-3">
+                <label for="bio" class="col-sm-3 col-form-label">个人简介</label>
+                <div class="col-sm-9">
+                  <textarea class="form-control" id="bio" rows="3"></textarea>
+                </div>
+              </div>
+              <div class="text-end">
+                <button type="submit" class="btn btn-primary">保存信息</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        
+        <!-- 账号设置 -->
+        <div class="tab-pane fade" id="settings">
+          <div class="card-body">
+            <h5 class="card-title">通知设置</h5>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="emailNotifications" checked>
+              <label class="form-check-label" for="emailNotifications">接收邮件通知</label>
+            </div>
+            <div class="form-check form-switch mb-3">
+              <input class="form-check-input" type="checkbox" id="messageNotifications" checked>
+              <label class="form-check-label" for="messageNotifications">接收消息通知</label>
+            </div>
+            
+            <h5 class="card-title mt-4">显示设置</h5>
+            <div class="mb-3">
+              <label for="language" class="form-label">语言</label>
+              <select class="form-select" id="language">
+                <option value="zh-CN" selected>简体中文</option>
+                <option value="en-US">English (US)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="timezone" class="form-label">时区</label>
+              <select class="form-select" id="timezone">
+                <option value="Asia/Shanghai" selected>(GMT+8:00) 北京，香港，新加坡</option>
+                <option value="Asia/Tokyo">(GMT+9:00) 东京，大阪</option>
+                <option value="America/New_York">(GMT-5:00) 纽约，华盛顿</option>
+                <option value="Europe/London">(GMT+0:00) 伦敦，都柏林</option>
+              </select>
+            </div>
+            
+            <div class="text-end">
+              <button type="button" class="btn btn-primary" id="saveSettingsBtn">保存设置</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 安全设置 -->
+        <div class="tab-pane fade" id="security">
+          <div class="card-body">
+            <h5 class="card-title">修改密码</h5>
+            <form id="changePasswordForm">
+              <div class="mb-3">
+                <label for="currentPassword" class="form-label">当前密码</label>
+                <input type="password" class="form-control" id="currentPassword" required>
+              </div>
+              <div class="mb-3">
+                <label for="newPassword" class="form-label">新密码</label>
+                <input type="password" class="form-control" id="newPassword" required>
+              </div>
+              <div class="mb-3">
+                <label for="confirmPassword" class="form-label">确认新密码</label>
+                <input type="password" class="form-control" id="confirmPassword" required>
+              </div>
+              <div class="text-end">
+                <button type="submit" class="btn btn-primary">更改密码</button>
+              </div>
+            </form>
+            
+            <hr>
+            
+            <h5 class="card-title mt-4">账号安全</h5>
+            <div class="mb-3">
+              <button type="button" class="btn btn-outline-danger" id="deactivateBtn">停用账号</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">我的研讨室</h5>
+      </div>
+      <div class="card-body">
+        <div id="myRoomsList" class="list-group list-group-flush">
+          <!-- 研讨室列表将在这里动态加载 -->
+          <div class="text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">加载中...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-footer text-end">
+        <a href="/rooms" class="btn btn-primary">查看所有研讨室</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // 检查用户是否已登录
+      if (!window.auth.checkAuth()) {
+        return;
+      }
+
+      // 获取用户信息
+      const user = window.auth.getUserInfo();
+      
+      // 显示用户基本信息
+      document.getElementById('userDisplayName').textContent = user.username;
+      document.getElementById('profileName').textContent = user.username;
+      document.getElementById('username').value = user.username;
+      
+      // 显示用户角色
+      const roleMap = {
+        'host': '主持人',
+        'admin': '管理员',
+        'sys': '系统管理员',
+        'delegate': '代表',
+        'observer': '观察者',
+        'judge': '评委'
+      };
+      document.getElementById('profileRole').textContent = `角色: ${roleMap[user.role] || user.role}`;
+      
+      // 设置加入时间（示例）
+      document.getElementById('joinDateValue').textContent = new Date().toLocaleDateString();
+      
+      // 如果有电子邮件和国家信息
+      if (user.email) {
+        document.getElementById('email').value = user.email;
+      }
+      if (user.country) {
+        document.getElementById('country').value = user.country;
+      }
+      if (user.bio) {
+        document.getElementById('bio').value = user.bio;
+      }
+      
+      // 加载用户的研讨室
+      loadUserRooms();
+      
+      // 加载用户的消息数量
+      loadUserStats();
+      
+      // 退出登录
+      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+        e.preventDefault();
+        window.auth.logout();
+      });
+      
+      // 提交个人信息表单
+      document.getElementById('profileInfoForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const updateData = {
+          email: document.getElementById('email').value.trim(),
+          country: document.getElementById('country').value.trim(),
+          bio: document.getElementById('bio').value.trim()
+        };
+        
+        try {
+          const response = await fetch('/api/user/profile', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(updateData)
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || '保存个人信息失败');
+          }
+          
+          const updatedUser = await response.json();
+          
+          // 更新本地存储的用户信息
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const newUser = { ...currentUser, ...updatedUser };
+          localStorage.setItem('user', JSON.stringify(newUser));
+          
+          alert('个人信息保存成功！');
+        } catch (error) {
+          console.error('保存个人信息失败:', error);
+          alert('保存个人信息失败: ' + error.message);
+        }
+      });
+      
+      // 保存账号设置
+      document.getElementById('saveSettingsBtn').addEventListener('click', async () => {
+        const settings = {
+          emailNotifications: document.getElementById('emailNotifications').checked,
+          messageNotifications: document.getElementById('messageNotifications').checked,
+          language: document.getElementById('language').value,
+          timezone: document.getElementById('timezone').value
+        };
+        
+        try {
+          const response = await fetch('/api/user/settings', {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(settings)
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || '保存设置失败');
+          }
+          
+          alert('设置保存成功！');
+        } catch (error) {
+          console.error('保存设置失败:', error);
+          alert('保存设置失败: ' + error.message);
+        }
+      });
+      
+      // 修改密码
+      document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (newPassword !== confirmPassword) {
+          alert('两次输入的新密码不一致，请重新输入！');
+          return;
+        }
+        
+        try {
+          const response = await fetch('/api/user/change-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify({
+              currentPassword,
+              newPassword
+            })
+          });
+          
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || '修改密码失败');
+          }
+          
+          alert('密码修改成功！请使用新密码重新登录。');
+          window.auth.logout();
+        } catch (error) {
+          console.error('修改密码失败:', error);
+          alert('修改密码失败: ' + error.message);
+        }
+      });
+      
+      // 停用账号
+      document.getElementById('deactivateBtn').addEventListener('click', () => {
+        if (confirm('确定要停用您的账号吗？这将使您无法登录系统，但您的数据将被保留。')) {
+          // 实际实现中，这里应该有一个停用账号的API调用
+          alert('此功能尚未实现');
+        }
+      });
+      
+      // 加载用户的研讨室
+      async function loadUserRooms() {
+        try {
+          const response = await fetch('/api/rooms?filter=my', {
+            headers: {
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            }
+          });
+          
+          if (!response.ok) {
+            throw new Error('获取研讨室列表失败');
+          }
+          
+          const rooms = await response.json();
+          const container = document.getElementById('myRoomsList');
+          
+          // 更新统计数据
+          document.getElementById('roomsCount').textContent = rooms.length;
+          
+          container.innerHTML = '';
+          
+          if (rooms.length === 0) {
+            container.innerHTML = `
+              <div class="text-center py-3">
+                <p class="text-muted">您还没有参与任何研讨室</p>
+                <a href="/rooms" class="btn btn-sm btn-primary">浏览研讨室</a>
+              </div>
+            `;
+            return;
+          }
+          
+          rooms.slice(0, 5).forEach(room => {
+            const a = document.createElement('a');
+            a.href = `/rooms/${room.id}`;
+            a.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+            
+            const isCreator = room.createdBy === user.userId;
+            const badge = isCreator ? 
+              '<span class="badge bg-primary">创建者</span>' : 
+              '<span class="badge bg-secondary">参与者</span>';
+            
+            a.innerHTML = `
+              <div>
+                <h6 class="mb-0">${room.name}</h6>
+                <small class="text-muted">${room.description || '无描述'}</small>
+              </div>
+              ${badge}
+            `;
+            
+            container.appendChild(a);
+          });
+          
+          if (rooms.length > 5) {
+            const more = document.createElement('div');
+            more.className = 'text-center mt-3';
+            more.innerHTML = `<a href="/rooms?filter=my" class="btn btn-sm btn-outline-primary">查看更多 (${rooms.length - 5})</a>`;
+            container.appendChild(more);
+          }
+        } catch (error) {
+          console.error('加载研讨室列表失败:', error);
+          document.getElementById('myRoomsList').innerHTML = `
+            <div class="alert alert-danger">
+              加载研讨室列表失败: ${error.message}
+            </div>
+          `;
+        }
+      }
+      
+      // 加载用户统计信息
+      async function loadUserStats() {
+        try {
+          // 这里应该有API调用获取用户统计信息
+          // 作为示例，我们使用模拟数据
+          document.getElementById('messagesCount').textContent = '42';
+        } catch (error) {
+          console.error('加载用户统计失败:', error);
+        }
+      }
+    });
+  </script>
+</body>
+</html> 

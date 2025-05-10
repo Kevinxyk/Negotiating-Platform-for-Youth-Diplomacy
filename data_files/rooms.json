@@ -1,0 +1,163 @@
+[
+  {
+    "name": "123",
+    "description": "123",
+    "maxParticipants": 10,
+    "isPrivate": false,
+    "createdBy": "1",
+    "participants": [
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-05-10T07:41:21.888Z"
+      }
+    ],
+    "schedule": [
+      {
+        "id": "schedule-1746862876936",
+        "name": "ewq",
+        "duration": 1800,
+        "completed": false
+      }
+    ],
+    "settings": {
+      "autoSchedule": false,
+      "allowMessageDelete": true,
+      "allowMessageEdit": true,
+      "allowRaiseHand": true,
+      "allowVoiceChat": true
+    },
+    "id": "1746862881888",
+    "inviteCode": "AXMUI4",
+    "createdAt": "2025-05-10T07:41:21.888Z",
+    "timer": {
+      "isRunning": false,
+      "startTime": null,
+      "duration": 0,
+      "remainingTime": 0,
+      "lastUpdate": null
+    }
+  },
+  {
+    "name": "test",
+    "description": "111",
+    "maxParticipants": 10,
+    "isPrivate": false,
+    "createdBy": "1",
+    "participants": [
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-05-10T10:47:41.414Z"
+      }
+    ],
+    "schedule": [
+      {
+        "id": "schedule-1746874048010",
+        "name": "testtste",
+        "duration": 1800,
+        "completed": false,
+        "order": 0
+      }
+    ],
+    "settings": {
+      "autoSchedule": false,
+      "allowMessageDelete": true,
+      "allowMessageEdit": true,
+      "allowRaiseHand": true,
+      "allowVoiceChat": true
+    },
+    "id": "1746874061415",
+    "inviteCode": "1VJ8TS",
+    "createdAt": "2025-05-10T10:47:41.415Z",
+    "timer": {
+      "isRunning": true,
+      "startTime": 1746874095914,
+      "duration": 60000,
+      "remainingTime": 60000,
+      "lastUpdate": 1746874095914
+    },
+    "updatedAt": "2025-05-10T10:57:21.526Z",
+    "status": "in_progress",
+    "currentScheduleIndex": 0,
+    "scheduleStartTime": 1746874641526,
+    "scheduleRemainingTime": 1800
+  },
+  {
+    "name": "q",
+    "description": "",
+    "maxParticipants": 50,
+    "isPrivate": false,
+    "createdBy": "1",
+    "participants": [
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-05-10T10:57:41.236Z"
+      }
+    ],
+    "schedule": [],
+    "settings": {
+      "autoSchedule": false,
+      "allowMessageDelete": true,
+      "allowMessageEdit": true,
+      "allowRaiseHand": true,
+      "allowVoiceChat": true
+    },
+    "id": "1746874661236",
+    "inviteCode": "H6IZ59",
+    "createdAt": "2025-05-10T10:57:41.236Z",
+    "timer": {
+      "isRunning": false,
+      "startTime": null,
+      "duration": 0,
+      "remainingTime": 0,
+      "lastUpdate": null
+    }
+  },
+  {
+    "name": "111",
+    "description": "",
+    "maxParticipants": 10,
+    "isPrivate": false,
+    "createdBy": "1",
+    "participants": [
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-05-10T10:59:16.222Z"
+      }
+    ],
+    "schedule": [
+      {
+        "id": "schedule-1746874750909",
+        "name": "111",
+        "duration": 1800,
+        "completed": false,
+        "order": 0
+      }
+    ],
+    "settings": {
+      "autoSchedule": false,
+      "allowMessageDelete": true,
+      "allowMessageEdit": true,
+      "allowRaiseHand": true,
+      "allowVoiceChat": true
+    },
+    "id": "1746874756222",
+    "inviteCode": "8F0HHW",
+    "createdAt": "2025-05-10T10:59:16.222Z",
+    "timer": {
+      "isRunning": false,
+      "startTime": 1746874857116,
+      "duration": 120000,
+      "remainingTime": 118650,
+      "lastUpdate": 1746874858990
+    },
+    "status": "paused",
+    "currentScheduleIndex": 0,
+    "scheduleStartTime": 1746874758664,
+    "scheduleRemainingTime": 1708.107,
+    "updatedAt": "2025-05-10T11:00:58.990Z"
+  }
+]

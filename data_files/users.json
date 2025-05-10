@@ -1,0 +1,44 @@
+[
+  {
+    "userId": "1",
+    "username": "admin",
+    "passwordHash": "$2b$10$wMOq5hCKbsC56ah.h2wduOMeIeIZmvqcC95h9BvU34LF/Milr7.le",
+    "role": "admin"
+  },
+  {
+    "userId": "2",
+    "username": "host",
+    "passwordHash": "$2b$10$nWnxToi/lqN8zfJ7rihlnOyVfcYTLqnLA5t8FCimvuKrAobmU2fkS",
+    "role": "host"
+  },
+  {
+    "userId": "3",
+    "username": "sys",
+    "passwordHash": "$2b$10$khar78Tbbm3Mal3ZxHMqLe2fNOCH9MbhXP9VXbp0YHeckLUs5tJwO",
+    "role": "sys"
+  },
+  {
+    "userId": "4",
+    "username": "student",
+    "passwordHash": "$2b$10$Mmv/R50QKs/iWZfHzSrgsO8OWEnevzDc4S810K2qwOOAOinl48Tr.",
+    "role": "student"
+  },
+  {
+    "userId": "5",
+    "username": "observer",
+    "passwordHash": "$2b$10$XEh9QxGiuUNqjdxDVquR7ebBXlBaaY7G2iUQa2fXSPpnW/ATWhvQK",
+    "role": "observer"
+  },
+  {
+    "userId": "6",
+    "username": "judge",
+    "passwordHash": "$2b$10$hLby1XyMK0tICe3UvROVwu9LnCb52U7NulfIYYnf9L1GhThviJijm",
+    "role": "judge"
+  },
+  {
+    "userId": "7",
+    "username": "delegate",
+    "passwordHash": "$2b$10$tuMx5fT6qvqqAsetZl4jaOKHf2En6uIpl4hxhMZGccijGyU8IPQ7q",
+    "role": "delegate"
+  }
+]
