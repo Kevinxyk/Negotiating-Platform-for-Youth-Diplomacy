@@ -544,8 +544,9 @@ async function startTimer(req, res) {
       return res.status(403).json({ error: '没有权限控制计时器' });
     }
 
-    const timer = store.startTimer(roomId, duration);
-    res.json(timer);
+    store.startTimer(roomId, duration);
+    const status = store.getTimerStatus(roomId);
+    res.json(status);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -570,8 +571,9 @@ async function pauseTimer(req, res) {
       return res.status(403).json({ error: '没有权限控制计时器' });
     }
 
-    const timer = store.pauseTimer(roomId);
-    res.json(timer);
+    store.pauseTimer(roomId);
+    const status = store.getTimerStatus(roomId);
+    res.json(status);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -596,8 +598,9 @@ async function resumeTimer(req, res) {
       return res.status(403).json({ error: '没有权限控制计时器' });
     }
 
-    const timer = store.resumeTimer(roomId);
-    res.json(timer);
+    store.resumeTimer(roomId);
+    const status = store.getTimerStatus(roomId);
+    res.json(status);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
