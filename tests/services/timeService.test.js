@@ -10,8 +10,9 @@ describe("TimeService", () => {
 
   it("scheduleEvent", () => {
     const cb = () => {};
-    expect(scheduleEvent("e1", { t:1 }, cb)).toBe(true);
-    expect(timeEvents.e1).toEqual({ timeInfo:{ t:1 }, callback:cb, paused:false });
+    const ev = scheduleEvent("e1", { t:1 }, cb);
+    expect(ev).toEqual({ timeInfo:{ t:1 }, callback:cb, paused:false });
+    expect(ev).toBe(timeEvents.e1);
   });
 
   it("pauseEvent / resumeEvent", () => {
