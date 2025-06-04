@@ -84,5 +84,11 @@
       }
     });
   </script>
+  <script src="/js/auth.js"></script>
+  <script>
+    if (localStorage.getItem('token')) {
+      document.querySelectorAll('a[href="/login"], a[href="/register"]').forEach(el => el.style.display = 'none');
+    }
+  </script>
 </body>
-</html> 
+</html>

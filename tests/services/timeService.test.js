@@ -5,14 +5,18 @@ const { timeData } = require("../../data/timeData");
 
 describe("TimeService", () => {
   beforeEach(() => {
+    Object.values(timeEvents).forEach(ev => ev.interval && clearInterval(ev.interval));
     Object.keys(timeEvents).forEach(k => delete timeEvents[k]);
   });
 
   it("scheduleEvent", () => {
     const cb = () => {};
-    const ev = scheduleEvent("e1", { t:1 }, cb);
-    expect(ev).toEqual({ timeInfo:{ t:1 }, callback:cb, paused:false });
+    const ev = scheduleEvent("e1", { durationSec:1, label:"t" }, cb);
+    expect(ev.callback).toBe(cb);
+    expect(ev.paused).toBe(false);
+    expect(ev.timeInfo.remainingSec).toBe(1);
     expect(ev).toBe(timeEvents.e1);
+    clearInterval(ev.interval);
   });
 
   it("pauseEvent / resumeEvent", () => {
