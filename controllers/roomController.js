@@ -146,7 +146,11 @@ async function deleteRoom(req, res) {
     
     // 检查权限
     const user = store.findUserById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId && p.role === 'admin')) {
+    const isCreator = room.createdBy === user.userId;
+    const isRoomAdmin = room.participants.some(p => p.user === user.userId && p.role === 'admin');
+
+    // 允许房间创建者、房间管理员或具有全局 admin 角色的用户删除房间
+    if (!(isCreator || isRoomAdmin || user.role === 'admin')) {
       return res.status(403).json({ error: '没有权限删除房间' });
     }
     

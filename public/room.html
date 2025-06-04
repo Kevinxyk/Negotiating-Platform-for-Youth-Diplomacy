@@ -1402,6 +1402,12 @@
           timerDisplay.style.color = '';
         }
       }
+
+      // 供 WebSocket 消息调用，更新计时器显示
+      window.updateTimerDisplay = function(sec) {
+        currentTime = sec;
+        updateDisplay();
+      };
     }
 
     // 初始化日程项
