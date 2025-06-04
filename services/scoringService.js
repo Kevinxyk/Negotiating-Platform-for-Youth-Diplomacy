@@ -68,9 +68,33 @@ async function getRanking(roomId) {
 }
 
 async function computeAIScore(roomId) {
-  // default placeholder, sum average across dimensions
   const list = await getScores(roomId);
-  const avg = list.reduce((acc, u) => acc + parseFloat(u.avgScore), 0) / (list.length || 1);
+
+  if (list.length === 0) {
+    return { roomId, aiScore: '0.00', remarks: 'AI default summary' };
+  }
+
+  const dimWeights = dimensions.reduce((m, d) => {
+    m[d.id] = d.weight;
+    return m;
+  }, {});
+
+  let sum = 0;
+  let weightSum = 0;
+
+  for (const record of list) {
+    let score = 0;
+    for (const [dim, val] of Object.entries(record.dimensionScores)) {
+      const w = dimWeights[dim] || 0;
+      score += val * w;
+    }
+
+    const roleFactor = roleWeights[record.role] || 1;
+    sum += score * roleFactor;
+    weightSum += roleFactor;
+  }
+
+  const avg = sum / weightSum;
   return { roomId, aiScore: avg.toFixed(2), remarks: 'AI default summary' };
 }
 
