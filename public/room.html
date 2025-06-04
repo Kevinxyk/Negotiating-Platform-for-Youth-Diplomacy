@@ -702,6 +702,53 @@
             msgElement.dataset.messageId = messageId;
           }
           
+          // 绑定编辑和删除事件
+          const editBtn = msgElement.querySelector('.edit-btn');
+          const deleteBtn = msgElement.querySelector('.delete-btn');
+          if (editBtn) {
+            editBtn.addEventListener('click', async () => {
+              const newContent = prompt('编辑消息', content);
+              if (newContent === null) return;
+              try {
+                const res = await fetch(`/api/rooms/${room.id}/messages/${messageId}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                  },
+                  body: JSON.stringify({ content: newContent })
+                });
+                if (!res.ok) {
+                  const err = await res.json();
+                  throw new Error(err.error || '编辑失败');
+                }
+                const updated = await res.json();
+                msgElement.querySelector('.message-content').textContent = updated.content;
+                msgElement.querySelector('.message-edited').style.display = 'inline';
+              } catch (e) {
+                alert('编辑消息失败: ' + e.message);
+              }
+            });
+          }
+          if (deleteBtn) {
+            deleteBtn.addEventListener('click', async () => {
+              if (!confirm('确定删除该消息吗?')) return;
+              try {
+                const res = await fetch(`/api/rooms/${room.id}/messages/${messageId}`, {
+                  method: 'DELETE',
+                  headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                if (!res.ok) {
+                  const err = await res.json();
+                  throw new Error(err.error || '删除失败');
+                }
+                msgElement.remove();
+              } catch (e) {
+                alert('删除消息失败: ' + e.message);
+              }
+            });
+          }
+
           // 添加到聊天窗口
           messagesContainer.appendChild(msgNode);
           
@@ -1258,7 +1305,7 @@
       .then(timer => {
         if (timer && timer.isRunning) {
           currentTime = timer.remainingTime;
-          isRunning = true;
+          isRunning = timer.isRunning;
           startTimer();
         } else if (timer && timer.remainingTime > 0) {
           currentTime = timer.remainingTime;
@@ -1297,7 +1344,7 @@
           
           const timer = await res.json();
           currentTime = timer.remainingTime;
-          isRunning = true;
+          isRunning = timer.isRunning;
           startTimer();
         } catch (err) {
           alert('开始计时失败: ' + err.message);
@@ -1323,7 +1370,7 @@
           
           const timer = await res.json();
           currentTime = timer.remainingTime;
-          isRunning = false;
+          isRunning = timer.isRunning;
           stopTimer();
           updateDisplay();
         } catch (err) {
@@ -1347,8 +1394,10 @@
             const error = await res.json();
             throw new Error(error.error || '继续计时失败');
           }
-          
-          isRunning = true;
+
+          const timer = await res.json();
+          currentTime = timer.remainingTime;
+          isRunning = timer.isRunning;
           startTimer();
         } catch (err) {
           alert('继续计时失败: ' + err.message);
@@ -1402,6 +1451,12 @@
           timerDisplay.style.color = '';
         }
       }
+
+      // 供 WebSocket 消息调用，更新计时器显示
+      window.updateTimerDisplay = function(sec) {
+        currentTime = sec;
+        updateDisplay();
+      };
     }
 
     // 初始化日程项

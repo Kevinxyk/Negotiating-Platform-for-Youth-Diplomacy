@@ -95,6 +95,11 @@ store.findRoomByInviteCode = (inviteCode) => {
   return store.rooms.find(r => r.inviteCode === inviteCode);
 };
 
+// 根据用户ID获取其参与的所有房间
+store.getRoomsByUser = (userId) => {
+  return store.rooms.filter(r => r.participants.some(p => p.userId === userId));
+};
+
 store.addRoom = (room) => {
   // 生成邀请码
   const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();

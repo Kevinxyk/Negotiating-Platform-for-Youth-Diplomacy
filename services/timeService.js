@@ -4,8 +4,30 @@ const timeEvents = {};
 module.exports.timeEvents = timeEvents;
 
 function scheduleEvent(name, timeInfo, callback) {
-  timeEvents[name] = { timeInfo, callback, paused: false };
-  return timeEvents[name];
+  // 初始化剩余秒数，便于倒计时逻辑
+  const info = {
+    ...timeInfo,
+    remainingSec: typeof timeInfo.durationSec === 'number' ? timeInfo.durationSec : 0
+  };
+  const event = {
+    timeInfo: info,
+    callback,
+    paused: false,
+    interval: null
+  };
+  event.interval = setInterval(() => {
+    if (!event.paused && event.timeInfo.remainingSec > 0) {
+      event.timeInfo.remainingSec -= 1;
+      if (event.timeInfo.remainingSec <= 0) {
+        clearInterval(event.interval);
+        if (typeof event.callback === 'function') {
+          event.callback();
+        }
+      }
+    }
+  }, 1000);
+  timeEvents[name] = event;
+  return event;
 }
 
 function pauseEvent(name) {
