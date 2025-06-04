@@ -1,5 +1,4 @@
 "use strict";
-const roomService = require('../services/roomService');
 const store = require('../data/store');
 const { generateToken } = require('../middleware/auth');
 
@@ -7,7 +6,7 @@ const { generateToken } = require('../middleware/auth');
 async function getRooms(req, res) {
   try {
     const userId = req.user.userId;
-    const rooms = roomService.getRoomsByUser(userId);
+    const rooms = store.getRoomsByUser(userId);
     res.json(rooms);
   } catch (error) {
     res.status(500).json({ error: error.message });
