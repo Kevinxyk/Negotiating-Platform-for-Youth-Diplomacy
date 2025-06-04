@@ -103,7 +103,7 @@ async function getRoom(req, res) {
 // 加入现有研讨室
 async function joinRoom(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -140,7 +140,7 @@ async function joinRoom(req, res) {
 // 删除研讨室
 async function deleteRoom(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -234,7 +234,7 @@ async function joinRoomByInviteCode(req, res) {
 // 离开房间
 async function leaveRoom(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -271,7 +271,7 @@ async function updateParticipantRole(req, res) {
   try {
     const { userId, role } = req.body;
     
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -300,7 +300,7 @@ async function updateParticipantRole(req, res) {
 // 开始日程
 async function startSchedule(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -328,7 +328,7 @@ async function startSchedule(req, res) {
 // 暂停日程
 async function pauseSchedule(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -351,7 +351,7 @@ async function pauseSchedule(req, res) {
 // 继续日程
 async function resumeSchedule(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -374,7 +374,7 @@ async function resumeSchedule(req, res) {
 // 完成当前日程项
 async function completeCurrentScheduleItem(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -400,7 +400,7 @@ async function completeCurrentScheduleItem(req, res) {
 // 获取消息列表
 async function getMessages(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -423,7 +423,7 @@ async function sendMessage(req, res) {
   try {
     const { content } = req.body;
     
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -456,7 +456,7 @@ async function editMessage(req, res) {
   try {
     const { content } = req.body;
     
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
@@ -491,7 +491,7 @@ async function editMessage(req, res) {
 // 删除消息
 async function deleteMessage(req, res) {
   try {
-    const room = store.findRoomById(req.params.roomId);
+    const room = store.findRoomById(req.params.id);
     if (!room) {
       return res.status(404).json({ error: '房间不存在' });
     }
