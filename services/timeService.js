@@ -5,7 +5,7 @@ module.exports.timeEvents = timeEvents;
 
 function scheduleEvent(name, timeInfo, callback) {
   timeEvents[name] = { timeInfo, callback, paused: false };
-  return true;
+  return timeEvents[name];
 }
 
 function pauseEvent(name) {
