@@ -594,6 +594,7 @@
         ws.addEventListener('open', () => {
           ws.send(JSON.stringify({
             type: 'join',
+            token: localStorage.getItem('token'),
             room: roomId,
             name: user.username,
             role: user.role,
@@ -973,7 +974,22 @@
           });
           
           // 保存房间设置
-          document.getElementById('saveRoomSettings').addEventListener('click', async () => {
+
+
+        // 加载历史消息
+        try {
+          const resMsg = await fetch(`/api/rooms/${room.id}/messages`, {
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+          });
+          if (resMsg.ok) {
+            const history = await resMsg.json();
+            history.forEach(m => {
+              addChatMessage(m.senderName || m.sender, m.content, m.timestamp, m.id);
+            });
+          }
+        } catch (e) {
+          console.error('加载历史消息失败:', e);
+        }
             try {
               const formData = collectRoomFormData();
               

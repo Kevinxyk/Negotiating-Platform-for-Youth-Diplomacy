@@ -9,6 +9,9 @@ const WebSocket = require('ws');
 const mysqlService = require('./services/mysqlService');
 const { v4: uuidv4 } = require('uuid');
 const store = require('./data/store');
+const jwt = require('jsonwebtoken');
+const userService = require('./services/userService');
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 const app = express();
 const server = http.createServer(app);
@@ -66,7 +69,7 @@ wss.on('connection', (ws, req) => {
   ws.on('pong', heartbeat);
   
   // 消息处理
-  ws.on('message', (message, isBinary) => {
+ws.on('message', async (message, isBinary) => {
     // 如果是二进制数据，则当作音频帧转发给同房间的其他客户端
     if (isBinary) {
       if (userInfo && userInfo.room && rooms.has(userInfo.room)) {
@@ -84,28 +87,38 @@ wss.on('connection', (ws, req) => {
       
       switch (data.type) {
         case 'join':
-          // 用户加入房间
-          const roomId = data.room;
-          if (!rooms.has(roomId)) rooms.set(roomId, new Set());
-          rooms.get(roomId).add(ws);
-          userInfo = {
-            id: userId,
-            name: data.name,
-            role: data.role,
-            country: data.country,
-            ws: ws,
-            room: roomId
-          };
-          onlineUsers.set(userId, userInfo);
-          
-          // 广播用户列表更新
-          broadcastUserList();
-          
-          // 发送欢迎消息
-          ws.send(JSON.stringify({
-            type: 'system',
-            message: '欢迎加入聊天室！'
-          }));
+          try {
+            const decoded = jwt.verify(data.token || '', JWT_SECRET);
+            const user = await userService.findById(decoded.userId);
+            if (!user) throw new Error('auth failed');
+
+            const roomId = data.room;
+            if (!rooms.has(roomId)) rooms.set(roomId, new Set());
+            rooms.get(roomId).add(ws);
+            userInfo = {
+              id: userId,
+              name: user.username,
+              role: user.role,
+              country: data.country,
+              ws: ws,
+              room: roomId
+            };
+            onlineUsers.set(userId, userInfo);
+
+            broadcastUserList();
+
+            if (timers.get('main')) {
+              ws.send(JSON.stringify({ type: 'timer', time: timers.get('main').remainingTime }));
+            }
+
+            ws.send(JSON.stringify({
+              type: 'system',
+              message: '欢迎加入聊天室！'
+            }));
+          } catch (e) {
+            ws.send(JSON.stringify({ type: 'error', message: '认证失败' }));
+            return;
+          }
           break;
           
         case 'chat':
