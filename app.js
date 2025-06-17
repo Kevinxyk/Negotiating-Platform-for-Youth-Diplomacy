@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const path = require("path");
 const http = require('http');
 const WebSocket = require('ws');
+const mysqlService = require('./services/mysqlService');
 
 const app = express();
 const server = http.createServer(app);
@@ -460,6 +461,9 @@ app.use(
 );
 
 const PORT = process.env.PORT || 3000;
+if (process.env.USE_MYSQL === 'true') {
+  mysqlService.init().catch(err => console.error('MySQL init error', err));
+}
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
