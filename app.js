@@ -7,6 +7,8 @@ const path = require("path");
 const http = require('http');
 const WebSocket = require('ws');
 const mysqlService = require('./services/mysqlService');
+const { v4: uuidv4 } = require('uuid');
+const store = require('./data/store');
 
 const app = express();
 const server = http.createServer(app);
@@ -118,18 +120,28 @@ wss.on('connection', (ws, req) => {
           
           const groupMessage = {
             type: 'chat',
+            id: uuidv4(),
             from: userId,
             fromName: userInfo.name,
             content: data.content,
             timestamp: new Date().toISOString()
           };
-          
+
           // 保存到历史记录
           chatHistory.group.push(groupMessage);
           if (chatHistory.group.length > 100) {
             chatHistory.group.shift();
           }
-          
+          store.addMessage({
+            id: groupMessage.id,
+            room: userInfo.room,
+            sender: userId,
+            content: data.content,
+            timestamp: groupMessage.timestamp,
+            edited: false,
+            deleted: false
+          });
+
           // 广播消息
           broadcastMessage(groupMessage);
           break;
@@ -186,10 +198,11 @@ wss.on('connection', (ws, req) => {
         case 'getHistory':
           // 获取历史消息
           if (data.mode === 'group') {
+            const history = store.getMessages(userInfo ? userInfo.room : '');
             ws.send(JSON.stringify({
               type: 'history',
               mode: 'group',
-              messages: chatHistory.group
+              messages: history
             }));
           } else if (data.mode === 'private' && data.targetUser) {
             const targetUser = Array.from(onlineUsers.values())
