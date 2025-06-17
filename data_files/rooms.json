@@ -1,88 +1,5 @@
 [
-  {
-    "name": "123",
-    "description": "123",
-    "maxParticipants": 10,
-    "isPrivate": false,
-    "createdBy": "1",
-    "participants": [
       {
-        "userId": "1",
-        "role": "admin",
-        "joinedAt": "2025-05-10T07:41:21.888Z"
-      }
-    ],
-    "schedule": [
-      {
-        "id": "schedule-1746862876936",
-        "name": "ewq",
-        "duration": 1800,
-        "completed": false
-      }
-    ],
-    "settings": {
-      "autoSchedule": false,
-      "allowMessageDelete": true,
-      "allowMessageEdit": true,
-      "allowRaiseHand": true,
-      "allowVoiceChat": true
-    },
-    "id": "1746862881888",
-    "inviteCode": "AXMUI4",
-    "createdAt": "2025-05-10T07:41:21.888Z",
-    "timer": {
-      "isRunning": false,
-      "startTime": null,
-      "duration": 0,
-      "remainingTime": 0,
-      "lastUpdate": null
-    }
-  },
-  {
-    "name": "test",
-    "description": "111",
-    "maxParticipants": 10,
-    "isPrivate": false,
-    "createdBy": "1",
-    "participants": [
-      {
-        "userId": "1",
-        "role": "admin",
-        "joinedAt": "2025-05-10T10:47:41.414Z"
-      }
-    ],
-    "schedule": [
-      {
-        "id": "schedule-1746874048010",
-        "name": "testtste",
-        "duration": 1800,
-        "completed": false,
-        "order": 0
-      }
-    ],
-    "settings": {
-      "autoSchedule": false,
-      "allowMessageDelete": true,
-      "allowMessageEdit": true,
-      "allowRaiseHand": true,
-      "allowVoiceChat": true
-    },
-    "id": "1746874061415",
-    "inviteCode": "1VJ8TS",
-    "createdAt": "2025-05-10T10:47:41.415Z",
-    "timer": {
-      "isRunning": true,
-      "startTime": 1746874095914,
-      "duration": 60000,
-      "remainingTime": 60000,
-      "lastUpdate": 1746874095914
-    },
-    "updatedAt": "2025-05-10T10:57:21.526Z",
-    "status": "in_progress",
-    "currentScheduleIndex": 0,
-    "scheduleStartTime": 1746874641526,
-    "scheduleRemainingTime": 1800
-  },
   {
     "name": "q",
     "description": "",
@@ -109,11 +26,12 @@
     "createdAt": "2025-05-10T10:57:41.236Z",
     "timer": {
       "isRunning": false,
-      "startTime": null,
-      "duration": 0,
-      "remainingTime": 0,
-      "lastUpdate": null
-    }
+      "startTime": 1749045932452,
+      "duration": 180000,
+      "remainingTime": 176998,
+      "lastUpdate": 1749045972665
+    },
+    "updatedAt": "2025-06-04T14:06:12.665Z"
   },
   {
     "name": "111",
@@ -238,7 +156,15 @@
         "joinedAt": "2025-05-10T12:01:02.655Z"
       }
     ],
-    "schedule": [],
+    "schedule": [
+      {
+        "id": "schedule-1749046040461-7q3nat9",
+        "name": "s",
+        "duration": 3600,
+        "completed": false,
+        "order": 0
+      }
+    ],
     "settings": {
       "autoSchedule": false,
       "allowMessageDelete": true,
@@ -255,6 +181,100 @@
       "duration": 0,
       "remainingTime": 0,
       "lastUpdate": null
-    }
+    },
+    "updatedAt": "2025-06-04T14:07:27.799Z",
+    "status": "paused",
+    "currentScheduleIndex": 0,
+    "scheduleStartTime": 1749046044332,
+    "scheduleRemainingTime": 3596.533
+  },
+  {
+    "name": "fds",
+    "description": "sda",
+    "maxParticipants": 10,
+    "isPrivate": false,
+    "createdBy": "1",
+    "participants": [
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-06-04T13:24:30.586Z"
+      }
+    ],
+    "schedule": [
+      {
+        "id": "schedule-1749043460448",
+        "name": "dsadsa",
+        "duration": 1800,
+        "completed": false,
+        "order": 0
+      }
+    ],
+    "settings": {
+      "autoSchedule": true,
+      "allowMessageDelete": true,
+      "allowMessageEdit": true,
+      "allowRaiseHand": true,
+      "allowVoiceChat": true
+    },
+    "id": "1749043470586",
+    "inviteCode": "8PD4IG",
+    "createdAt": "2025-06-04T13:24:30.586Z",
+    "timer": {
+      "isRunning": true,
+      "startTime": 1749043552864,
+      "duration": 1200000,
+      "remainingTime": 1199237,
+      "lastUpdate": 1749043554306
+    },
+    "updatedAt": "2025-06-04T13:25:54.306Z"
+  },
+  {
+    "name": "从",
+    "description": "潇洒",
+    "maxParticipants": 10,
+    "isPrivate": false,
+    "createdBy": "1",
+    "participants": [
+      {
+        "userId": "1",
+        "role": "admin",
+        "joinedAt": "2025-06-04T13:27:36.046Z"
+      }
+    ],
+    "schedule": [
+      {
+        "id": "schedule-1749043768336-w46u0uy",
+        "name": "1去",
+        "duration": 3600,
+        "completed": false,
+        "order": 0
+      },
+      {
+        "id": "schedule-1749043768336-m0dam79",
+        "name": "21d",
+        "duration": 799200,
+        "completed": false,
+        "order": 1
+      }
+    ],
+    "settings": {
+      "autoSchedule": true,
+      "allowMessageDelete": true,
+      "allowMessageEdit": true,
+      "allowRaiseHand": true,
+      "allowVoiceChat": true
+    },
+    "id": "1749043656047",
+    "inviteCode": "G0F9TJ",
+    "createdAt": "2025-06-04T13:27:36.047Z",
+    "timer": {
+      "isRunning": true,
+      "startTime": 1749043659559,
+      "duration": 3600000,
+      "remainingTime": 3600000,
+      "lastUpdate": 1749043659559
+    },
+    "updatedAt": "2025-06-04T13:29:28.343Z"
   }
 ]
