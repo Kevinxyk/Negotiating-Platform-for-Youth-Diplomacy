@@ -1,6 +1,6 @@
 "use strict";
 const bcrypt = require('bcryptjs');
-const store = require('../data/store');
+const userService = require('../services/userService');
 const { generateToken } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -22,14 +22,14 @@ async function register(req, res) {
     }
 
     // 检查用户名是否已存在
-    const existingUser = store.findUserByUsername(username);
+    const existingUser = await userService.findByUsername(username);
     if (existingUser) {
       return res.status(400).json({ error: '用户名已存在' });
     }
 
     // 创建新用户
     const passwordHash = await bcrypt.hash(password, 10);
-    const user = store.addUser({
+    const user = await userService.addUser({
       username,
       passwordHash,
       role
@@ -63,7 +63,7 @@ async function login(req, res) {
     }
 
     // 查找用户
-    const user = store.findUserByUsername(username);
+    const user = await userService.findByUsername(username);
     if (!user) {
       return res.status(401).json({ error: '用户名或密码错误' });
     }
@@ -95,7 +95,7 @@ async function login(req, res) {
 async function forgotPassword(req, res) {
   try {
     const { username } = req.body;
-    const user = store.findUserByUsername(username);
+    const user = await userService.findByUsername(username);
     if (!user) {
       return res.status(404).json({ error: '用户不存在' });
     }
@@ -114,7 +114,7 @@ async function resetPassword(req, res) {
   try {
     const { token, newPassword } = req.body;
     const payload = jwt.verify(token, JWT_SECRET);
-    const user = store.findUserById(payload.userId);
+    const user = await userService.findById(payload.userId);
     if (!user) {
       return res.status(404).json({ error: '用户不存在' });
     }
