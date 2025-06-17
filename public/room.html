@@ -660,38 +660,16 @@
           const message = messageInput.value.trim();
 
           if (!message) return;
-
-          if (editingMessage) {
-            fetch(`/api/rooms/${room.id}/messages/${editingMessage.dataset.messageId}`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + localStorage.getItem('token')
-              },
-              body: JSON.stringify({ content: message })
-            }).then(async res => {
-              if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || '编辑失败');
-              }
-              const updated = await res.json();
-              editingMessage.querySelector('.message-content').textContent = updated.content;
-              editingMessage.querySelector('.message-edited').style.display = 'inline';
-              editingMessage = null;
-              document.getElementById('sendBtn').textContent = '发送';
-              messageInput.value = '';
-            }).catch(e => alert('编辑消息失败: ' + e.message));
-            return;
-          }
+          
 
           console.log('发送消息:', message);
+          
 
           // 发送消息到服务器
           ws.send(JSON.stringify({
             type: 'chat',
             content: message
           }));
-
           // 清空输入框
           messageInput.value = '';
         }
@@ -731,11 +709,36 @@
           const editBtn = msgElement.querySelector('.edit-btn');
           const deleteBtn = msgElement.querySelector('.delete-btn');
           if (editBtn) {
-            editBtn.addEventListener('click', () => {
-              document.getElementById('messageInput').value = content;
-              document.getElementById('sendBtn').textContent = '更新';
-              editingMessage = msgElement;
-              document.getElementById('messageInput').focus();
+            editBtn.addEventListener('click', async () => {
+              const newContent = prompt('编辑消息', content);
+              if (newContent === null) return;
+              try {
+                const res = await fetch(`/api/rooms/${room.id}/messages/${messageId}`, {
+                  method: 'PUT',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                  },
+                  body: JSON.stringify({ content: newContent })
+                  method: 'DELETE',
+                  headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
+                });
+                if (!res.ok) {
+                  const err = await res.json();
+                  throw new Error(err.error || '编辑失败');
+                  throw new Error(err.error || '撤回失败');
+                }
+                const updated = await res.json();
+                msgElement.querySelector('.message-content').textContent = updated.content;
+                msgElement.querySelector('.message-edited').style.display = 'inline';
+                msgElement.remove();
+                document.getElementById('messageInput').value = content;
+                document.getElementById('sendBtn').textContent = '发送';
+                document.getElementById('messageInput').focus();
+              } catch (e) {
+                alert('编辑消息失败: ' + e.message);
+                alert('撤回消息失败: ' + e.message);
+              }
             });
           }
           if (deleteBtn) {
