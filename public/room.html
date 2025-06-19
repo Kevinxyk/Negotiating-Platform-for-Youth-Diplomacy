@@ -653,6 +653,8 @@
           }
         });
         
+        let editingMessage = null;
+
         // 添加发送消息函数
         function sendChatMessage() {
           const messageInput = document.getElementById('messageInput');
@@ -660,8 +662,10 @@
 
           if (!message) return;
 
-          console.log('发送消息:', message);
+          console.log('发送消息:', message);          
 
+          console.log('发送消息:', message);
+          
           // 发送消息到服务器
           ws.send(JSON.stringify({
             type: 'chat',
@@ -715,8 +719,10 @@
                 });
                 if (!res.ok) {
                   const err = await res.json();
+
                   throw new Error(err.error || '撤回失败');
                 }
+                
                 msgElement.remove();
                 document.getElementById('messageInput').value = content;
                 document.getElementById('sendBtn').textContent = '发送';
