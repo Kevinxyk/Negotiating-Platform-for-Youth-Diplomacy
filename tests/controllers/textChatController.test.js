@@ -6,7 +6,7 @@ const textChatService = require("../../services/textChatService");
 describe("TextChatController", () => {
   let req, res;
   beforeEach(() => {
-    req = { params:{room:"R1",messageId:"M1"}, query:{}, body:{}, headers:{} };
+    req = { params:{room:"R1",messageId:"M1"}, query:{}, body:{}, headers:{}, user:{username:'u',role:'admin'} };
     res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
   });
 
@@ -31,7 +31,7 @@ describe("TextChatController", () => {
     it("成功 201 + {status,message}", async () => {
       const m = { id:"X", text:"hi" };
       textChatService.saveMessage.mockResolvedValue(m);
-      req.body = { username:"u",country:"c",role:"r",text:"t" };
+      req.body = { country:"c", text:"t" };
       await ctrl.sendMessage(req, res);
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({ status:"ok", message:m });
@@ -40,6 +40,7 @@ describe("TextChatController", () => {
 
   describe("revokeMessage", () => {
     it("成功 revocation", async () => {
+      textChatService.getMessageById.mockResolvedValue({ id:"M1", username:"u" });
       textChatService.revokeMessage.mockResolvedValue(true);
       await ctrl.revokeMessage(req, res);
       expect(textChatService.revokeMessage).toHaveBeenCalledWith("M1");

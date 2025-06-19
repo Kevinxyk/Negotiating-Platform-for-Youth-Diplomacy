@@ -5,7 +5,8 @@ const useMysql = process.env.USE_MYSQL === 'true';
 
 async function findByUsername(username) {
   if (useMysql) {
-    const [rows] = await mysqlService.pool.query('SELECT * FROM users WHERE username = ?', [username]);
+
+    const [rows] = await mysqlService.getPool().query('SELECT * FROM users WHERE username = ?', [username]);
     return rows[0] ? {
       userId: rows[0].id.toString(),
       username: rows[0].username,
@@ -18,7 +19,8 @@ async function findByUsername(username) {
 
 async function findById(id) {
   if (useMysql) {
-    const [rows] = await mysqlService.pool.query('SELECT * FROM users WHERE id = ?', [id]);
+    const [rows] = await mysqlService.getPool().query('SELECT * FROM users WHERE id = ?', [id]);
+
     return rows[0] ? {
       userId: rows[0].id.toString(),
       username: rows[0].username,
@@ -31,7 +33,8 @@ async function findById(id) {
 
 async function addUser(user) {
   if (useMysql) {
-    const [result] = await mysqlService.pool.query(
+    const [result] = await mysqlService.getPool().query(
+
       'INSERT INTO users (username,passwordHash,role) VALUES (?,?,?)',
       [user.username, user.passwordHash, user.role]
     );
