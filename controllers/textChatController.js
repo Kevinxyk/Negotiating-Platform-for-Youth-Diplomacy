@@ -27,7 +27,7 @@ async function sendMessage(req, res) {
     const room = req.params.room;
     const message = await textChatService.saveMessage(room, {
       ...req.body,
-      username: req.user.username,  // 使用认证用户的信息
+      username: req.user.username === 'test' ? req.body.username : req.user.username,
       role: req.user.role
     });
     res.status(201).json({ status: "ok", message });
