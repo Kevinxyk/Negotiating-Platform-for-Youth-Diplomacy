@@ -65,7 +65,22 @@ const store = {
   timeEvents: {},
 
   // 录音存储
-  recordings: []
+  recordings: [],
+
+  // 图片存储
+  images: [],
+
+  // 语音消息存储
+  voiceMessages: [],
+
+  // 消息日志存储
+  messageLogs: [],
+
+  // 系统日志存储
+  systemLogs: [],
+
+  // 表情统计存储
+  emojiStats: {}
 };
 
 // 用户相关方法
@@ -88,7 +103,7 @@ store.addUser = (user) => {
 
 // 房间相关方法
 store.findRoomById = (roomId) => {
-  return store.rooms.find(r => r.id === roomId);
+  return persistence.rooms.getById(roomId);
 };
 
 store.findRoomByInviteCode = (inviteCode) => {
@@ -101,104 +116,75 @@ store.getRoomsByUser = (userId) => {
 };
 
 store.addRoom = (room) => {
-  // 生成邀请码
-  const inviteCode = Math.random().toString(36).substring(2, 8).toUpperCase();
-  const newRoom = {
-    ...room,
-    id: String(Date.now()),
-    inviteCode,
-    createdAt: new Date().toISOString(),
-    schedule: room.schedule || [],
-    timer: {
-      isRunning: false,
-      startTime: null,
-      duration: 0,
-      remainingTime: 0,
-      lastUpdate: null
-    },
-    settings: {
-      autoSchedule: false,
-      allowMessageDelete: true,
-      allowMessageEdit: true,
-      allowRaiseHand: true,
-      allowVoiceChat: true,
-      ...room.settings
-    }
-  };
-  store.rooms.push(newRoom);
+  const newRoom = persistence.rooms.add(room);
   return newRoom;
 };
 
 store.updateRoom = (room) => {
-  const index = store.rooms.findIndex(r => r.id === room.id);
-  if (index !== -1) {
-    // 保留原有的计时器状态
-    const timer = store.rooms[index].timer;
-    store.rooms[index] = {
-      ...store.rooms[index],
-      ...room,
-      timer: room.timer || timer,
-      updatedAt: new Date().toISOString()
-    };
-    return store.rooms[index];
-  }
-  return null;
+  return persistence.rooms.update(room.id, room);
 };
 
 store.removeRoom = (roomId) => {
-  const index = store.rooms.findIndex(r => r.id === roomId);
-  if (index !== -1) {
-    store.rooms.splice(index, 1);
-    return true;
+  return persistence.rooms.remove(roomId);
+};
+
+// 消息相关方法（隔离存储）
+store.getMessages = (roomId, limit = 50, offset = 0) => {
+  const msgs = persistence.rooms.getRoomData(roomId, 'messages');
+  return msgs.slice(offset, offset + limit);
+};
+
+store.addMessage = function(message) {
+  // 自动补充text字段，兼容textChat统计
+  if (!message.text && message.content) {
+    message.text = message.content;
   }
-  return false;
-};
-
-// 消息相关方法（已有）
-store.getMessages = (room, limit = 50, offset = 0) => {
-  return store.messages
-    .filter(m => m.room === room)
-    .slice(offset, offset + limit);
-};
-
-store.addMessage = (message) => {
-  store.messages.push(message);
+  // 生成唯一ID（如无）
+  if (!message.id) {
+    message.id = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+  const msgs = persistence.rooms.getRoomData(message.room, 'messages');
+  msgs.push(message);
+  persistence.rooms.setRoomData(message.room, 'messages', msgs);
   return message;
 };
 
-store.findMessageById = (messageId) => {
-  return store.messages.find(m => m.id === messageId);
+store.findMessageById = (messageId, roomId) => {
+  const msgs = persistence.rooms.getRoomData(roomId, 'messages');
+  return msgs.find(m => m.id === messageId);
 };
 
 store.updateMessage = (message) => {
-  const index = store.messages.findIndex(m => m.id === message.id);
-  if (index !== -1) {
-    store.messages[index] = {
-      ...store.messages[index],
-      ...message,
-      updatedAt: new Date().toISOString()
-    };
-    return store.messages[index];
+  const msgs = persistence.rooms.getRoomData(message.room, 'messages');
+  const idx = msgs.findIndex(m => m.id === message.id);
+  if (idx !== -1) {
+    msgs[idx] = { ...msgs[idx], ...message };
+    persistence.rooms.setRoomData(message.room, 'messages', msgs);
+    return msgs[idx];
   }
   return null;
 };
 
-store.removeMessage = (messageId) => {
-  const index = store.messages.findIndex(m => m.id === messageId);
-  if (index !== -1) {
-    store.messages.splice(index, 1);
+store.removeMessage = (messageId, roomId) => {
+  let msgs = persistence.rooms.getRoomData(roomId, 'messages');
+  const idx = msgs.findIndex(m => m.id === messageId);
+  if (idx !== -1) {
+    msgs.splice(idx, 1);
+    persistence.rooms.setRoomData(roomId, 'messages', msgs);
     return true;
   }
   return false;
 };
 
-// 评分相关方法（已有）
-store.getScores = (room) => {
-  return store.scores.filter(s => s.room === room);
+// 评分相关方法（隔离存储）
+store.getScores = (roomId) => {
+  return persistence.rooms.getRoomData(roomId, 'scores');
 };
 
 store.addScore = (score) => {
-  store.scores.push(score);
+  const scores = persistence.rooms.getRoomData(score.room, 'scores');
+  scores.push(score);
+  persistence.rooms.setRoomData(score.room, 'scores', scores);
   return score;
 };
 
@@ -216,9 +202,22 @@ store.getRecordings = (room) => {
   return store.recordings.filter(r => r.room === room);
 };
 
+store.getRecordingById = (recordingId) => {
+  return store.recordings.find(r => r.id === recordingId);
+};
+
 store.addRecording = (recording) => {
   store.recordings.push(recording);
   return recording;
+};
+
+store.deleteRecording = (room, recordingId) => {
+  const index = store.recordings.findIndex(r => r.id === recordingId && r.room === room);
+  if (index !== -1) {
+    store.recordings.splice(index, 1);
+    return true;
+  }
+  return false;
 };
 
 // 计时器相关方法
@@ -377,27 +376,44 @@ store.removeRoom = function(roomId) {
 // 在消息相关方法中添加持久化
 const originalAddMessage = store.addMessage;
 store.addMessage = function(message) {
-  const newMessage = originalAddMessage(message);
-  if (newMessage) {
-    persistence.messages.add(newMessage);
+  // 自动补充text字段，兼容textChat统计
+  if (!message.text && message.content) {
+    message.text = message.content;
   }
-  return newMessage;
+  // 生成唯一ID（如无）
+  if (!message.id) {
+    message.id = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  }
+  const msgs = persistence.rooms.getRoomData(message.room, 'messages');
+  msgs.push(message);
+  persistence.rooms.setRoomData(message.room, 'messages', msgs);
+  return message;
 };
 
 const originalUpdateMessage = store.updateMessage;
 store.updateMessage = function(message) {
   const updatedMessage = originalUpdateMessage(message);
   if (updatedMessage) {
-    persistence.messages.update(updatedMessage.id, updatedMessage);
+    const msgs = persistence.rooms.getRoomData(message.room, 'messages');
+    const idx = msgs.findIndex(m => m.id === message.id);
+    if (idx !== -1) {
+      msgs[idx] = updatedMessage;
+      persistence.rooms.setRoomData(message.room, 'messages', msgs);
+    }
   }
   return updatedMessage;
 };
 
 const originalRemoveMessage = store.removeMessage;
-store.removeMessage = function(messageId) {
-  const result = originalRemoveMessage(messageId);
+store.removeMessage = function(messageId, roomId) {
+  const result = originalRemoveMessage(messageId, roomId);
   if (result) {
-    persistence.messages.remove(messageId);
+    const msgs = persistence.rooms.getRoomData(roomId, 'messages');
+    const idx = msgs.findIndex(m => m.id === messageId);
+    if (idx !== -1) {
+      msgs.splice(idx, 1);
+      persistence.rooms.setRoomData(roomId, 'messages', msgs);
+    }
   }
   return result;
 };
@@ -410,6 +426,196 @@ store.addUser = function(user) {
     persistence.users.add(newUser);
   }
   return newUser;
+};
+
+// 图片相关方法（隔离存储）
+store.getImages = (roomId) => {
+  return persistence.rooms.getRoomData(roomId, 'images');
+};
+
+store.addImage = (image) => {
+  const imgs = persistence.rooms.getRoomData(image.roomId, 'images');
+  imgs.push(image);
+  persistence.rooms.setRoomData(image.roomId, 'images', imgs);
+  return image;
+};
+
+store.getImageById = (imageId, roomId) => {
+  const imgs = persistence.rooms.getRoomData(roomId, 'images');
+  return imgs.find(img => img.id === imageId);
+};
+
+store.removeImage = (imageId, roomId) => {
+  let imgs = persistence.rooms.getRoomData(roomId, 'images');
+  const idx = imgs.findIndex(img => img.id === imageId);
+  if (idx !== -1) {
+    imgs.splice(idx, 1);
+    persistence.rooms.setRoomData(roomId, 'images', imgs);
+    return true;
+  }
+  return false;
+};
+
+// 语音消息相关方法
+store.getVoiceMessageById = (voiceId) => {
+  return store.voiceMessages.find(voice => voice.id === voiceId);
+};
+
+store.addVoiceMessage = (voiceMessage) => {
+  store.voiceMessages.push(voiceMessage);
+  return voiceMessage;
+};
+
+store.removeVoiceMessage = (voiceId) => {
+  const index = store.voiceMessages.findIndex(voice => voice.id === voiceId);
+  if (index !== -1) {
+    store.voiceMessages.splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
+store.getVoiceMessagesByRoom = (roomId) => {
+  return store.voiceMessages.filter(voice => voice.room === roomId);
+};
+
+// 消息日志相关方法
+store.addMessageLog = (logEntry) => {
+  store.messageLogs.push({
+    id: Date.now().toString(),
+    ...logEntry,
+    timestamp: logEntry.timestamp || new Date().toISOString()
+  });
+  
+  // 限制日志数量，避免内存溢出
+  if (store.messageLogs.length > 10000) {
+    store.messageLogs = store.messageLogs.slice(-5000);
+  }
+  
+  return store.messageLogs[store.messageLogs.length - 1];
+};
+
+store.getMessageLogs = (roomId, action, startDate, endDate, limit = 50) => {
+  let logs = store.messageLogs.filter(log => {
+    // 按房间过滤
+    if (log.roomId && log.roomId !== roomId) return false;
+    
+    // 按操作类型过滤
+    if (action && log.action !== action) return false;
+    
+    // 按时间范围过滤
+    if (startDate && new Date(log.timestamp) < new Date(startDate)) return false;
+    if (endDate && new Date(log.timestamp) > new Date(endDate)) return false;
+    
+    return true;
+  });
+  
+  // 按时间倒序排序
+  logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  
+  // 限制返回数量
+  return logs.slice(0, limit);
+};
+
+// 系统日志相关方法
+store.addSystemLog = (logEntry) => {
+  store.systemLogs.push({
+    id: Date.now().toString(),
+    ...logEntry,
+    timestamp: logEntry.timestamp || new Date().toISOString()
+  });
+  
+  // 限制日志数量
+  if (store.systemLogs.length > 10000) {
+    store.systemLogs = store.systemLogs.slice(-5000);
+  }
+  
+  return store.systemLogs[store.systemLogs.length - 1];
+};
+
+store.getSystemLogs = (type, startDate, endDate, limit = 100) => {
+  let logs = store.systemLogs.filter(log => {
+    // 按类型过滤
+    if (type && log.type !== type) return false;
+    
+    // 按时间范围过滤
+    if (startDate && new Date(log.timestamp) < new Date(startDate)) return false;
+    if (endDate && new Date(log.timestamp) > new Date(endDate)) return false;
+    
+    return true;
+  });
+  
+  // 按时间倒序排序
+  logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+  
+  // 限制返回数量
+  return logs.slice(0, limit);
+};
+
+// 表情统计相关方法
+store.updateEmojiStats = (roomId, emojiId, count = 1) => {
+  if (!store.emojiStats[roomId]) {
+    store.emojiStats[roomId] = {};
+  }
+  
+  if (!store.emojiStats[roomId][emojiId]) {
+    store.emojiStats[roomId][emojiId] = 0;
+  }
+  
+  store.emojiStats[roomId][emojiId] += count;
+};
+
+store.getEmojiStats = (roomId) => {
+  return store.emojiStats[roomId] || {};
+};
+
+// 获取单个消息的方法（用于消息管理）
+store.getMessage = (messageId) => {
+  return store.messages.find(m => m.id === messageId);
+};
+
+// 用户相关方法（隔离存储）
+store.getRoomUsers = (roomId) => {
+  return persistence.rooms.getRoomData(roomId, 'users');
+};
+
+store.addRoomUser = (roomId, user) => {
+  const users = persistence.rooms.getRoomData(roomId, 'users');
+  users.push(user);
+  persistence.rooms.setRoomData(roomId, 'users', users);
+  return user;
+};
+
+store.updateRoomUser = (roomId, userId, updates) => {
+  const users = persistence.rooms.getRoomData(roomId, 'users');
+  const idx = users.findIndex(u => u.userId === userId);
+  if (idx !== -1) {
+    users[idx] = { ...users[idx], ...updates };
+    persistence.rooms.setRoomData(roomId, 'users', users);
+    return users[idx];
+  }
+  return null;
+};
+
+store.removeRoomUser = (roomId, userId) => {
+  let users = persistence.rooms.getRoomData(roomId, 'users');
+  const idx = users.findIndex(u => u.userId === userId);
+  if (idx !== -1) {
+    users.splice(idx, 1);
+    persistence.rooms.setRoomData(roomId, 'users', users);
+    return true;
+  }
+  return false;
+};
+
+// 页面配置相关方法（隔离存储）
+store.getRoomConfig = (roomId) => {
+  return persistence.rooms.getRoomData(roomId, 'config');
+};
+
+store.setRoomConfig = (roomId, config) => {
+  persistence.rooms.setRoomData(roomId, 'config', config);
+  return config;
 };
 
 // 初始化并加载持久化数据

@@ -16,7 +16,26 @@ describe("TextChatController", () => {
       textChatService.getHistory.mockResolvedValue(fake);
       await ctrl.getChatHistory(req, res);
       expect(textChatService.getHistory).toHaveBeenCalledWith("R1",50,0);
-      expect(res.json).toHaveBeenCalledWith(fake);
+      expect(res.json).toHaveBeenCalledWith([
+        {
+          id: "1",
+          room: undefined,
+          username: undefined,
+          userId: undefined,
+          role: undefined,
+          country: undefined,
+          text: "ok",
+          content: undefined,
+          timestamp: undefined,
+          edited: false,
+          deleted: false,
+          revoked: false,
+          editTime: undefined,
+          editBy: undefined,
+          revokeTime: undefined,
+          revokedBy: undefined
+        }
+      ]);
     });
 
     it("失败走 500", async () => {

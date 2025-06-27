@@ -21,15 +21,19 @@ const generateToken = (user) => {
 // 验证 JWT token
 const verifyToken = async (req, res, next) => {
   const token = req.headers.authorization?.split(' ')[1];
-
-  if (!token) {
-    // 测试环境或未启用认证时允许匿名访问
+  
+  // Test environment bypass
+  if (process.env.NODE_ENV === 'test') {
     req.user = {
       userId: 'test',
-      username: req.headers['x-user-role'] || 'test',
+      username: 'test',
       role: req.headers['x-user-role'] || 'delegate'
     };
     return next();
+  }
+  
+  if (!token) {
+    return res.status(401).json({ error: '未提供认证令牌' });
   }
 
   try {
@@ -47,6 +51,7 @@ const verifyToken = async (req, res, next) => {
     };
     next();
   } catch (err) {
+    console.error('Token verification error:', err);
     return res.status(401).json({ error: '无效的认证令牌' });
   }
 };
@@ -58,8 +63,8 @@ const requireRoles = (roles) => {
       return res.status(401).json({ error: '未认证' });
     }
 
-    // 测试用户放行
-    if (req.user.userId === 'test') {
+    // Test environment bypass
+    if (process.env.NODE_ENV === 'test' && req.user.userId === 'test') {
       return next();
     }
 

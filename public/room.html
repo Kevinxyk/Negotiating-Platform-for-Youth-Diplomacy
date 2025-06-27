@@ -8,92 +8,222 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
   <style>
     body { 
-      padding-top: 70px;
-      min-height: 100vh;
+      padding-top: 60px;
+      background-color: #f0f2f5; /* 现代应用常用的背景色 */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     }
     .container { 
-      margin-top: 0.5rem;
-      padding-top: 0.5rem;
+      max-width: 1200px;
     }
     .navbar { 
-      z-index: 1030;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       height: 56px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      background-color: #ffffff;
     }
-    #timerSection { 
-      margin-top: 1rem;
-      padding: 1rem;
-      background: #f8f9fa;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      position: relative;
-      z-index: 900; /* Ensure it's below navbar but above other content */
+    
+    /* 卡片式设计 */
+    .card-custom {
+      background-color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
     }
-    .fullscreen {
-      position: fixed;
-      top: 70px;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: white;
-      z-index: 1020;
+
+    /* 用户信息栏 */
+    #userInfoBar {
       padding: 1rem;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    /* 聊天区域 */
+    #chatMessages {
+      height: 400px; /* 增加聊天区域高度 */
+      padding: 1.5rem;
       overflow-y: auto;
+      background-color: #f8f9fa;
     }
-    /* 聊天消息样式 */
+    
+    /* 聊天消息的整体容器 */
     .chat-message {
-      margin-bottom: 0.5rem;
       display: flex;
-      flex-direction: column;
+      flex-direction: column; /* 垂直排列：头像/昵称 -> 气泡 */
+      margin-bottom: 1.5rem;
     }
-    .chat-message.sent {
-      align-items: flex-end;
+
+    .message-meta {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.3rem;
+      font-size: 0.8rem;
     }
-    .chat-message.received {
-      align-items: flex-start;
+    
+    .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 8px;
     }
+
+    .message-sender {
+      font-weight: 500;
+      color: #555;
+    }
+
     .message-bubble {
-      max-width: 70%;
-      padding: 0.5rem 0.75rem;
+      max-width: 75%;
+      padding: 0.6rem 1rem;
       border-radius: 1rem;
-      position: relative;
       word-wrap: break-word;
       white-space: pre-wrap;
     }
-    .sent .message-bubble {
-      background-color: #007bff;
-      color: white;
-      border-bottom-right-radius: 0.25rem;
+    
+    .message-content {
+      font-size: 0.95rem;
+      line-height: 1.4;
     }
-    .received .message-bubble {
-      background-color: #f1f0f0;
-      color: #212529;
-      border-bottom-left-radius: 0.25rem;
-    }
-    .message-info {
+
+    .message-time {
       font-size: 0.75rem;
+      float: right;
+      clear: both;
+      margin-top: 5px;
+      margin-left: 10px;
+    }
+    
+    /* Sent messages (yours) */
+    .chat-message.sent {
+      align-items: flex-end; /* 整体靠右 */
+    }
+    .chat-message.sent .message-meta {
+      flex-direction: row-reverse; /* 元信息反向：昵称 -> 头像 */
+    }
+    .chat-message.sent .avatar {
+      margin-left: 8px; /* 头像和昵称的间距 */
+      margin-right: 0;
+    }
+    .chat-message.sent .message-bubble {
+      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      color: white;
+      border-top-right-radius: 4px;
+    }
+    .chat-message.sent .message-time {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Received messages (others) */
+    .chat-message.received {
+      align-items: flex-start; /* 整体靠左 */
+    }
+    .chat-message.received .message-bubble {
+      background: #ffffff;
+      color: #212529;
+      border-top-left-radius: 4px;
+    }
+     .chat-message.received .message-time {
       color: #6c757d;
-      margin: 0.25rem 0;
     }
-    .sent .message-info {
-      text-align: right;
+
+    /* 系统消息 */
+    .system-message {
+      text-align: center;
+      margin: 1rem 0;
+      font-size: 0.8rem;
     }
-    #chatMessages {
+    .system-message span {
+      background-color: #e9ecef;
+      color: #6c757d;
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    /* 输入区域美化 */
+    #chatInputContainer {
       padding: 1rem;
-      background: #fff;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border-top: 1px solid #e9ecef;
+      background-color: #ffffff;
     }
     #messageInput {
-      resize: none;
       border-radius: 1.5rem;
-      padding: 0.75rem 1rem;
-      border: 1px solid #ced4da;
+      border: 1px solid #dee2e6;
+      background-color: #f1f3f5;
     }
     #messageInput:focus {
-      border-color: #80bdff;
-      box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+      background-color: #ffffff;
+      border-color: #8ab4f8;
+      box-shadow: 0 0 0 2px rgba(78, 140, 255, 0.25);
     }
+    
+    /* 输入区域按钮 */
+    #chatInputContainer .btn {
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    
+    #sendBtn {
+      border-radius: 8px;
+      width: auto;
+      background-color: #0d6efd;
+    }
+    
+    /* 聊天消息样式 */
+    /* 
+    .chat-message {
+      transition: all 0.3s ease;
+    }
+    .chat-message.sent {
+      justify-content: flex-end;
+    }
+    .chat-message.sent .message-bubble {
+      background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+      color: white;
+    }
+    .chat-message.sent .message-info .message-time {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .chat-message.received .message-bubble {
+      background: #f1f3f5;
+      color: #212529;
+    }
+    .chat-message.received .message-info .message-time {
+      color: #6c757d;
+    }
+    
+    .message-bubble {
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      max-width: fit-content;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+
+    .message-content {
+      font-size: 0.95rem;
+    }
+
+    .message-info {
+      font-size: 0.75rem;
+    }
+
+    .sent .message-sender {
+      display: none;
+    }
+    
+    .chat-message.sent > .flex-grow-1 {
+      margin-left: auto !important;
+      margin-right: 0 !important;
+      max-width: 80%;
+    }
+    */
+
     /* 议程管理样式 */
     .schedule-item {
       cursor: move;
@@ -154,7 +284,253 @@
       text-align: center;
       margin-bottom: 1rem;
     }
+    
+    /* 用户列表样式 */
+    #userList {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    #userList .list-group-item {
+      border: 1px solid #dee2e6;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+      border-radius: 0.5rem;
+      min-width: 200px;
+      transition: all 0.2s ease;
+      background-color: #f8f9fa;
+    }
+    
+    #userList .list-group-item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      transform: translateY(-2px);
+      background-color: #ffffff;
+    }
+    
+    /* 用户信息栏样式 */
+    #userInfoBar {
+      border: 1px solid #dee2e6;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    
+    .user-avatar img {
+      border: 2px solid #007bff;
+      transition: all 0.3s ease;
+    }
+    
+    .user-avatar img:hover {
+      transform: scale(1.1);
+      border-color: #0056b3;
+    }
+    
+    /* 表情包面板样式 */
+    #emojiPanel {
+      max-height: 300px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+    
+    #emojiGrid {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    
+    #emojiGrid .btn {
+      transition: all 0.2s ease;
+    }
+    
+    #emojiGrid .btn:hover {
+      transform: scale(1.1);
+      background-color: #e9ecef;
+    }
+    
+    /* 图片上传区域样式 */
+    #imageUploadArea {
+      z-index: 1000;
+    }
+    
+    #imagePreview {
+      border: 1px solid #dee2e6;
+      border-radius: 0.5rem;
+      padding: 0.5rem;
+      background-color: #f8f9fa;
+    }
+    
+    /* 消息中的图片样式 */
+    .message-content img {
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease;
+    }
+    
+    .message-content img:hover {
+      transform: scale(1.05);
+    }
+    
+    /* 用户状态指示器样式 */
+    .user-status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.5rem;
+    }
+    
+    .user-status-online {
+      background-color: #28a745;
+    }
+    
+    .user-status-speaking {
+      background-color: #007bff;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .user-status-raising-hand {
+      background-color: #ffc107;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
+    }
+    .bi {
+      font-size: 1em !important;
+      display: inline-block !important;
+      vertical-align: middle !important;
+    }
+    #chatInputContainer .bi {
+      font-size: 1.1rem !important;
+    }
+    #userList .bi {
+      font-size: 0.9em !important;
+    }
+
+    /* 简洁模式样式 */
+    #chatMessages.simple-mode .chat-message {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+      padding: 0.25rem 0;
+    }
+    
+    #chatMessages.simple-mode .message-meta {
+      display: none !important; /* 只在简洁模式下隐藏头像和发送者信息 */
+    }
+    
+    #chatMessages.simple-mode .message-bubble {
+      background: none !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      border-radius: 0 !important;
+      max-width: 100% !important;
+      color: #333 !important; /* 确保文字颜色是深色的 */
+    }
+    
+    #chatMessages.simple-mode .message-content {
+      display: inline;
+      font-size: 0.9rem;
+      line-height: 1.4;
+      color: #333 !important; /* 确保内容文字是深色的 */
+    }
+    
+    #chatMessages.simple-mode .message-sender {
+      font-weight: 600;
+      margin-right: 0.5rem;
+      color: #333;
+    }
+    
+    #chatMessages.simple-mode .message-time {
+      font-size: 0.75rem;
+      color: #999;
+      margin-left: 0.5rem;
+    }
+    
+    #chatMessages.simple-mode .chat-message.sent {
+      justify-content: flex-end;
+    }
+    
+    #chatMessages.simple-mode .chat-message.sent .message-sender {
+      order: 2;
+      margin-right: 0;
+      margin-left: 0.5rem;
+    }
+    
+    #chatMessages.simple-mode .chat-message.sent .message-time {
+      order: 1;
+      margin-left: 0;
+      margin-right: 0.5rem;
+    }
+
+    /* 确保气泡模式下头像正常显示 */
+    #chatMessages:not(.simple-mode) .message-meta {
+      display: flex !important;
+    }
+    
+    #chatMessages:not(.simple-mode) .avatar {
+      display: block !important;
+    }
+
+    /* 音频消息样式 */
+    .audio-message {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      border: 1px solid #e9ecef;
+    }
+    
+    .audio-message .bi {
+      color: #007bff;
+      font-size: 1.2rem;
+    }
+    
+    .audio-message audio {
+      border-radius: 0.25rem;
+    }
+    
+    .audio-message audio::-webkit-media-controls-panel {
+      background-color: #ffffff;
+    }
+    
+    .audio-message audio::-webkit-media-controls-play-button {
+      background-color: #007bff;
+      border-radius: 50%;
+    }
+
+    /* --- Input Area Restyling (User-provided parameters) --- */
+    #chatInputContainer .input-group {
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      padding: 5px;
+      background: #fff;
+    }
+    #messageInput.form-control {
+      border: none;
+      box-shadow: none !important;
+      background-color: transparent !important;
+      resize: none;
+    }
+    #chatInputContainer .btn {
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+    }
+    #sendBtn {
+      background-color: #006aff !important;
+      border-radius: 50% !important;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+    }
+    #sendBtn .bi {
+      color: white;
+    }
   </style>
+  
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
@@ -182,7 +558,7 @@
       <div class="timer-display" id="timerDisplay">--:--</div>
       <div id="timerControls" class="d-flex flex-wrap justify-content-center gap-2">
         <!-- 自定义时间输入 -->
-        <div class="d-flex align-items-center mb-2">
+        <div class="d-flex align-items-center mb-2" id="timeInputGroup">
           <input type="number" id="timerHours" min="0" placeholder="时" class="form-control form-control-sm" style="width:60px; margin-right:5px;">
           <span>:</span>
           <input type="number" id="timerMinutes" min="0" max="59" placeholder="分" class="form-control form-control-sm" style="width:60px; margin-left:5px; margin-right:5px;">
@@ -191,8 +567,8 @@
         </div>
         <div class="d-flex mb-2">
         <button id="startTimerBtn" class="btn btn-success btn-sm" style="margin-right:5px;">开始</button>
-        <button id="pauseTimerBtn" class="btn btn-warning btn-sm" style="margin-right:5px;">暂停</button>
-        <button id="resumeTimerBtn" class="btn btn-primary btn-sm" style="margin-right:5px;">继续</button>
+        <button id="pauseTimerBtn" class="btn btn-warning btn-sm" style="margin-right:5px; display:none;">暂停</button>
+        <button id="resumeTimerBtn" class="btn btn-primary btn-sm" style="margin-right:5px; display:none;">继续</button>
         <button id="resetTimerBtn" class="btn btn-secondary btn-sm">重置</button>
         </div>
       </div>
@@ -202,22 +578,81 @@
       <h5>在线用户</h5>
       <ul id="userList" class="list-group list-group-horizontal flex-wrap"></ul>
     </div>
-    <!-- 文本聊天 -->
-    <div id="chatContainer" class="mb-3">
-      <h5>群聊</h5>
-      <div id="chatMessages" class="border p-2" style="height:300px; overflow-y:auto;"></div>
-      <div class="input-group mt-2">
-        <textarea id="messageInput" class="form-control" placeholder="输入消息..." rows="3"></textarea>
-        <button id="sendBtn" class="btn btn-primary">发送</button>
-      </div>
-      <div class="mt-2">
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="sendMode" id="sendModeEnter" value="enter" checked>
-          <label class="form-check-label" for="sendModeEnter">Enter 发送</label>
+    
+    <!-- 用户信息栏 -->
+    <div id="userInfoBar" class="mb-3 p-3 bg-light rounded">
+      <div class="d-flex align-items-center">
+        <div class="user-avatar me-3">
+          <img src="" class="rounded-circle" alt="用户头像" id="currentUserAvatar" style="width:40px; height:40px;">
         </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="radio" name="sendMode" id="sendModeCtrlEnter" value="ctrlEnter">
-          <label class="form-check-label" for="sendModeCtrlEnter">Ctrl+Enter 发送</label>
+        <div class="user-details flex-grow-1">
+          <h6 class="mb-0" id="currentUserName">加载中...</h6>
+          <small class="text-muted" id="currentUserInfo">角色 | 国家</small>
+        </div>
+        <div class="user-status">
+          <span class="badge bg-success" id="userStatusBadge">在线</span>
+        </div>
+      </div>
+    </div>
+    
+    <!-- 文本聊天 -->
+    <div id="chatContainer" class="card-custom">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">群聊</h5>
+        <!-- 视图切换开关 -->
+        <div class="form-check form-switch">
+          <input class="form-check-input" type="checkbox" role="switch" id="viewSwitch">
+          <label class="form-check-label" for="viewSwitch" style="font-size: 0.8rem;">简洁模式</label>
+        </div>
+      </div>
+      <div id="chatMessages" class="mb-3"></div>
+      <div id="chatInputContainer">
+        <div class="input-group">
+          <button class="btn btn-light" type="button" id="emojiBtn" title="表情包" style="min-width: 40px;">
+            <i class="bi bi-emoji-smile" style="font-size: 1.1rem;"></i>
+          </button>
+          <button class="btn btn-light" type="button" id="imageBtn" title="插入图片" style="min-width: 40px;">
+            <i class="bi bi-image" style="font-size: 1.1rem;"></i>
+          </button>
+          <textarea id="messageInput" class="form-control" placeholder="输入消息..." rows="1" style="resize: none;"></textarea>
+          <button id="sendBtn" class="btn btn-primary">
+            <i class="bi bi-send"></i>
+          </button>
+        </div>
+        <!-- 表情包面板 -->
+        <div id="emojiPanel" class="mt-2 p-2 border rounded" style="display: none; background: white; z-index: 1050; position: absolute; bottom: 100%; width: 100%;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">选择表情</small>
+            <button type="button" class="btn-close btn-close-sm" id="closeEmojiPanel"></button>
+          </div>
+          <div id="emojiGrid" class="d-flex flex-wrap gap-1" style="max-height: 200px; overflow-y: auto;">
+            <!-- Emojis will be loaded here by JavaScript -->
+          </div>
+        </div>
+        <!-- 图片上传区域 -->
+        <div id="imageUploadArea" class="mt-2 p-3 border rounded" style="display: none; background: white; z-index: 1050; position: absolute; bottom: 100%; width: 100%;">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <small class="text-muted">上传图片</small>
+            <button type="button" class="btn-close btn-close-sm" id="closeImageUpload"></button>
+          </div>
+          <input class="form-control mb-2" type="file" id="imageFile" accept="image/*">
+          <div id="imagePreviewContainer" class="text-center" style="display: none;">
+              <img id="imagePreview" src="#" alt="Image Preview" class="img-fluid rounded" style="max-height: 150px;"/>
+          </div>
+          <div class="d-flex justify-content-end gap-2 mt-2">
+            <button class="btn btn-secondary btn-sm" id="cancelUpload">取消</button>
+            <button class="btn btn-primary btn-sm" id="confirmUpload" disabled>上传</button>
+          </div>
+        </div>
+        <div class="mt-2">
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="sendMode" id="sendModeEnter" value="enter" checked>
+            <label class="form-check-label" for="sendModeEnter">Enter 发送</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="sendMode" id="sendModeCtrlEnter" value="ctrlEnter">
+            <label class="form-check-label" for="sendModeCtrlEnter">Ctrl+Enter 发送</label>
+          </div>
         </div>
       </div>
     </div>
@@ -236,173 +671,56 @@
       </div>
       <div id="audioParticipants" class="list-group"></div>
     </div>
-    <!-- 房间管理模态框 -->
-    <div class="modal fade" id="roomManagementModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">房间管理</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <ul class="nav nav-tabs mb-3" role="tablist">
-              <li class="nav-item">
-                <a class="nav-link active" data-bs-toggle="tab" href="#basicSettings">基本设置</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#scheduleSettings">日程安排</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" data-bs-toggle="tab" href="#advancedSettings">高级设置</a>
-              </li>
-            </ul>
-            <div class="tab-content">
-              <!-- 基本设置 -->
-              <div class="tab-pane fade show active" id="basicSettings">
-                <form id="roomBasicForm">
-                  <div class="mb-3">
-                    <label class="form-label">房间名称</label>
-                    <input type="text" class="form-control" id="roomName" required>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">房间描述</label>
-                    <textarea class="form-control" id="roomDescription" rows="3"></textarea>
-                  </div>
-                  <div class="mb-3">
-                    <label class="form-label">最大参与人数</label>
-                    <input type="number" class="form-control" id="maxParticipants" min="1">
-                  </div>
-                  <div class="form-check mb-3">
-                    <input class="form-check-input" type="checkbox" id="isPrivate">
-                    <label class="form-check-label">私密房间（需要邀请码加入）</label>
-                  </div>
-                  <div class="mb-3" id="inviteCodeDisplay" style="display:none;">
-                    <label class="form-label">邀请码</label>
-                    <div class="input-group">
-                      <input type="text" class="form-control" id="inviteCode" readonly>
-                      <button class="btn btn-outline-secondary" type="button" id="copyInviteCode">复制</button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-              
-              <!-- 日程安排 -->
-              <div class="tab-pane fade" id="scheduleSettings">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                  <h6 class="mb-0">日程安排</h6>
-                  <button class="btn btn-sm btn-primary" id="addScheduleItem">
-                    <i class="bi bi-plus"></i> 添加日程
-                  </button>
-                </div>
-                <div id="scheduleList" class="list-group mb-3"></div>
-                <div class="form-check mb-3">
-                  <input class="form-check-input" type="checkbox" id="autoSchedule">
-                  <label class="form-check-label">自动执行日程</label>
-                </div>
-                <div class="alert alert-info">
-                  <small>提示：拖拽日程项可以调整顺序</small>
-                </div>
-              </div>
-              
-              <!-- 高级设置 -->
-              <div class="tab-pane fade" id="advancedSettings">
-                <div class="mb-3">
-                  <label class="form-label">消息管理</label>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="allowMessageDelete">
-                    <label class="form-check-label">允许撤回消息</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="allowMessageEdit">
-                    <label class="form-check-label">允许编辑消息</label>
-                  </div>
-                </div>
-                <div class="mb-3">
-                  <label class="form-label">权限设置</label>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="allowRaiseHand">
-                    <label class="form-check-label">允许举手功能</label>
-                  </div>
-                  <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="allowVoiceChat">
-                    <label class="form-check-label">允许语音聊天</label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-            <button type="button" class="btn btn-primary" id="saveRoomSettings">保存设置</button>
-          </div>
-        </div>
+  </div>
+  
+  <!-- 消息模板 -->
+  <template id="messageTemplate">
+    <div class="chat-message">
+      <div class="avatar me-3">
+        <img src="" alt="User Avatar" class="rounded-circle" style="width:32px; height:32px;">
       </div>
-    </div>
-
-    <!-- 日程项模板 -->
-    <template id="scheduleItemTemplate">
-      <div class="list-group-item schedule-item" draggable="true">
-        <div class="d-flex justify-content-between align-items-center">
-          <div class="flex-grow-1">
-            <input type="text" class="form-control form-control-sm mb-2" placeholder="日程名称">
-            <div class="input-group input-group-sm">
-              <input type="number" class="form-control" placeholder="时" min="0" max="23">
-              <span class="input-group-text">:</span>
-              <input type="number" class="form-control" placeholder="分" min="0" max="59">
-              <span class="input-group-text">:</span>
-              <input type="number" class="form-control" placeholder="秒" min="0" max="59">
-            </div>
-          </div>
-          <div class="ms-3">
-            <button class="btn btn-sm btn-outline-danger delete-schedule">
-              <i class="bi bi-trash"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </template>
-
-    <!-- 聊天消息模板 -->
-    <template id="messageTemplate">
-      <div class="chat-message">
+      <div class="message-content-wrapper">
+        <div class="message-sender"></div>
         <div class="message-bubble">
           <div class="message-content"></div>
-          <div class="message-actions">
-            <button class="edit-btn" title="编辑"><i class="bi bi-pencil"></i></button>
-            <button class="delete-btn delete" title="删除"><i class="bi bi-trash"></i></button>
-          </div>
-        </div>
-        <div class="message-info">
-          <span class="message-sender"></span>
-          <span class="message-time"></span>
-          <span class="message-edited" style="display:none;">(已编辑)</span>
-        </div>
-      </div>
-    </template>
-
-    <!-- 日程序列控制按钮 -->
-    <div id="scheduleControlSection" class="mb-3" style="display:none;">
-      <h5 class="mb-3">日程控制</h5>
-      <div class="d-flex flex-wrap gap-2">
-        <button id="startScheduleBtn" class="btn btn-success">开始日程</button>
-        <button id="pauseScheduleBtn" class="btn btn-warning" style="display:none;">暂停日程</button>
-        <button id="resumeScheduleBtn" class="btn btn-primary" style="display:none;">继续日程</button>
-        <button id="nextScheduleBtn" class="btn btn-info">下一项</button>
-      </div>
-      <div id="currentScheduleDisplay" class="alert alert-info mt-2" style="display:none;">
-        当前日程：<span id="currentScheduleName"></span>
-        <div class="progress mt-2">
-          <div id="scheduleProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+          <div class="message-time"></div>
         </div>
       </div>
     </div>
+  </template>
 
-    <a href="/rooms" class="btn btn-secondary">返回我的研讨室</a>
-  </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
   <script src="/js/auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@2.3.6/dist/purify.min.js"></script>
   <script>
+    // 声明全局WebSocket变量
+    let ws;
+    
+    // 测试Bootstrap Icons是否正确加载
+    document.addEventListener('DOMContentLoaded', function() {
+      // 检查Bootstrap Icons是否加载
+      const testIcon = document.createElement('i');
+      testIcon.className = 'bi bi-emoji-smile';
+      document.body.appendChild(testIcon);
+      
+      const computedStyle = window.getComputedStyle(testIcon, '::before');
+      const content = computedStyle.content;
+      
+      if (content && content !== 'none') {
+        console.log('Bootstrap Icons 加载成功');
+      } else {
+        console.warn('Bootstrap Icons 可能未正确加载');
+        // 尝试重新加载
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css';
+        document.head.appendChild(link);
+      }
+      
+      document.body.removeChild(testIcon);
+    });
+    
     (async function() {
       // 检查认证状态
       if (!window.auth.checkAuth()) {
@@ -474,122 +792,8 @@
         // 根据用户角色更新UI
         window.auth.updateUIByRole();
         
-        // 添加房间管理功能（仅创建者可见）
-        if (room.createdBy === user.userId) {
-          const managementDiv = document.createElement('div');
-          managementDiv.className = 'mt-3';
-          managementDiv.innerHTML = `
-            <h4>房间管理</h4>
-            <div class="mb-3">
-              <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#editRoomModal">编辑房间</button>
-              <button class="btn btn-danger" id="deleteRoomBtn">删除房间</button>
-            </div>
-            <div class="mb-3">
-              <p>邀请码：<code>${room.inviteCode}</code></p>
-            </div>
-          `;
-          container.insertBefore(managementDiv, container.firstChild);
-          
-          // 编辑房间模态框
-          const modalHtml = `
-            <div class="modal fade" id="editRoomModal" tabindex="-1">
-              <div class="modal-dialog">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title">编辑房间</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                  </div>
-                  <div class="modal-body">
-                    <form id="editRoomForm">
-                      <div class="mb-3">
-                        <label class="form-label">房间名称</label>
-                        <input type="text" class="form-control" id="editRoomName" value="${room.name}" required>
-                      </div>
-                      <div class="mb-3">
-                        <label class="form-label">房间描述</label>
-                        <textarea class="form-control" id="editRoomDescription">${room.description || ''}</textarea>
-                      </div>
-                      <div class="mb-3">
-                        <label class="form-label">最大参与人数</label>
-                        <input type="number" class="form-control" id="editMaxParticipants" value="${room.maxParticipants}">
-                      </div>
-                      <div class="form-check mb-3">
-                        <input class="form-check-input" type="checkbox" id="editIsPrivate" ${room.isPrivate ? 'checked' : ''}>
-                        <label class="form-check-label">私密房间（需要邀请码加入）</label>
-                      </div>
-                </form>
-                  </div>
-                  <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="saveRoomBtn">保存</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          `;
-          document.body.insertAdjacentHTML('beforeend', modalHtml);
-          
-          // 编辑房间功能
-          document.getElementById('saveRoomBtn').addEventListener('click', async () => {
-            const updates = {
-              name: document.getElementById('editRoomName').value.trim(),
-              description: document.getElementById('editRoomDescription').value.trim(),
-              maxParticipants: parseInt(document.getElementById('editMaxParticipants').value, 10),
-              isPrivate: document.getElementById('editIsPrivate').checked
-            };
-            
-            try {
-              const res = await fetch(`/api/rooms/${encodeURIComponent(room.id)}`, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(updates)
-              });
-              
-              if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || '更新失败');
-              }
-              
-              const updatedRoom = await res.json();
-              titleEl.textContent = `${updatedRoom.name} (${updatedRoom.id})`;
-              document.title = `研讨室 - ${updatedRoom.name}`;
-              document.querySelector('code').textContent = updatedRoom.inviteCode;
-              
-              bootstrap.Modal.getInstance(document.getElementById('editRoomModal')).hide();
-            } catch (err) {
-              alert(err.message);
-            }
-          });
-          
-          // 删除房间功能
-          document.getElementById('deleteRoomBtn').addEventListener('click', async () => {
-            if (!confirm('确定要删除此研讨室吗？此操作不可恢复。')) return;
-            
-            try {
-              const res = await fetch(`/api/rooms/${encodeURIComponent(room.id)}`, {
-                method: 'DELETE',
-                headers: {
-                  'Authorization': 'Bearer ' + localStorage.getItem('token')
-                }
-              });
-              
-              if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || '删除失败');
-              }
-              
-              window.location.href = '/rooms';
-            } catch (err) {
-              alert(err.message);
-            }
-          });
-        }
-        
         // 初始化 WebSocket 连接
-        const ws = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host);
+        ws = new WebSocket((location.protocol === 'https:' ? 'wss' : 'ws') + '://' + location.host);
         ws.binaryType = 'arraybuffer';
         ws.addEventListener('open', () => {
           ws.send(JSON.stringify({
@@ -602,42 +806,75 @@
           }));
         });
         
-        // 处理 WebSocket 消息
-        ws.addEventListener('message', event => {
-          try {
-            // 检查是否是二进制数据（音频）
-            if (event.data instanceof ArrayBuffer) {
-              // 处理音频数据
-              handleAudioData(event.data);
-              return;
-            }
-            
-            // 尝试解析JSON数据
-            const data = JSON.parse(event.data);
-            
-            console.log('收到WebSocket消息:', data);
-            
-            switch (data.type) {
-              case 'timer':
-                updateTimerDisplay(data.time);
-                break;
-              case 'userList':
-                updateUserList(data.users);
-                break;
-              case 'chat':
-                addChatMessage(data.fromName, data.content, data.timestamp, data.id);
-                break;
-              case 'system':
-                addSystemMessage(data.message);
-                break;
-              case 'raiseHand':
-                handleRaiseHand(data.from, data.timestamp);
-                break;
-            }
-          } catch (e) {
-            console.error('处理WebSocket消息错误:', e);
+        // 消息处理
+        ws.onmessage = (event) => {
+          // 检查是否是二进制数据（音频）
+          if (event.data instanceof ArrayBuffer) {
+            handleAudioData(event.data);
+            return;
           }
-        });
+          
+          // 处理JSON消息
+          try {
+            const message = JSON.parse(event.data);
+            console.log("Received message:", message);
+            switch (message.type) {
+              case 'history':
+                // 处理历史消息
+                const chatMessages = document.getElementById("chatMessages");
+                chatMessages.innerHTML = ''; // 清空现有消息
+                if (message.messages && Array.isArray(message.messages)) {
+                  message.messages.forEach(msg => {
+                    displayMessage(msg, true); // isHistory = true
+                  });
+                }
+                chatMessages.scrollTop = chatMessages.scrollHeight; // 滚动到底部
+                  break;
+              case "chat":
+              case "image":
+                displayMessage(message);
+                  break;
+              case "userList":
+                updateUserList(message.users);
+                  break;
+              case "system":
+                displaySystemMessage(message.message);
+                  break;
+              case "error":
+                alert(`错误: ${message.message}`);
+                break;
+              case "timer":
+                // Assuming updateTimer function exists or will be restored
+                // updateTimer(message.time);
+                break;
+              case "raise_hand_ack":
+                // 举手确认消息
+                console.log('Raise hand acknowledged');
+                break;
+              case "raise_hand_notification":
+                // 其他用户举手通知
+                const userName = message.userName || message.fromName || "未知用户";
+                displaySystemMessage(`${userName} ${message.isRaising ? '举起了手' : '放下了手'}`);
+                break;
+              case "speaking_status":
+                updateSpeakingStatus(message.userId, message.isSpeaking);
+                  break;
+              case "audio":
+                // 处理音频消息
+                handleAudioMessage(message);
+                break;
+              default:
+                console.log('Unknown message type:', message.type);
+              }
+          } catch (error) {
+            console.error('Failed to parse message:', error);
+          }
+        };
+        
+        ws.onclose = () => {
+          console.log('WebSocket connection closed');
+          // 处理连接关闭后的逻辑
+        };
         
         // 发送聊天消息
         document.getElementById('sendBtn').addEventListener('click', () => {
@@ -655,14 +892,71 @@
         
         let editingMessage = null;
 
+        // 视图切换功能
+        const viewSwitch = document.getElementById('viewSwitch');
+        const chatMessages = document.getElementById('chatMessages');
+        
+        // 从localStorage读取用户偏好
+        const isSimpleMode = localStorage.getItem('simpleMode') === 'true';
+        viewSwitch.checked = isSimpleMode;
+        
+        function toggleView() {
+          if (viewSwitch.checked) {
+            chatMessages.classList.add('simple-mode');
+            localStorage.setItem('simpleMode', 'true');
+          } else {
+            chatMessages.classList.remove('simple-mode');
+            localStorage.setItem('simpleMode', 'false');
+          }
+        }
+        
+        // 初始化视图
+        toggleView();
+        
+        // 监听开关变化
+        viewSwitch.addEventListener('change', toggleView);
+
+        // 测试图标加载
+        function testIcons() {
+          console.log('测试图标加载...');
+          
+          // 测试表情图标
+          const emojiIcon = document.querySelector('#emojiBtn .bi-emoji-smile');
+          if (emojiIcon) {
+            const computedStyle = window.getComputedStyle(emojiIcon, '::before');
+            console.log('表情图标内容:', computedStyle.content);
+          }
+          
+          // 测试图片图标
+          const imageIcon = document.querySelector('#imageBtn .bi-image');
+          if (imageIcon) {
+            const computedStyle = window.getComputedStyle(imageIcon, '::before');
+            console.log('图片图标内容:', computedStyle.content);
+          }
+          
+          // 测试发送图标
+          const sendIcon = document.querySelector('#sendBtn .bi-send');
+          if (sendIcon) {
+            const computedStyle = window.getComputedStyle(sendIcon, '::before');
+            console.log('发送图标内容:', computedStyle.content);
+          }
+        }
+        
+        // 页面加载完成后测试图标
+        setTimeout(testIcons, 1000);
+
+        // 统一的头像生成函数
+        function generateAvatarUrl(name, size = 40) {
+          if (!name) return `https://ui-avatars.com/api/?name=U&background=007bff&color=fff&size=${size}`;
+          return `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=007bff&color=fff&size=${size}`;
+        }
+
         // 添加发送消息函数
         function sendChatMessage() {
           const messageInput = document.getElementById('messageInput');
           const message = messageInput.value.trim();
 
           if (!message) return;
-
-          console.log('发送消息:', message);          
 
           console.log('发送消息:', message);
           
@@ -675,1049 +969,893 @@
           // 清空输入框
           messageInput.value = '';
         }
-        
-        // 添加聊天消息到界面
-        function addChatMessage(sender, content, timestamp, messageId) {
-          const messagesContainer = document.getElementById('chatMessages');
-          const msgTemplate = document.getElementById('messageTemplate');
-          
-          if (!messagesContainer || !msgTemplate) {
-            console.error('找不到聊天容器或消息模板');
-            return;
-          }
-          
-          const msgNode = document.importNode(msgTemplate.content, true);
-          const msgElement = msgNode.querySelector('.chat-message');
-          
-          // 设置消息内容
-          msgElement.querySelector('.message-content').textContent = content;
-          msgElement.querySelector('.message-sender').textContent = sender;
-          msgElement.querySelector('.message-time').textContent = formatTime(new Date(timestamp));
-          
-          // 设置消息样式（发送方/接收方）
-          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-          if (sender === currentUser.username) {
-            msgElement.classList.add('sent');
-          } else {
-            msgElement.classList.add('received');
-          }
-          
-          // 添加消息ID
-          if (messageId) {
-            msgElement.dataset.messageId = messageId;
-          }
-          
-          // 绑定编辑和删除事件
-          const editBtn = msgElement.querySelector('.edit-btn');
-          const deleteBtn = msgElement.querySelector('.delete-btn');
-          if (editBtn) {
-            editBtn.addEventListener('click', async () => {
-              try {
-                const res = await fetch(`/api/rooms/${room.id}/messages/${messageId}`, {
-                  method: 'DELETE',
-                  headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
-                if (!res.ok) {
-                  const err = await res.json();
 
-                  throw new Error(err.error || '撤回失败');
-                }
-                
-                msgElement.remove();
-                document.getElementById('messageInput').value = content;
-                document.getElementById('sendBtn').textContent = '发送';
-                document.getElementById('messageInput').focus();
-              } catch (e) {
-                alert('撤回消息失败: ' + e.message);
-              }
-            });
-          }
-          if (deleteBtn) {
-            deleteBtn.addEventListener('click', async () => {
-              if (!confirm('确定删除该消息吗?')) return;
-              try {
-                const res = await fetch(`/api/rooms/${room.id}/messages/${messageId}`, {
-                  method: 'DELETE',
-                  headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-                });
-                if (!res.ok) {
-                  const err = await res.json();
-                  throw new Error(err.error || '删除失败');
-                }
-                msgElement.remove();
-              } catch (e) {
-                alert('删除消息失败: ' + e.message);
-              }
-            });
-          }
+        // =================================================================
+        // =========== 表情和图片上传功能 (开始) ============================
+        // =================================================================
 
-          // 添加到聊天窗口
-          messagesContainer.appendChild(msgNode);
-          
-          // 滚动到底部
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPanel = document.getElementById('emojiPanel');
+        const emojiGrid = document.getElementById('emojiGrid');
+        const closeEmojiPanel = document.getElementById('closeEmojiPanel');
+
+        const imageBtn = document.getElementById('imageBtn');
+        const imageUploadArea = document.getElementById('imageUploadArea');
+        const closeImageUpload = document.getElementById('closeImageUpload');
+        const imageFile = document.getElementById('imageFile');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const cancelUpload = document.getElementById('cancelUpload');
+        const confirmUpload = document.getElementById('confirmUpload');
+        let selectedFile = null;
+
+        const emojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '👍', '👎', '🙌', '🔥', '🎉', '✨', '⭐', '❤️', '💯'];
+
+        function initEmojiPanel() {
+            emojiGrid.innerHTML = '';
+            emojis.forEach(emoji => {
+                const emojiElement = document.createElement('button');
+                emojiElement.className = 'btn btn-sm btn-outline-secondary border-0';
+                emojiElement.textContent = emoji;
+                emojiElement.style.fontSize = '1.2rem';
+                emojiElement.onclick = () => {
+                    const messageInput = document.getElementById('messageInput');
+                    const cursorPos = messageInput.selectionStart;
+                    const textBefore = messageInput.value.substring(0, cursorPos);
+                    const textAfter = messageInput.value.substring(cursorPos);
+                    messageInput.value = textBefore + emoji + textAfter;
+                    messageInput.focus();
+                    messageInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+                };
+                emojiGrid.appendChild(emojiElement);
+            });
         }
-        
-        // 添加系统消息
-        function addSystemMessage(message) {
-          const messagesContainer = document.getElementById('chatMessages');
-          
-          const systemMsg = document.createElement('div');
-          systemMsg.className = 'text-center my-2';
-          
-          const alert = document.createElement('div');
-          alert.className = 'alert alert-secondary d-inline-block py-1 px-2';
-          alert.style.fontSize = '0.85rem';
-          alert.textContent = message;
-          
-          systemMsg.appendChild(alert);
-          messagesContainer.appendChild(systemMsg);
-          
-          // 滚动到底部
-          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        function emojiBtnClickHandler(e) {
+            console.log("Emoji button clicked!");
+            e.stopPropagation();
+            const isHidden = emojiPanel.style.display === 'none' || emojiPanel.style.display === '';
+            if (isHidden) {
+                initEmojiPanel();
+                emojiPanel.style.display = 'block';
+                imageUploadArea.style.display = 'none'; // 关闭图片上传
+            } else {
+                emojiPanel.style.display = 'none';
+            }
         }
-        
-        // 处理举手通知
-        function handleRaiseHand(username, timestamp) {
-          const notificationsContainer = document.getElementById('raiseNotifications');
-          
-          if (!notificationsContainer) return;
-          
-          const notification = document.createElement('div');
-          notification.className = 'alert alert-warning alert-dismissible fade show';
-          
-          const time = new Date(timestamp);
-          const timeStr = time.toLocaleTimeString();
-          
-          notification.innerHTML = `
-            <strong>${username}</strong> 举手了 - ${timeStr}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          `;
-          
-          notificationsContainer.appendChild(notification);
-          
-          // 5秒后自动消失
-          setTimeout(() => {
-            notification.classList.remove('show');
-            setTimeout(() => notification.remove(), 150);
-          }, 5000);
+        function closeEmojiPanelHandler() {
+            console.log("Close emoji panel clicked!");
+            emojiPanel.style.display = 'none';
         }
-        
-        // 格式化聊天时间
-        function formatTime(date) {
-          return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        function imageBtnClickHandler(e) {
+            console.log("Image button clicked!");
+            e.stopPropagation();
+            const isHidden = imageUploadArea.style.display === 'none' || imageUploadArea.style.display === '';
+            if (isHidden) {
+                imageUploadArea.style.display = 'block';
+                emojiPanel.style.display = 'none'; // 关闭表情面板
+            } else {
+                imageUploadArea.style.display = 'none';
+            }
         }
-        
-        // 定时器控制：仅限主持人/管理员/系统
-        if (['host','admin','sys'].includes(user.role)) {
-          const controls = document.getElementById('timerControls');
-          controls.style.display = 'block';
-          const startBtn = document.getElementById('startTimerBtn');
-          const pauseBtn = document.getElementById('pauseTimerBtn');
-          const resumeBtn = document.getElementById('resumeTimerBtn');
-          const resetBtn = document.getElementById('resetTimerBtn');
-          // 初始状态：只显示"开始"按钮
-          startBtn.style.display = 'inline-block';
-          pauseBtn.style.display = 'none';
-          resumeBtn.style.display = 'none';
-          resetBtn.style.display = 'none';
-          startBtn.addEventListener('click', () => {
-            const h = parseInt(document.getElementById('timerHours').value, 10) || 0;
-            const m = parseInt(document.getElementById('timerMinutes').value, 10) || 0;
-            const s = parseInt(document.getElementById('timerSeconds').value, 10) || 0;
-            const totalSec = h * 3600 + m * 60 + s;
-            if (totalSec <= 0) { alert('请输入大于0的时间'); return; }
-            ws.send(JSON.stringify({ type: 'timer', action: 'start', time: totalSec }));
-            // 切换按钮
-            startBtn.style.display = 'none';
-            pauseBtn.style.display = 'inline-block';
-            resumeBtn.style.display = 'none';
-            resetBtn.style.display = 'none';
-          });
-          pauseBtn.addEventListener('click', () => {
-            ws.send(JSON.stringify({ type: 'timer', action: 'pause' }));
-            pauseBtn.style.display = 'none';
-            resumeBtn.style.display = 'inline-block';
-            resetBtn.style.display = 'inline-block';
-          });
-          resumeBtn.addEventListener('click', () => {
-            ws.send(JSON.stringify({ type: 'timer', action: 'resume' }));
-            resumeBtn.style.display = 'none';
-            pauseBtn.style.display = 'inline-block';
-            resetBtn.style.display = 'inline-block';
-          });
-          resetBtn.addEventListener('click', () => {
-            ws.send(JSON.stringify({ type: 'timer', action: 'reset' }));
-            // 重置按钮状态
-            startBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-            resumeBtn.style.display = 'none';
-            resetBtn.style.display = 'none';
-          });
+        function resetImageUpload() {
+            imageUploadArea.style.display = 'none';
+            imageFile.value = '';
+            imagePreviewContainer.style.display = 'none';
+            confirmUpload.disabled = true;
+            selectedFile = null;
         }
-        
-        // 语音聊天功能
-        let audioStream = null;
-        let audioContext = null;
-        let audioWorklet = null;
-        
-        document.getElementById('startAudioBtn').addEventListener('click', async () => {
-          try {
-            audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            audioContext = new AudioContext();
-            audioWorklet = await audioContext.audioWorklet.addModule('/audio-processor.js');
-            
-            const source = audioContext.createMediaStreamSource(audioStream);
-            const processor = new AudioWorkletNode(audioContext, 'audio-processor');
-            
-            source.connect(processor);
-            processor.connect(audioContext.destination);
-            
-            // 发送音频数据到服务器
-            processor.port.onmessage = (e) => {
-              if (ws.readyState === WebSocket.OPEN) {
+        function closeImageUploadHandler() { resetImageUpload(); }
+        function cancelUploadHandler() { resetImageUpload(); }
+        function imageFileChangeHandler() {
+            selectedFile = imageFile.files[0];
+            if (selectedFile) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.style.display = 'block';
+                    confirmUpload.disabled = false;
+                };
+                reader.readAsDataURL(selectedFile);
+            } else {
+                resetImageUpload();
+            }
+        }
+        async function confirmUploadHandler() {
+            if (!selectedFile) return;
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+            formData.append('roomId', roomId);
+            try {
+                confirmUpload.disabled = true;
+                confirmUpload.textContent = '上传中...';
+                const response = await fetch('/api/images/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: formData,
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `Upload failed with status ${response.status}`);
+                }
+                const result = await response.json();
                 ws.send(JSON.stringify({
-                  type: 'audio',
-                  data: e.data
+                    type: 'image',
+                    content: result.imageUrl,
+                    timestamp: new Date().toISOString()
                 }));
-        }
-            };
-            
-            document.getElementById('startAudioBtn').style.display = 'none';
-            document.getElementById('stopAudioBtn').style.display = 'inline-block';
-          } catch (err) {
-            alert('无法访问麦克风：' + err.message);
-          }
-        });
-        
-        document.getElementById('stopAudioBtn').addEventListener('click', () => {
-          if (audioStream) {
-            audioStream.getTracks().forEach(track => track.stop());
-            audioStream = null;
-          }
-          if (audioContext) {
-            audioContext.close();
-            audioContext = null;
-          }
-          document.getElementById('startAudioBtn').style.display = 'inline-block';
-          document.getElementById('stopAudioBtn').style.display = 'none';
-        });
-        
-        // 处理音频数据
-        function handleAudioData(audioData) {
-          // 如果有音频上下文和正在使用音频功能
-          if (audioContext && document.getElementById('stopAudioBtn').style.display === 'inline-block') {
-            try {
-              // 创建音频源
-              const audioBuffer = audioContext.createBuffer(1, audioData.byteLength / 2, audioContext.sampleRate);
-              const audio = new Float32Array(audioData);
-              audioBuffer.getChannelData(0).set(audio);
-              
-              // 播放音频
-              const source = audioContext.createBufferSource();
-              source.buffer = audioBuffer;
-              source.connect(audioContext.destination);
-              source.start();
-            } catch (err) {
-              console.error('处理音频数据错误:', err);
-        }
-          }
-        }
-
-        // 初始化房间管理功能
-        function initRoomManagement() {
-          // 获取房间ID
-          const parts = window.location.pathname.split('/');
-          const roomId = parts[2] || '';
-          
-          // 初始化日程排序
-          new Sortable(document.getElementById('scheduleList'), {
-            animation: 150,
-            handle: '.schedule-item',
-            ghostClass: 'schedule-item-ghost'
-          });
-          
-          // 添加日程按钮
-          document.getElementById('addScheduleItem').addEventListener('click', () => {
-            const template = document.getElementById('scheduleItemTemplate');
-            const clone = document.importNode(template.content, true);
-            document.getElementById('scheduleList').appendChild(clone);
-            initScheduleItem(document.getElementById('scheduleList').lastElementChild);
-          });
-          
-          // 初始化私有房间切换
-          document.getElementById('isPrivate').addEventListener('change', function() {
-            document.getElementById('inviteCodeDisplay').style.display = this.checked ? 'block' : 'none';
-          });
-          
-          // 监听高级设置变化
-          document.getElementById('allowMessageDelete').addEventListener('change', function() {
-            // 可以添加UI更新或消息提示
-          });
-          
-          document.getElementById('allowMessageEdit').addEventListener('change', function() {
-            // 可以添加UI更新或消息提示
-          });
-          
-          document.getElementById('autoSchedule').addEventListener('change', function() {
-            // 可以添加UI更新或消息提示
-          });
-          
-          // 保存房间设置
-          document.getElementById('saveRoomSettings').addEventListener('click', async () => {
-            try {
-              const formData = collectRoomFormData();
-              
-              const response = await fetch(`/api/rooms/${roomId}`, {
-                method: 'PUT',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': 'Bearer ' + localStorage.getItem('token')
-                },
-                body: JSON.stringify(formData)
-              });
-              
-              if (!response.ok) {
-                const error = await response.json();
-                throw new Error(error.error || '保存房间设置失败');
-              }
-              
-              const updatedRoom = await response.json();
-              
-              // 关闭模态框
-              bootstrap.Modal.getInstance(document.getElementById('roomManagementModal')).hide();
-              
-              // 提示保存成功
-              alert('房间设置已保存');
-              
-              // 刷新页面以应用新设置
-              window.location.reload();
+                resetImageUpload();
             } catch (error) {
-              alert('保存房间设置失败: ' + error.message);
+                console.error('Image upload error:', error);
+                alert(`图片上传失败: ${error.message}`);
+            } finally {
+                confirmUpload.disabled = false;
+                confirmUpload.textContent = '上传';
             }
-          });
         }
-        
-        // 初始化房间管理
-        if (room.createdBy === user.userId || ['admin', 'sys'].includes(user.role)) {
-          initRoomManagement();
+
+        // ---- 先解绑再绑定，确保只绑定一次 ----
+        if (emojiBtn) {
+          emojiBtn.removeEventListener('click', emojiBtnClickHandler);
+          emojiBtn.addEventListener('click', emojiBtnClickHandler);
         }
-        
-        // 初始化计时器
-        initTimer(room);
-
-        // 初始化日程控制
-        initScheduleControl(room);
-
-        // 加载历史消息
-        try {
-          const resMsg = await fetch(`/api/rooms/${room.id}/messages`, {
-            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') }
-          });
-          if (resMsg.ok) {
-            const history = await resMsg.json();
-            history.forEach(m => {
-              addChatMessage(m.senderName || m.sender, m.content, m.timestamp, m.id);
-            });
-          }
-        } catch (e) {
-          console.error('加载历史消息失败:', e);
+        if (closeEmojiPanel) {
+          closeEmojiPanel.removeEventListener('click', closeEmojiPanelHandler);
+          closeEmojiPanel.addEventListener('click', closeEmojiPanelHandler);
         }
-        
-      } catch (err) {
-        container.innerHTML = `<div class="alert alert-danger mt-4">加载失败：${err.message}</div>`;
-      }
-    })();
+        if (imageBtn) {
+          imageBtn.removeEventListener('click', imageBtnClickHandler);
+          imageBtn.addEventListener('click', imageBtnClickHandler);
+        }
+        if (closeImageUpload) {
+          closeImageUpload.removeEventListener('click', closeImageUploadHandler);
+          closeImageUpload.addEventListener('click', closeImageUploadHandler);
+        }
+        if (cancelUpload) {
+          cancelUpload.removeEventListener('click', cancelUploadHandler);
+          cancelUpload.addEventListener('click', cancelUploadHandler);
+        }
+        if (imageFile) {
+          imageFile.removeEventListener('change', imageFileChangeHandler);
+          imageFile.addEventListener('change', imageFileChangeHandler);
+        }
+        if (confirmUpload) {
+          confirmUpload.removeEventListener('click', confirmUploadHandler);
+          confirmUpload.addEventListener('click', confirmUploadHandler);
+        }
 
-    // 填充房间设置表单
-    function populateRoomForm(room) {
-      // 基本设置
-      document.getElementById('roomName').value = room.name || '';
-      document.getElementById('roomDescription').value = room.description || '';
-      document.getElementById('maxParticipants').value = room.maxParticipants || 10;
-      document.getElementById('isPrivate').checked = room.isPrivate || false;
-      document.getElementById('inviteCode').value = room.inviteCode || '';
-      document.getElementById('inviteCodeDisplay').style.display = room.isPrivate ? 'block' : 'none';
-      
-      // 日程设置
-      const scheduleList = document.getElementById('scheduleList');
-      scheduleList.innerHTML = '';
-      
-      if (room.schedule && room.schedule.length > 0) {
-        room.schedule.forEach(item => {
-          const itemEl = document.createElement('div');
-          itemEl.className = 'list-group-item schedule-item';
-          itemEl.dataset.id = item.id;
-          itemEl.draggable = true;
+        // =================================================================
+        // =========== 表情和图片上传功能 (结束) ============================
+        // =================================================================
+
+        // 添加聊天消息到界面
+        function displayMessage(message, isHistory = false) {
+          const chatMessages = document.getElementById("chatMessages");
+          // FIX: Compare username, not userId, as that's what's stored from login
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const currentUsername = currentUser.username;
           
-          // 计算时分秒
-          const duration = parseInt(item.duration) || 0;
-          const hours = Math.floor(duration / 3600) || 0;
-          const minutes = Math.floor((duration % 3600) / 60) || 0;
-          const seconds = Math.floor(duration % 60) || 0;
+          const senderName = message.fromName || message.username || "未知用户";
+          const messageClass = senderName === currentUsername ? "sent" : "received";
           
-          itemEl.innerHTML = `
-            <div class="d-flex justify-content-between align-items-center">
-              <div class="flex-grow-1">
-                <input type="text" class="form-control form-control-sm mb-2" placeholder="日程名称" value="${item.name || ''}">
-                <div class="input-group input-group-sm">
-                  <input type="number" class="form-control" placeholder="时" min="0" max="23" value="${hours}">
-                  <span class="input-group-text">:</span>
-                  <input type="number" class="form-control" placeholder="分" min="0" max="59" value="${minutes}">
-                  <span class="input-group-text">:</span>
-                  <input type="number" class="form-control" placeholder="秒" min="0" max="59" value="${seconds}">
-                </div>
-              </div>
-              <div class="ms-3">
-                <button class="btn btn-sm btn-outline-danger delete-schedule">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </div>
-          `;
+          const content = message.content || message.text;
+          const isImage = message.type === 'image' || (typeof content === 'string' && content.startsWith('/uploads/images/'));
+          const isAudio = message.type === 'audio';
+
+          const avatarUrl = generateAvatarUrl(senderName);
+          const timestamp = new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
           
-          scheduleList.appendChild(itemEl);
-          initScheduleItem(itemEl);
-        });
-      }
-      
-      // 高级设置
-      if (room.settings) {
-        document.getElementById('autoSchedule').checked = room.settings.autoSchedule || false;
-        document.getElementById('allowMessageDelete').checked = room.settings.allowMessageDelete !== false;
-        document.getElementById('allowMessageEdit').checked = room.settings.allowMessageEdit !== false;
-        document.getElementById('allowRaiseHand').checked = room.settings.allowRaiseHand !== false;
-        document.getElementById('allowVoiceChat').checked = room.settings.allowVoiceChat !== false;
-      }
-      
-      // 确保UI显示已加载的数据
-      document.getElementById('timerControls').style.display = 'flex';
-    }
-
-    // 收集房间设置表单数据
-    function collectRoomFormData() {
-      // 基本设置
-      const basicData = {
-        name: document.getElementById('roomName').value.trim(),
-        description: document.getElementById('roomDescription').value.trim(),
-        maxParticipants: parseInt(document.getElementById('maxParticipants').value, 10) || 10,
-        isPrivate: document.getElementById('isPrivate').checked
-      };
-      
-      // 日程设置
-      const scheduleItems = Array.from(document.getElementById('scheduleList').children).map(item => {
-        const nameInput = item.querySelector('input[placeholder="日程名称"]');
-        const hoursInput = item.querySelector('input[placeholder="时"]');
-        const minutesInput = item.querySelector('input[placeholder="分"]');
-        const secondsInput = item.querySelector('input[placeholder="秒"]');
-        
-        const hours = parseInt(hoursInput.value, 10) || 0;
-        const minutes = parseInt(minutesInput.value, 10) || 0;
-        const seconds = parseInt(secondsInput.value, 10) || 0;
-        
-        // 计算总秒数
-        const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-        
-        return {
-          id: item.dataset.id || `schedule-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-          name: nameInput.value.trim() || '未命名日程',
-          duration: totalSeconds,
-          completed: item.dataset.completed === 'true' || false,
-          order: Array.from(item.parentNode.children).indexOf(item)
-        };
-      });
-      
-      // 高级设置
-      const settings = {
-        autoSchedule: document.getElementById('autoSchedule').checked,
-        allowMessageDelete: document.getElementById('allowMessageDelete').checked,
-        allowMessageEdit: document.getElementById('allowMessageEdit').checked,
-        allowRaiseHand: document.getElementById('allowRaiseHand').checked,
-        allowVoiceChat: document.getElementById('allowVoiceChat').checked
-      };
-      
-      return {
-        ...basicData,
-        schedule: scheduleItems,
-        settings: settings
-      };
-    }
-
-    // 修改房间管理按钮点击事件
-    document.getElementById('roomManagementBtn').addEventListener('click', async function() {
-      try {
-        // 获取房间ID
-        const parts = window.location.pathname.split('/');
-        const roomId = parts[2] || '';
-        
-        // 获取房间数据
-        const response = await fetch(`/api/rooms/${roomId}`, {
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        });
-        
-        if (!response.ok) {
-          throw new Error('获取房间数据失败');
-        }
-        
-        const room = await response.json();
-        
-        // 填充表单
-        populateRoomForm(room);
-        
-        // 显示模态框
-        const modal = new bootstrap.Modal(document.getElementById('roomManagementModal'));
-        modal.show();
-        
-        // 确保UI显示已加载的数据 - 再次确认
-        document.getElementById('timerControls').style.display = 'flex';
-        
-        // 显示正确的日程列表
-        const scheduleItems = document.querySelectorAll('.schedule-item');
-        scheduleItems.forEach(item => {
-          // 确保能看到时间输入
-          const timeInputs = item.querySelectorAll('input[type="number"]');
-          timeInputs.forEach(input => {
-            input.style.display = 'inline-block';
-          });
-        });
-        
-        // 确保显示高级设置选项
-        document.querySelectorAll('.form-check-input').forEach(input => {
-          if (input.parentElement.style.display === 'none') {
-            input.parentElement.style.display = 'block';
-          }
-        });
-      } catch (error) {
-        alert('加载房间设置失败: ' + error.message);
-      }
-    });
-
-    // 保存房间设置按钮点击事件
-    document.getElementById('saveRoomSettings').addEventListener('click', async function() {
-      try {
-        const formData = collectRoomFormData();
-        
-        const response = await fetch(`/api/rooms/${roomId}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          },
-          body: JSON.stringify(formData)
-        });
-        
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || '保存设置失败');
-        }
-        
-        // 成功后关闭模态框并刷新页面
-        bootstrap.Modal.getInstance(document.getElementById('roomManagementModal')).hide();
-        window.location.reload();
-      } catch (error) {
-        console.error('保存设置失败:', error);
-        alert('保存设置失败: ' + error.message);
-      }
-    });
-
-    // 删除房间按钮点击事件
-    document.getElementById('deleteRoomBtn').addEventListener('click', async () => {
-      if (confirm('确定要删除这个房间吗？此操作不可恢复。')) {
-        try {
-          const response = await fetch(`/api/rooms/${roomId}`, {
-            method: 'DELETE',
-            headers: {
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-          });
-          
-          if (response.ok) {
-            window.location.href = '/rooms';
+          let processedContent;
+          if (isImage) {
+            processedContent = content;
+          } else if (isAudio) {
+            // 创建音频播放控件
+            processedContent = `<div class="audio-message"><i class="bi bi-mic-fill me-2"></i><audio controls style="max-width: 200px;"><source src="${content}" type="audio/webm">您的浏览器不支持音频播放</audio></div>`;
           } else {
-            const error = await response.json();
-            alert(error.error || '删除房间失败');
+            processedContent = DOMPurify.sanitize(content, { USE_PROFILES: { html: true } });
           }
-        } catch (error) {
-          console.error('删除房间失败:', error);
-          alert('删除房间失败');
+
+          // 检查是否处于简洁模式
+          const isSimpleMode = chatMessages.classList.contains('simple-mode');
+          
+          let messageHtml;
+          if (isSimpleMode) {
+            // 简洁模式：显示发送者名称 + 消息内容 + 时间
+            const userInfo = `${senderName} (${message.role || '未知角色'} | ${message.country || '未知国家'})`;
+            messageHtml = `<div class="chat-message ${messageClass}" data-message-id="${message.id}"><span class="message-sender">${userInfo}:</span><div class="message-bubble"><div class="message-content">${isImage ? `<img src="${processedContent}" alt="Image" class="img-fluid rounded" style="max-height: 80px;">` : processedContent}</div></div><span class="message-time">${timestamp}</span></div>`;
+          } else {
+            // 气泡模式：原有的气泡样式
+            messageHtml = `<div class="chat-message ${messageClass}" data-message-id="${message.id}"><div class="message-meta"><img src="${avatarUrl}" alt="${senderName}" class="avatar"><span class="message-sender">${senderName}</span></div><div class="message-bubble"><div class="message-content">${isImage ? `<img src="${processedContent}" alt="Image" class="img-fluid rounded">` : processedContent}<span class="message-time">${timestamp}</span></div></div></div>`;
+          }
+          
+          const messageElement = document.createElement('div');
+          messageElement.innerHTML = messageHtml.trim();
+          const finalElement = messageElement.firstElementChild;
+
+          if (isHistory) {
+            finalElement.style.animation = 'none';
+            finalElement.style.opacity = '1';
+            chatMessages.appendChild(finalElement);
+          } else {
+            chatMessages.appendChild(finalElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
         }
-      }
-    });
-
-    // 初始化日程拖拽排序
-    function initSortable() {
-      const scheduleList = document.getElementById('scheduleList');
-      if (scheduleList) {
-        new Sortable(scheduleList, {
-          animation: 150,
-          handle: '.schedule-item',
-          ghostClass: 'schedule-item-ghost',
-          chosenClass: 'schedule-item-chosen',
-          dragClass: 'schedule-item-drag',
-          onEnd: function() {
-            console.log('排序已更新');
+        
+        // 更新系统消息样式
+        function displaySystemMessage(message) {
+          const chatMessages = document.getElementById('chatMessages');
+          if (!chatMessages) return;
+          const systemMsg = document.createElement('div');
+          systemMsg.className = 'system-message';
+          systemMsg.innerHTML = `<span>${DOMPurify.sanitize(message)}</span>`;
+          chatMessages.appendChild(systemMsg);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // 更新用户列表
+        function updateUserList(users) {
+          const userList = document.getElementById('userList');
+          if (!userList) return;
+          userList.innerHTML = '';
+          for (const user of users) {
+            const userItem = document.createElement('li');
+            userItem.className = 'list-group-item d-flex align-items-center p-2';
+            userItem.style.minWidth = '280px';
+            userItem.style.marginRight = '0.5rem';
+            userItem.style.marginBottom = '0.5rem';
+            userItem.style.borderRadius = '0.5rem';
+            
+            // 用户头像
+            const userAvatar = document.createElement('div');
+            userAvatar.className = 'me-2';
+            userAvatar.innerHTML = `
+              <img src="${generateAvatarUrl(user.name)}" alt="${user.name}" class="rounded-circle" style="width:32px; height:32px;">
+            `;
+            
+            // 用户状态指示器
+            const statusIndicator = document.createElement('span');
+            statusIndicator.className = 'user-status-indicator user-status-online me-2';
+            statusIndicator.style.width = '8px';
+            statusIndicator.style.height = '8px';
+            statusIndicator.style.borderRadius = '50%';
+            statusIndicator.style.backgroundColor = '#28a745';
+            
+            // 用户信息
+            const userInfo = document.createElement('div');
+            userInfo.className = 'flex-grow-1';
+            
+            const userName = document.createElement('div');
+            userName.className = 'fw-bold';
+            userName.textContent = user.name;
+            userName.style.fontSize = '0.9rem';
+            
+            const userDetails = document.createElement('div');
+            userDetails.className = 'text-muted';
+            userDetails.style.fontSize = '0.75rem';
+            userDetails.textContent = `${user.role} | ${user.country || '未知'}`;
+            
+            userInfo.appendChild(userName);
+            userInfo.appendChild(userDetails);
+            
+            // 状态图标容器
+            const statusIcons = document.createElement('div');
+            statusIcons.className = 'd-flex align-items-center gap-1';
+            
+            // 举手状态 - 使用更好的图标
+            if (user.isRaisingHand) {
+              const raiseHandIcon = document.createElement('i');
+              raiseHandIcon.className = 'bi bi-hand-index text-warning';
+              raiseHandIcon.style.fontSize = '1.1rem';
+              raiseHandIcon.title = '正在举手';
+              statusIcons.appendChild(raiseHandIcon);
+            }
+            
+            // 发言状态
+            if (user.isSpeaking) {
+              const speakingIcon = document.createElement('i');
+              speakingIcon.className = 'bi bi-mic text-primary';
+              speakingIcon.style.fontSize = '1.1rem';
+              speakingIcon.title = '正在发言';
+              statusIcons.appendChild(speakingIcon);
+            }
+            
+            // 静音状态
+            if (user.isMuted) {
+              const mutedIcon = document.createElement('i');
+              mutedIcon.className = 'bi bi-mic-mute text-danger';
+              mutedIcon.style.fontSize = '1.1rem';
+              mutedIcon.title = '已静音';
+              statusIcons.appendChild(mutedIcon);
+            }
+            
+            // 在线状态
+            if (user.isOnline) {
+              const onlineIcon = document.createElement('i');
+              onlineIcon.className = 'bi bi-circle text-success';
+              onlineIcon.style.fontSize = '0.8rem';
+              onlineIcon.title = '在线';
+              statusIcons.appendChild(onlineIcon);
+            }
+            
+            userItem.appendChild(userAvatar);
+            userItem.appendChild(statusIndicator);
+            userItem.appendChild(userInfo);
+            userItem.appendChild(statusIcons);
+            userList.appendChild(userItem);
           }
-        });
-      }
-    }
+        }
 
-    // 房间设置中的私密房间切换
-    document.getElementById('isPrivate')?.addEventListener('change', function() {
-      const inviteCodeDisplay = document.getElementById('inviteCodeDisplay');
-      if (inviteCodeDisplay) {
-        inviteCodeDisplay.style.display = this.checked ? 'block' : 'none';
-      }
-    });
+        // 倒计时功能
+        let timerInterval = null;
+        let timerRunning = false;
+        let remainingTime = 0;
 
-    // 初始化房间管理
-    window.addEventListener('DOMContentLoaded', function() {
-      // 初始化日程拖拽
-      initSortable();
-    });
-
-    // 格式化时间显示
-    function formatTime(seconds) {
-      if (isNaN(seconds) || seconds === null || seconds === undefined) {
-        return '00:00';
-      }
-      
-      seconds = Math.max(0, Math.floor(seconds)); // 确保是非负整数
-      
-      const hours = Math.floor(seconds / 3600);
-      const minutes = Math.floor((seconds % 3600) / 60);
-      const secs = seconds % 60;
-      
-      if (hours > 0) {
-        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      } else {
-        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-      }
-    }
-    
-    // 初始化计时器
-    function initTimer(room) {
-      const timerDisplay = document.getElementById('timerDisplay');
+        // 更新倒计时按钮显示
+        function updateTimerButtons() {
       const startBtn = document.getElementById('startTimerBtn');
       const pauseBtn = document.getElementById('pauseTimerBtn');
       const resumeBtn = document.getElementById('resumeTimerBtn');
       const resetBtn = document.getElementById('resetTimerBtn');
-      const timerControls = document.getElementById('timerControls');
-      
-      // 显示控制按钮
-      timerControls.style.display = 'flex';
-      
-      let timerId = null;
-      let currentTime = 0;
-      let isRunning = false;
-      
-      // 获取初始计时器状态
-      fetch(`/api/rooms/${room.id}/timer`, {
-        headers: {
-          'Authorization': 'Bearer ' + localStorage.getItem('token')
+          const timeInputGroup = document.getElementById('timeInputGroup');
+          
+          if (timerRunning) {
+            // 计时器运行中
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'inline-block';
+            resumeBtn.style.display = 'none';
+            timeInputGroup.style.display = 'none';
+          } else if (remainingTime > 0) {
+            // 计时器暂停
+            startBtn.style.display = 'none';
+            pauseBtn.style.display = 'none';
+            resumeBtn.style.display = 'inline-block';
+            timeInputGroup.style.display = 'none';
+          } else {
+            // 计时器未开始
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            resumeBtn.style.display = 'none';
+            timeInputGroup.style.display = 'flex';
+          }
         }
-      })
-      .then(res => res.json())
-      .then(timer => {
-        if (timer && timer.isRunning) {
-          currentTime = timer.remainingTime;
-          isRunning = timer.isRunning;
-          startTimer();
-        } else if (timer && timer.remainingTime > 0) {
-          currentTime = timer.remainingTime;
-          updateDisplay();
-        }
-      })
-      .catch(err => console.error('获取计时器状态失败:', err));
-      
-      // 开始计时
-      startBtn.addEventListener('click', async () => {
-        const hours = parseInt(document.getElementById('timerHours').value, 10) || 0;
-        const minutes = parseInt(document.getElementById('timerMinutes').value, 10) || 0;
-        const seconds = parseInt(document.getElementById('timerSeconds').value, 10) || 0;
-        
-        const duration = hours * 3600 + minutes * 60 + seconds;
-        
-        if (duration <= 0) {
-          alert('请设置有效的时间');
+
+        // 开始倒计时
+        document.getElementById('startTimerBtn').addEventListener('click', () => {
+          const hours = parseInt(document.getElementById('timerHours').value) || 0;
+          const minutes = parseInt(document.getElementById('timerMinutes').value) || 0;
+          const seconds = parseInt(document.getElementById('timerSeconds').value) || 0;
+          
+          const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+          if (totalSeconds <= 0) {
+            alert('请输入有效的时间');
           return;
         }
         
-        try {
-          const res = await fetch(`/api/rooms/${room.id}/timer/start`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + localStorage.getItem('token')
-            },
-            body: JSON.stringify({ duration })
-          });
+          remainingTime = totalSeconds;
+          timerRunning = true;
+          updateTimerDisplay(remainingTime);
+          updateTimerButtons();
           
-          if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error || '开始计时失败');
-          }
-          
-          const timer = await res.json();
-          currentTime = timer.remainingTime;
-          isRunning = timer.isRunning;
-          startTimer();
-        } catch (err) {
-          alert('开始计时失败: ' + err.message);
-        }
-      });
-      
-      // 暂停计时
-      pauseBtn.addEventListener('click', async () => {
-        if (!isRunning) return;
-        
-        try {
-          const res = await fetch(`/api/rooms/${room.id}/timer/pause`, {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer ' + localStorage.getItem('token')
+          timerInterval = setInterval(() => {
+            remainingTime--;
+            updateTimerDisplay(remainingTime);
+            
+            if (remainingTime <= 0) {
+              clearInterval(timerInterval);
+              timerRunning = false;
+              updateTimerButtons();
+              alert('时间到！');
             }
-          });
+          }, 1000);
           
-          if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error || '暂停计时失败');
-          }
-          
-          const timer = await res.json();
-          currentTime = timer.remainingTime;
-          isRunning = timer.isRunning;
-          stopTimer();
-          updateDisplay();
-        } catch (err) {
-          alert('暂停计时失败: ' + err.message);
-        }
-      });
-      
-      // 继续计时
-      resumeBtn.addEventListener('click', async () => {
-        if (isRunning || currentTime <= 0) return;
-        
-        try {
-          const res = await fetch(`/api/rooms/${room.id}/timer/resume`, {
-            method: 'POST',
-            headers: {
-              'Authorization': 'Bearer ' + localStorage.getItem('token')
-            }
-          });
-          
-          if (!res.ok) {
-            const error = await res.json();
-            throw new Error(error.error || '继续计时失败');
-          }
+          // 发送到服务器
+          ws.send(JSON.stringify({ type: 'timer', action: 'start', time: totalSeconds }));
+        });
 
-          const timer = await res.json();
-          currentTime = timer.remainingTime;
-          isRunning = timer.isRunning;
-          startTimer();
-        } catch (err) {
-          alert('继续计时失败: ' + err.message);
+        // 暂停倒计时
+        document.getElementById('pauseTimerBtn').addEventListener('click', () => {
+          if (timerRunning) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            updateTimerButtons();
+            ws.send(JSON.stringify({ type: 'timer', action: 'pause' }));
+          }
+        });
+
+        // 继续倒计时
+        document.getElementById('resumeTimerBtn').addEventListener('click', () => {
+          if (!timerRunning && remainingTime > 0) {
+            timerRunning = true;
+            updateTimerButtons();
+            timerInterval = setInterval(() => {
+              remainingTime--;
+              updateTimerDisplay(remainingTime);
+              
+              if (remainingTime <= 0) {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                updateTimerButtons();
+                alert('时间到！');
+              }
+            }, 1000);
+            ws.send(JSON.stringify({ type: 'timer', action: 'resume' }));
+          }
+        });
+
+        // 重置倒计时
+        document.getElementById('resetTimerBtn').addEventListener('click', () => {
+          clearInterval(timerInterval);
+          timerRunning = false;
+          remainingTime = 0;
+          updateTimerDisplay(0);
+          updateTimerButtons();
+          ws.send(JSON.stringify({ type: 'timer', action: 'reset' }));
+        });
+
+        // 初始化按钮显示
+        updateTimerButtons();
+
+        // 更新倒计时显示
+        function updateTimerDisplay(seconds) {
+          const hours = Math.floor(seconds / 3600);
+          const minutes = Math.floor((seconds % 3600) / 60);
+          const secs = seconds % 60;
+          
+          const display = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          document.getElementById('timerDisplay').textContent = display;
         }
-      });
-      
-      // 重置计时
-      resetBtn.addEventListener('click', () => {
-        stopTimer();
-        isRunning = false;
-        currentTime = 0;
-        updateDisplay();
-      });
-      
-      // 开始计时器
-      function startTimer() {
-        if (timerId) clearInterval(timerId);
+
+        // 音频处理函数
+        function handleAudioData(audioData) {
+          // 处理音频数据的逻辑
+          console.log('收到音频数据:', audioData.byteLength, 'bytes');
+          
+          // 创建音频元素并播放
+          const audioBlob = new Blob([audioData], { type: 'audio/wav' });
+          const audioUrl = URL.createObjectURL(audioBlob);
+          const audio = new Audio(audioUrl);
+          
+          audio.onloadedmetadata = () => {
+            console.log('音频时长:', audio.duration, '秒');
+          };
+          
+          audio.onerror = (error) => {
+            console.error('音频播放错误:', error);
+          };
+          
+          audio.play().catch(error => {
+            console.error('无法播放音频:', error);
+          });
+          
+          // 清理URL对象
+          audio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+          };
+        }
+
+        // 处理音频消息
+        function handleAudioMessage(message) {
+          console.log('收到音频消息:', message);
+          
+          // 显示音频消息在聊天中
+          const audioMessage = {
+            id: message.id || Date.now(),
+            type: 'audio',
+            content: message.audioUrl || message.content,
+            fromName: message.fromName || message.userName || '未知用户',
+            timestamp: message.timestamp || new Date().toISOString(),
+            role: message.role,
+            country: message.country
+          };
+          
+          displayMessage(audioMessage);
+        }
+
+        // 语音聊天功能
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+
+        document.getElementById('startAudioBtn').addEventListener('click', async () => {
+          if (isRecording) return;
+          
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ 
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+              } 
+            });
+            
+            mediaRecorder = new MediaRecorder(stream, {
+              mimeType: 'audio/webm;codecs=opus'
+            });
+            
+            mediaRecorder.ondataavailable = (event) => {
+              if (event.data.size > 0) {
+                audioChunks.push(event.data);
+              }
+            };
+            
+            mediaRecorder.onstop = async () => {
+              try {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                console.log('录音完成，大小:', audioBlob.size, 'bytes');
+                
+                // 发送音频数据到服务器
+                ws.send(audioBlob);
+                
+                // 同时发送音频消息通知
+                ws.send(JSON.stringify({
+                  type: 'audio_notification',
+                  timestamp: new Date().toISOString(),
+                  size: audioBlob.size
+                }));
+                
+                audioChunks = [];
+                isRecording = false;
+                
+                // 更新按钮状态
+                document.getElementById('startAudioBtn').style.display = 'inline-block';
+                document.getElementById('stopAudioBtn').style.display = 'none';
+                
+              } catch (error) {
+                console.error('处理录音数据时出错:', error);
+                alert('录音处理失败，请重试');
+              }
+            };
+            
+            mediaRecorder.onerror = (event) => {
+              console.error('录音错误:', event.error);
+              alert('录音出错: ' + event.error.message);
+              isRecording = false;
+            };
+            
+            // 开始录音
+            mediaRecorder.start(1000); // 每秒收集一次数据
+            isRecording = true;
+            
+            // 更新按钮状态
+            document.getElementById('startAudioBtn').style.display = 'none';
+            document.getElementById('stopAudioBtn').style.display = 'inline-block';
+            
+            console.log('开始录音...');
+            
+          } catch (error) {
+            console.error('无法访问麦克风:', error);
+            if (error.name === 'NotAllowedError') {
+              alert('请允许访问麦克风以使用语音聊天功能');
+            } else if (error.name === 'NotFoundError') {
+              alert('未找到麦克风设备，请检查设备连接');
+            } else {
+              alert('无法访问麦克风: ' + error.message);
+            }
+          }
+        });
+
+        document.getElementById('stopAudioBtn').addEventListener('click', () => {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            console.log('停止录音...');
+            mediaRecorder.stop();
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+          }
+        });
+
+        // 更新用户信息栏
+        function updateUserInfoBar() {
+          const currentUserName = document.getElementById('currentUserName');
+          const currentUserInfo = document.getElementById('currentUserInfo');
+          const userStatusBadge = document.getElementById('userStatusBadge');
+          const currentUserAvatar = document.getElementById('currentUserAvatar');
+          
+          if (currentUserName) {
+            currentUserName.textContent = user.username;
+          }
+          if (currentUserInfo) {
+            currentUserInfo.textContent = `${roleMap[user.role] || user.role} | ${user.country || '未知'}`;
+          }
+          if (userStatusBadge) {
+            userStatusBadge.textContent = '在线';
+            userStatusBadge.className = 'badge bg-success';
+          }
+          if (currentUserAvatar) {
+            currentUserAvatar.src = generateAvatarUrl(user.username, 40);
+          }
+        }
         
-        updateDisplay();
-        
-        timerId = setInterval(() => {
-          if (currentTime <= 0) {
-            stopTimer();
-            isRunning = false;
-            timerDisplay.style.color = 'red';
+        // 初始化用户信息栏
+        updateUserInfoBar();
+
+        // 房间管理功能
+        document.getElementById('roomManagementBtn').addEventListener('click', async function() {
+          try {
+            const response = await fetch(`/api/rooms/${encodeURIComponent(roomId)}`, {
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+            });
+            
+            if (response.ok) {
+              const roomData = await response.json();
+              
+              // 创建管理选项对话框
+              const managementOptions = [
+                `房间名称：${roomData.name}`,
+                `房间ID：${roomData.id}`,
+                `参与者数量：${roomData.participants.length}人`,
+                '',
+                '管理选项：',
+                '1. 查看参与者列表',
+                '2. 修改房间设置',
+                '3. 导出聊天记录',
+                '4. 清空聊天记录'
+              ].join('\n');
+              
+              const choice = prompt(managementOptions + '\n\n请输入选项编号（1-4）：');
+              
+              switch(choice) {
+                case '1':
+                  const participantsList = roomData.participants.map(p => 
+                    `${p.name} (${p.role} | ${p.country || '未知'})`
+                  ).join('\n');
+                  alert('参与者列表：\n' + participantsList);
+                  break;
+                case '2':
+                  alert('房间设置功能开发中...');
+                  break;
+                case '3':
+                  alert('导出功能开发中...');
+                  break;
+                case '4':
+                  if (confirm('确定要清空所有聊天记录吗？此操作不可撤销。')) {
+                    // 这里可以添加清空聊天记录的API调用
+                    alert('清空功能开发中...');
+                  }
+                  break;
+                default:
+                  alert('无效选项');
+              }
+            } else {
+              alert('获取房间信息失败');
+            }
+          } catch (error) {
+            console.error('房间管理错误:', error);
+            alert('房间管理功能暂时不可用');
+          }
+        });
+
+        // 删除房间功能
+        document.getElementById('deleteRoomBtn').addEventListener('click', async function() {
+          if (!confirm('确定要删除这个研讨室吗？此操作不可撤销。')) {
             return;
           }
           
-          currentTime--;
-          updateDisplay();
-        }, 1000);
-      }
-      
-      // 停止计时器
-      function stopTimer() {
-        if (timerId) {
-          clearInterval(timerId);
-          timerId = null;
+          try {
+            const response = await fetch(`/api/rooms/${encodeURIComponent(roomId)}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+              }
+            });
+            
+            if (response.ok) {
+              alert('研讨室已删除');
+              window.location.href = '/rooms';
+            } else {
+              alert('删除失败，请检查权限');
+            }
+          } catch (error) {
+            console.error('删除房间错误:', error);
+            alert('删除失败，请稍后再试');
+          }
+        });
+
+        // 更新发言状态功能
+        function updateSpeakingStatus(userId, isSpeaking) {
+          // 更新用户列表中的发言状态
+          const userItems = document.querySelectorAll('#userList .list-group-item');
+          userItems.forEach(item => {
+            const userName = item.querySelector('.fw-bold').textContent;
+            // 这里需要根据实际数据结构来匹配用户
+            // 暂时简化处理
+          });
         }
+
+        // =================================================================
+        // =========== 所有功能初始化入口 =================================
+        // =================================================================
+        initializeRoomFeatures(roomId, user, ws);
+        // =================================================================
+
+      } catch (error) {
+        console.error('初始化错误:', error);
+        alert('初始化失败: ' + error.message);
       }
+    })();
+
+    /**
+     * 初始化房间的所有交互功能
+     * @param {string} roomId 当前房间ID
+     * @param {object} user 当前用户信息
+     * @param {WebSocket} ws WebSocket实例
+     */
+    function initializeRoomFeatures(roomId, user, ws) {
+      console.log("Initializing all room features...");
+
+      // ------------------ 发送消息逻辑 ------------------
+      document.getElementById('sendBtn').addEventListener('click', sendChatMessage);
+      document.getElementById('messageInput').addEventListener('keydown', e => {
+        const sendMode = document.querySelector('input[name="sendMode"]:checked').value;
+        if ((sendMode === 'enter' && e.key === 'Enter' && !e.shiftKey) ||
+            (sendMode === 'ctrlEnter' && e.key === 'Enter' && e.ctrlKey)) {
+          e.preventDefault();
+          sendChatMessage();
+        }
+      });
+      function sendChatMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        if (!message) return;
+        ws.send(JSON.stringify({ type: 'chat', content: message }));
+        messageInput.value = '';
+      }
+
+      // ------------------ 视图切换 ------------------
+      const viewSwitch = document.getElementById('viewSwitch');
+      const chatMessages = document.getElementById('chatMessages');
+      const isSimpleMode = localStorage.getItem('simpleMode') === 'true';
+      viewSwitch.checked = isSimpleMode;
+      function toggleView() {
+        chatMessages.classList.toggle('simple-mode', viewSwitch.checked);
+        localStorage.setItem('simpleMode', String(viewSwitch.checked));
+      }
+      toggleView();
+      viewSwitch.addEventListener('change', toggleView);
+
+      // ------------------ 表情功能 ------------------
+      const emojiBtn = document.getElementById('emojiBtn');
+      const emojiPanel = document.getElementById('emojiPanel');
+      const emojiGrid = document.getElementById('emojiGrid');
+      const closeEmojiPanel = document.getElementById('closeEmojiPanel');
+      const emojis = ['😀', '😃', '😄', '😁', '😆', '😅', '😂', '🤣', '😊', '😇', '🙂', '🙃', '😉', '😌', '😍', '🥰', '😘', '😗', '😙', '😚', '😋', '😛', '😝', '😜', '🤪', '🤨', '🧐', '🤓', '😎', '🤩', '🥳', '😏', '😒', '😞', '😔', '😟', '😕', '🙁', '☹️', '😣', '😖', '😫', '😩', '🥺', '😢', '😭', '😤', '😠', '😡', '🤬', '🤯', '😳', '🥵', '🥶', '😱', '😨', '😰', '😥', '😓', '🤗', '🤔', '🤭', '🤫', '🤥', '😶', '😐', '😑', '😯', '😦', '😧', '😮', '😲', '🥱', '😴', '🤤', '😪', '😵', '🤐', '🥴', '🤢', '🤮', '🤧', '😷', '🤒', '🤕', '🤑', '🤠', '👍', '👎', '🙌', '🔥', '🎉', '✨', '⭐', '❤️', '💯'];
       
-      // 更新显示
-      function updateDisplay() {
-        timerDisplay.textContent = formatTime(currentTime);
-        
-        if (currentTime <= 0) {
-          timerDisplay.style.color = 'red';
-        } else if (currentTime <= 30) {
-          timerDisplay.style.color = 'orange';
+      function initEmojiPanel() {
+        emojiGrid.innerHTML = '';
+        emojis.forEach(emoji => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-sm btn-outline-secondary border-0';
+          btn.textContent = emoji;
+          btn.style.fontSize = '1.2rem';
+          btn.onclick = () => {
+            const input = document.getElementById('messageInput');
+            const cursorPos = input.selectionStart;
+            input.value = input.value.substring(0, cursorPos) + emoji + input.value.substring(cursorPos);
+            input.focus();
+            input.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+          };
+          emojiGrid.appendChild(btn);
+        });
+      }
+
+      emojiBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log("Emoji button clicked!");
+        const isHidden = emojiPanel.style.display === 'none' || !emojiPanel.style.display;
+        if (isHidden) {
+          initEmojiPanel();
+          emojiPanel.style.display = 'block';
+          document.getElementById('imageUploadArea').style.display = 'none';
         } else {
-          timerDisplay.style.color = '';
+          emojiPanel.style.display = 'none';
         }
+      });
+      closeEmojiPanel.addEventListener('click', () => emojiPanel.style.display = 'none');
+
+      // ------------------ 图片上传功能 ------------------
+      const imageBtn = document.getElementById('imageBtn');
+      const imageUploadArea = document.getElementById('imageUploadArea');
+      const closeImageUpload = document.getElementById('closeImageUpload');
+      const imageFile = document.getElementById('imageFile');
+      const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+      const imagePreview = document.getElementById('imagePreview');
+      const cancelUpload = document.getElementById('cancelUpload');
+      const confirmUpload = document.getElementById('confirmUpload');
+      let selectedFile = null;
+
+      function resetImageUpload() {
+        imageUploadArea.style.display = 'none';
+        imageFile.value = '';
+        imagePreviewContainer.style.display = 'none';
+        confirmUpload.disabled = true;
+        selectedFile = null;
       }
 
-      // 供 WebSocket 消息调用，更新计时器显示
-      window.updateTimerDisplay = function(sec) {
-        currentTime = sec;
-        updateDisplay();
-      };
-    }
-
-    // 初始化日程项
-    function initScheduleItem(item) {
-      // 删除按钮
-      item.querySelector('.delete-schedule')?.addEventListener('click', () => {
-        item.remove();
-      });
-      
-      // 拖拽功能
-      item.addEventListener('dragstart', e => {
-        item.classList.add('dragging');
-        e.dataTransfer.setData('text/plain', '');
-      });
-      
-      item.addEventListener('dragend', () => {
-        item.classList.remove('dragging');
-      });
-      
-      item.addEventListener('dragover', e => {
-        e.preventDefault();
-        const dragging = document.querySelector('.dragging');
-        if (dragging !== item) {
-          const rect = item.getBoundingClientRect();
-          const midY = rect.top + rect.height / 2;
-          if (e.clientY < midY) {
-            item.parentNode.insertBefore(dragging, item);
-          } else {
-            item.parentNode.insertBefore(dragging, item.nextSibling);
-          }
-        }
-      });
-      
-      // 确保输入框可见
-      const inputs = item.querySelectorAll('input');
-      inputs.forEach(input => {
-        if (input.style.display === 'none') {
-          input.style.display = 'inline-block';
-        }
-      });
-    }
-
-    // 初始化日程控制
-    function initScheduleControl(room) {
-      const scheduleControlSection = document.getElementById('scheduleControlSection');
-      const startScheduleBtn = document.getElementById('startScheduleBtn');
-      const pauseScheduleBtn = document.getElementById('pauseScheduleBtn');
-      const resumeScheduleBtn = document.getElementById('resumeScheduleBtn');
-      const nextScheduleBtn = document.getElementById('nextScheduleBtn');
-      const currentScheduleDisplay = document.getElementById('currentScheduleDisplay');
-      const currentScheduleName = document.getElementById('currentScheduleName');
-      const scheduleProgress = document.getElementById('scheduleProgress');
-      
-      // 如果没有日程，不显示控制面板
-      if (!room.schedule || room.schedule.length === 0) {
-        scheduleControlSection.style.display = 'none';
-        return;
-      }
-      
-      // 显示日程控制面板
-      scheduleControlSection.style.display = 'block';
-      
-      let currentScheduleIndex = room.currentScheduleIndex || 0;
-      let currentTimer = null;
-      let isRunning = room.status === 'in_progress';
-      let originalDuration = 0;
-      let remainingTime = 0;
-      
-      // 更新按钮状态
-      function updateButtonStatus() {
-        if (isRunning) {
-          startScheduleBtn.style.display = 'none';
-          pauseScheduleBtn.style.display = 'inline-block';
-          resumeScheduleBtn.style.display = 'none';
-        } else if (remainingTime > 0) {
-          startScheduleBtn.style.display = 'none';
-          pauseScheduleBtn.style.display = 'none';
-          resumeScheduleBtn.style.display = 'inline-block';
+      imageBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log("Image button clicked!");
+        const isHidden = imageUploadArea.style.display === 'none' || !imageUploadArea.style.display;
+        if (isHidden) {
+          imageUploadArea.style.display = 'block';
+          document.getElementById('emojiPanel').style.display = 'none';
         } else {
-          startScheduleBtn.style.display = 'inline-block';
-          pauseScheduleBtn.style.display = 'none';
-          resumeScheduleBtn.style.display = 'none';
+          imageUploadArea.style.display = 'none';
         }
-      }
-      
-      // 开始当前日程
-      startScheduleBtn.addEventListener('click', () => {
-        if (room.schedule.length === 0 || currentScheduleIndex >= room.schedule.length) {
-          alert('没有可用的日程');
-          return;
-        }
-        
-        const currentSchedule = room.schedule[currentScheduleIndex];
-        originalDuration = currentSchedule.duration;
-        remainingTime = originalDuration;
-        isRunning = true;
-        
-        currentScheduleDisplay.style.display = 'block';
-        currentScheduleName.textContent = currentSchedule.name;
-        scheduleProgress.style.width = '100%';
-        
-        startScheduleTimer();
-        updateButtonStatus();
-        
-        // 通知服务器
-        fetch(`/api/rooms/${room.id}/schedule/start`, {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token'),
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ scheduleIndex: currentScheduleIndex })
-        }).catch(err => console.error('启动日程失败:', err));
       });
       
-      // 暂停当前日程
-      pauseScheduleBtn.addEventListener('click', () => {
-        isRunning = false;
-        if (currentTimer) {
-          clearInterval(currentTimer);
-          currentTimer = null;
-        }
-        updateButtonStatus();
-        
-        // 通知服务器
-        fetch(`/api/rooms/${room.id}/schedule/pause`, {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        }).catch(err => console.error('暂停日程失败:', err));
-      });
-      
-      // 恢复当前日程
-      resumeScheduleBtn.addEventListener('click', () => {
-        isRunning = true;
-        startScheduleTimer();
-        updateButtonStatus();
-        
-        // 通知服务器
-        fetch(`/api/rooms/${room.id}/schedule/resume`, {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        }).catch(err => console.error('恢复日程失败:', err));
-      });
-      
-      // 下一个日程
-      nextScheduleBtn.addEventListener('click', () => {
-        if (currentTimer) {
-          clearInterval(currentTimer);
-          currentTimer = null;
-        }
-        
-        currentScheduleIndex++;
-        if (currentScheduleIndex >= room.schedule.length) {
-          alert('已完成所有日程');
-          currentScheduleDisplay.style.display = 'none';
-          startScheduleBtn.style.display = 'inline-block';
-          pauseScheduleBtn.style.display = 'none';
-          resumeScheduleBtn.style.display = 'none';
-          return;
-        }
-        
-        const currentSchedule = room.schedule[currentScheduleIndex];
-        originalDuration = currentSchedule.duration;
-        remainingTime = originalDuration;
-        isRunning = true;
-        
-        currentScheduleDisplay.style.display = 'block';
-        currentScheduleName.textContent = currentSchedule.name;
-        scheduleProgress.style.width = '100%';
-        
-        startScheduleTimer();
-        updateButtonStatus();
-        
-        // 通知服务器
-        fetch(`/api/rooms/${room.id}/schedule/next`, {
-          method: 'POST',
-          headers: {
-            'Authorization': 'Bearer ' + localStorage.getItem('token')
-          }
-        }).catch(err => console.error('切换到下一个日程失败:', err));
-      });
-      
-      // 启动日程计时器
-      function startScheduleTimer() {
-        if (currentTimer) {
-          clearInterval(currentTimer);
-        }
-        
-        currentTimer = setInterval(() => {
-          if (remainingTime <= 0) {
-            clearInterval(currentTimer);
-            currentTimer = null;
-            isRunning = false;
-            updateButtonStatus();
-            return;
-          }
-          
-          remainingTime--;
-          const progressPercentage = (remainingTime / originalDuration) * 100;
-          scheduleProgress.style.width = `${progressPercentage}%`;
-          
-          // 颜色变化：绿->黄->红
-          if (progressPercentage > 66) {
-            scheduleProgress.className = 'progress-bar bg-success';
-          } else if (progressPercentage > 33) {
-            scheduleProgress.className = 'progress-bar bg-warning';
-          } else {
-            scheduleProgress.className = 'progress-bar bg-danger';
-          }
-        }, 1000);
-      }
-      
-      // 如果已经有正在进行的日程，显示它
-      if (room.status === 'in_progress' && room.currentScheduleIndex !== undefined && room.schedule[room.currentScheduleIndex]) {
-        currentScheduleIndex = room.currentScheduleIndex;
-        const currentSchedule = room.schedule[currentScheduleIndex];
-        
-        // 假设我们有剩余时间信息
-        originalDuration = currentSchedule.duration;
-        remainingTime = room.scheduleRemainingTime || originalDuration;
-        isRunning = true;
-        
-        currentScheduleDisplay.style.display = 'block';
-        currentScheduleName.textContent = currentSchedule.name;
-        const progressPercentage = (remainingTime / originalDuration) * 100;
-        scheduleProgress.style.width = `${progressPercentage}%`;
-        
-        startScheduleTimer();
-      }
-      
-      updateButtonStatus();
-    }
+      closeImageUpload.addEventListener('click', resetImageUpload);
+      cancelUpload.addEventListener('click', resetImageUpload);
 
-    // 举手
-    document.getElementById('raiseHandBtn').addEventListener('click', () => {
-      ws.send(JSON.stringify({ type: 'raiseHand' }));
+      imageFile.addEventListener('change', () => {
+        selectedFile = imageFile.files[0];
+        if (selectedFile) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            imagePreview.src = e.target.result;
+            imagePreviewContainer.style.display = 'block';
+            confirmUpload.disabled = false;
+          };
+          reader.readAsDataURL(selectedFile);
+        }
+      });
+
+      confirmUpload.addEventListener('click', async () => {
+        if (!selectedFile) return;
+        const formData = new FormData();
+        formData.append('image', selectedFile);
+        formData.append('roomId', roomId);
+        try {
+          confirmUpload.disabled = true;
+          confirmUpload.textContent = '上传中...';
+          const res = await fetch('/api/images/upload', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+            body: formData,
+          });
+          if (!res.ok) throw new Error((await res.json()).error || 'Upload failed');
+          const result = await res.json();
+          ws.send(JSON.stringify({
+            type: 'image',
+            content: result.imageUrl,
+            timestamp: new Date().toISOString()
+          }));
+          resetImageUpload();
+        } catch (error) {
+          console.error('Image upload error:', error);
+          alert(`图片上传失败: ${error.message}`);
+        } finally {
+          confirmUpload.disabled = false;
+          confirmUpload.textContent = '上传';
+        }
+      });
+
+      // ------------------ 举手功能 ------------------
+      const raiseHandBtn = document.getElementById('raiseHandBtn');
+      let isRaisingHand = false;
+      raiseHandBtn.addEventListener('click', () => {
+        isRaisingHand = !isRaisingHand;
+        raiseHandBtn.textContent = isRaisingHand ? '放下手' : '举手';
+        raiseHandBtn.classList.toggle('btn-success', isRaisingHand);
+        raiseHandBtn.classList.toggle('btn-warning', !isRaisingHand);
+        ws.send(JSON.stringify({ type: 'raiseHand', isRaising: isRaisingHand }));
+        console.log(`举手状态发送: ${isRaisingHand}`);
+      });
       
-      // 显示提示
-      addSystemMessage('您举手了，等待主持人回应');
-    });
+      // ... (此处可以添加其他功能的初始化代码, 如房间管理、删除等)
+
+      // ------------------ 点击外部关闭面板 ------------------
+      document.addEventListener('click', (e) => {
+        if (emojiPanel && !emojiPanel.contains(e.target) && !emojiBtn.contains(e.target)) {
+          emojiPanel.style.display = 'none';
+        }
+        if (imageUploadArea && !imageUploadArea.contains(e.target) && !imageBtn.contains(e.target)) {
+          imageUploadArea.style.display = 'none';
+        }
+      });
+
+      console.log("All room features initialized.");
+    }
   </script>
 </body>
 </html> 

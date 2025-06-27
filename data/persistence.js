@@ -11,7 +11,8 @@ const FILES = {
   ROOMS: path.join(DATA_DIR, 'rooms.json'),
   MESSAGES: path.join(DATA_DIR, 'messages.json'),
   SCORES: path.join(DATA_DIR, 'scores.json'),
-  SETTINGS: path.join(DATA_DIR, 'settings.json')
+  SETTINGS: path.join(DATA_DIR, 'settings.json'),
+  IMAGES: path.join(DATA_DIR, 'images.json')
 };
 
 // 确保数据目录存在
@@ -56,6 +57,21 @@ function writeData(file, data) {
     console.error(`Error writing data to ${file}:`, error);
     return false;
   }
+}
+
+// 新增：确保房间目录存在
+function ensureRoomDir(roomId) {
+  const roomDir = path.join(DATA_DIR, 'rooms', String(roomId));
+  if (!fs.existsSync(roomDir)) {
+    fs.mkdirSync(roomDir, { recursive: true });
+  }
+  return roomDir;
+}
+
+// 新增：获取房间下的文件路径
+function getRoomFile(roomId, type) {
+  const roomDir = ensureRoomDir(roomId);
+  return path.join(roomDir, `${type}.json`);
 }
 
 /**
@@ -116,54 +132,72 @@ const persistence = {
   
   // 房间数据操作
   rooms: {
-    // 获取所有房间
+    // 获取所有房间（只返回房间基本信息，不含子数据）
     getAll() {
-      return readData(FILES.ROOMS);
+      const roomsRoot = path.join(DATA_DIR, 'rooms');
+      if (!fs.existsSync(roomsRoot)) return [];
+      const roomIds = fs.readdirSync(roomsRoot).filter(f => fs.statSync(path.join(roomsRoot, f)).isDirectory());
+      return roomIds.map(roomId => {
+        const metaFile = getRoomFile(roomId, 'meta');
+        if (fs.existsSync(metaFile)) {
+          return { ...JSON.parse(fs.readFileSync(metaFile, 'utf8')), id: roomId };
+        } else {
+          return { id: roomId };
+        }
+      });
     },
-    
     // 通过ID获取房间
     getById(roomId) {
-      const rooms = this.getAll();
-      return rooms.find(room => room.id === roomId);
+      const metaFile = getRoomFile(roomId, 'meta');
+      if (fs.existsSync(metaFile)) {
+        return { ...JSON.parse(fs.readFileSync(metaFile, 'utf8')), id: roomId };
+      }
+      return null;
     },
-    
     // 通过邀请码获取房间
     getByInviteCode(inviteCode) {
       const rooms = this.getAll();
       return rooms.find(room => room.inviteCode === inviteCode);
     },
-    
     // 添加新房间
     add(room) {
-      const rooms = this.getAll();
-      rooms.push(room);
-      return writeData(FILES.ROOMS, rooms) ? room : null;
+      const roomId = room.id || String(Date.now());
+      ensureRoomDir(roomId);
+      const metaFile = getRoomFile(roomId, 'meta');
+      fs.writeFileSync(metaFile, JSON.stringify(room, null, 2), 'utf8');
+      return { ...room, id: roomId };
     },
-    
     // 更新房间
     update(roomId, updates) {
-      const rooms = this.getAll();
-      const index = rooms.findIndex(room => room.id === roomId);
-      
-      if (index !== -1) {
-        rooms[index] = { ...rooms[index], ...updates };
-        return writeData(FILES.ROOMS, rooms) ? rooms[index] : null;
+      const metaFile = getRoomFile(roomId, 'meta');
+      let data = {};
+      if (fs.existsSync(metaFile)) {
+        data = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
       }
-      
-      return null;
+      const newData = { ...data, ...updates };
+      fs.writeFileSync(metaFile, JSON.stringify(newData, null, 2), 'utf8');
+      return { ...newData, id: roomId };
     },
-    
     // 删除房间
     remove(roomId) {
-      const rooms = this.getAll();
-      const filteredRooms = rooms.filter(room => room.id !== roomId);
-      
-      if (filteredRooms.length < rooms.length) {
-        return writeData(FILES.ROOMS, filteredRooms);
+      const roomDir = path.join(DATA_DIR, 'rooms', String(roomId));
+      if (fs.existsSync(roomDir)) {
+        fs.rmSync(roomDir, { recursive: true, force: true });
+        return true;
       }
-      
       return false;
-    }
+    },
+    // ========== 房间子数据 ===========
+    getRoomData(roomId, type) {
+      const file = getRoomFile(roomId, type);
+      if (!fs.existsSync(file)) return [];
+      return JSON.parse(fs.readFileSync(file, 'utf8'));
+    },
+    setRoomData(roomId, type, data) {
+      const file = getRoomFile(roomId, type);
+      fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf8');
+      return true;
+    },
   },
   
   // 消息数据操作
@@ -274,6 +308,72 @@ const persistence = {
     }
   },
   
+  // 图片数据操作
+  images: {
+    // 获取所有图片
+    getAll() {
+      return readData(FILES.IMAGES);
+    },
+    
+    // 通过ID获取图片
+    getById(imageId) {
+      const images = this.getAll();
+      return images.find(img => img.id === imageId);
+    },
+    
+    // 通过房间ID获取图片
+    getByRoom(roomId) {
+      const images = this.getAll();
+      return images.filter(img => img.roomId === roomId);
+    },
+    
+    // 添加新图片
+    add(image) {
+      const images = this.getAll();
+      const newImage = {
+        ...image,
+        id: image.id || `img-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        uploadTime: image.uploadTime || new Date().toISOString()
+      };
+      images.push(newImage);
+      return writeData(FILES.IMAGES, images) ? newImage : null;
+    },
+    
+    // 更新图片
+    update(imageId, updates) {
+      const images = this.getAll();
+      const index = images.findIndex(img => img.id === imageId);
+      
+      if (index !== -1) {
+        images[index] = { 
+          ...images[index], 
+          ...updates,
+          updatedAt: new Date().toISOString()
+        };
+        return writeData(FILES.IMAGES, images) ? images[index] : null;
+      }
+      
+      return null;
+    },
+    
+    // 删除图片
+    remove(imageId) {
+      const images = this.getAll();
+      const filteredImages = images.filter(img => img.id !== imageId);
+      
+      if (filteredImages.length < images.length) {
+        return writeData(FILES.IMAGES, filteredImages);
+      }
+      
+      return false;
+    },
+    
+    // 保存图片数组
+    save(images) {
+      return writeData(FILES.IMAGES, images);
+    }
+  },
+  
   // 加载初始数据
   loadInitialData(store) {
     // 加载用户数据
@@ -309,6 +409,14 @@ const persistence = {
       writeData(FILES.SCORES, store.scores);
     }
     
+    // 加载图片数据
+    const images = this.images.getAll();
+    if (images.length > 0) {
+      store.images = images;
+    } else if (store.images.length > 0) {
+      writeData(FILES.IMAGES, store.images);
+    }
+    
     console.log('数据加载完成');
     return store;
   },
@@ -319,6 +427,7 @@ const persistence = {
     writeData(FILES.ROOMS, store.rooms);
     writeData(FILES.MESSAGES, store.messages);
     writeData(FILES.SCORES, store.scores);
+    writeData(FILES.IMAGES, store.images);
     console.log('数据已保存到文件系统');
     return true;
   },

@@ -1,9 +1,10 @@
 "use strict";
 const { v4: uuidv4 } = require("uuid");
 const { messages: defaults } = require("../data/messages");
+const store = require('../data/store');
 
 // 全局消息存储
-const messages = [];
+const messages = store.messages;
 module.exports.messages = messages;
 
 // 记录哪些 room 已经清空过
@@ -38,18 +39,21 @@ async function getHistory(room, limit = 50, offset = 0) {
 }
 
 // 保存消息
-async function saveMessage(room, { username, country, role, text }) {
+async function saveMessage(room, { username, country, role, text, userId }) {
   const entry = {
     id:        uuidv4(),
     room,
     username,
-    country,
-    role,
+    userId: userId || null, // 用户ID
+    country: country || '',
+    role: role || 'user',
     text,
     timestamp: new Date().toISOString(),
     revoked:   false
   };
+  
   messages.push(entry);
+  
   return entry;
 }
 
@@ -69,6 +73,7 @@ async function getMessageById(id) {
 // 按用户汇总：不仅返回数量，也返回消息列表
 async function getUserSummary(room) {
   const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
+  
   const byUser = {};
   roomMsgs.forEach(m => {
     if (!byUser[m.username]) {
@@ -77,6 +82,7 @@ async function getUserSummary(room) {
     byUser[m.username].count++;
     byUser[m.username].messages.push(m);
   });
+  
   return byUser;
 }
 

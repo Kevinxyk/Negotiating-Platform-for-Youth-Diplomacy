@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聊天室</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; height: 100vh; }
+        .chat-container { display: flex; height: 100vh; }
+        .chat-main { flex: 1; display: flex; flex-direction: column; }
+        .chat-header { background: white; padding: 20px; border-bottom: 1px solid #e1e5e9; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px; background: #f8f9fa; }
+        .message-item { display: flex; margin-bottom: 20px; align-items: flex-start; }
+        .message-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; }
+        .message-content { flex: 1; }
+        .message-header { display: flex; align-items: center; margin-bottom: 8px; }
+        .message-name { font-weight: bold; color: #1a1a1a; margin-right: 8px; }
+        .message-role { font-size: 12px; padding: 2px 6px; border-radius: 10px; color: white; }
+        .message-country { font-size: 12px; color: #666; margin-left: 8px; }
+        .message-time { font-size: 12px; color: #999; margin-left: auto; }
+        .message-bubble { background: white; padding: 12px 16px; border-radius: 18px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); max-width: 70%; word-wrap: break-word; }
+        .message-bubble.own { background: #0084ff; color: white; margin-left: auto; }
+        .message-bubble.revoked { background: #f1f3f4; color: #666; font-style: italic; }
+        .chat-input { background: white; padding: 20px; border-top: 1px solid #e1e5e9; }
+        .input-container { display: flex; gap: 10px; }
+        .message-input { flex: 1; padding: 12px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+        .send-btn { padding: 12px 24px; background: #0084ff; color: white; border: none; border-radius: 20px; cursor: pointer; }
+        .send-btn:hover { background: #0073e6; }
+        .user-sidebar { width: 300px; background: white; border-left: 1px solid #e1e5e9; display: flex; flex-direction: column; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #e1e5e9; background: #f8f9fa; }
+        .user-list { flex: 1; overflow-y: auto; padding: 10px; }
+        .user-item { display: flex; align-items: center; padding: 10px; border-radius: 8px; margin-bottom: 5px; }
+        .user-item:hover { background: #f8f9fa; }
+        .user-item.speaking { background: #e3f2fd; }
+        .user-item.raising-hand { background: #fff3e0; }
+        .user-item.muted { background: #ffebee; }
+        .user-avatar-small { width: 32px; height: 32px; border-radius: 50%; margin-right: 10px; }
+        .user-info-small { flex: 1; }
+        .user-name-small { font-weight: bold; font-size: 14px; }
+        .user-role-small { font-size: 12px; color: #666; }
+        .user-status-small { width: 8px; height: 8px; border-radius: 50%; margin-left: 8px; }
+        .status-online { background: #4caf50; }
+        .status-speaking { background: #2196f3; }
+        .status-raising-hand { background: #ff9800; }
+        .status-muted { background: #f44336; }
+        .emoji-picker { position: absolute; bottom: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px; display: none; }
+        .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+        .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 4px; }
+        .emoji-item:hover { background: #f0f0f0; }
+        .system-message { text-align: center; color: #666; font-style: italic; margin: 10px 0; }
+        .raise-hand-btn { padding: 8px 16px; background: #ff9800; color: white; border: none; border-radius: 16px; cursor: pointer; margin-right: 10px; }
+        .raise-hand-btn:hover { background: #f57c00; }
+        .raise-hand-btn.active { background: #e65100; }
+        .date-divider { text-align: center; color: #888; margin: 16px 0 8px 0; font-size: 14px; }
+        .quote-block { background: #f5f5f5; border-left: 3px solid #0084ff; padding: 6px 12px; margin-bottom: 4px; color: #555; font-size: 13px; }
+        .time-banner { text-align: center; color: #aaa; font-size: 12px; margin: 4px 0 2px 0; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-main">
+            <div class="chat-header">
+                <h2>外交谈判平台</h2>
+                <p>房间: <span id="roomName">test-room</span> | 在线: <span id="onlineCount">0</span>人</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- 消息将在这里动态生成 -->
+            </div>
+            
+            <div class="chat-input">
+                <div class="input-container">
+                    <button class="raise-hand-btn" id="raiseHandBtn" onclick="raiseHand()">举手</button>
+                    <button class="send-btn" id="emojiBtn" type="button" style="margin-right: 8px;">😀</button>
+                    <button class="send-btn" id="imageBtn" type="button" style="margin-right: 8px;">🖼️</button>
+                    <input type="file" id="imageInput" accept="image/*" style="display:none">
+                    <input type="text" class="message-input" id="messageInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+                    <button class="send-btn" onclick="sendMessage()">发送</button>
+                </div>
+                <!-- 表情面板 -->
+                <div id="emojiPanel" class="emoji-picker" style="display:none;position:absolute;z-index:1001;"></div>
+                <!-- 图片预览面板 -->
+                <div id="imagePreviewPanel" style="display:none;position:absolute;z-index:1002;background:#fff;padding:10px;border:1px solid #ddd;border-radius:8px;">
+                    <img id="previewImg" src="" style="max-width:200px;max-height:200px;display:block;margin-bottom:10px;">
+                    <button id="sendImageBtn" class="send-btn">发送图片</button>
+                    <button id="cancelImageBtn" class="send-btn" style="background:#ccc;color:#333;">取消</button>
+                </div>
+                <!-- 引用条 -->
+                <div id="quoteBar" style="display:none;background:#f5f5f5;border-left:3px solid #0084ff;padding:6px 12px;margin-bottom:4px;color:#555;font-size:13px;display:flex;align-items:center;">
+                    <span style="flex:1;"><b><span id="quoteFromName"></b></span><button id="cancelQuoteBtn" style="margin-left:12px;background:none;border:none;color:#888;cursor:pointer;">取消引用</button></div>
+            </div>
+        </div>
+        
+        <div class="user-sidebar">
+            <div class="sidebar-header">
+                <h3>在线用户</h3>
+                <p>共 <span id="userCount">0</span> 人</p>
+            </div>
+            <div class="user-list" id="userList">
+                <!-- 用户列表将在这里动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let ws = null;
+        let currentUser = null;
+        let users = [];
+        let messages = [];
+        let isRaisingHand = false;
+        let currentQuote = null;
+
+        // 初始化WebSocket连接
+        function initWebSocket() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录');
+                window.location.href = '/login';
+                return;
+            }
+
+            ws = new WebSocket(`ws://${window.location.host}`);
+            
+            ws.onopen = function() {
+                console.log('WebSocket连接已建立');
+                ws.send(JSON.stringify({
+                    type: 'join',
+                    token: token,
+                    room: 'test-room',
+                    country: '中国'
+                }));
+            };
+
+            ws.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                console.log('收到消息:', message);
+                
+                switch (message.type) {
+                    case 'chat':
+                        addMessage(message);
+                        break;
+                    case 'userList':
+                        users = message.users;
+                        renderUserList();
+                        updateOnlineCount();
+                        break;
+                    case 'system':
+                        addSystemMessage(message.message);
+                        break;
+                    case 'messageRevoked':
+                        handleMessageRevoked(message.messageId);
+                        break;
+                    case 'raiseHand':
+                        handleRaiseHand(message);
+                        break;
+                }
+            };
+
+            ws.onerror = function(error) {
+                console.error('WebSocket错误:', error);
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket连接已关闭');
+            };
+        }
+
+        // 添加消息到聊天界面
+        function addMessage(message) {
+            messages.push(message);
+            renderMessage(message);
+            scrollToBottom();
+        }
+
+        // 渲染单条消息（支持日期分隔条和引用按钮）
+        function renderMessage(message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const isOwnMessage = message.fromName === currentUser?.name;
+
+            // 日期分隔条逻辑
+            if (!renderMessage.lastDate) renderMessage.lastDate = null;
+            const msgDate = message.timestamp ? message.timestamp.slice(0, 10) : null;
+            if (msgDate && msgDate !== renderMessage.lastDate) {
+                // 插入日期分隔条
+                const week = ['日','一','二','三','四','五','六'];
+                const d = new Date(msgDate);
+                const weekStr = '星期' + week[d.getDay()];
+                const dividerHtml = `<div class=\"date-divider\" style=\"text-align:center;color:#888;margin:16px 0 8px 0;font-size:14px;\">${msgDate} ${weekStr}</div>`;
+                chatMessages.insertAdjacentHTML('beforeend', dividerHtml);
+                renderMessage.lastDate = msgDate;
+            }
+
+            // 引用内容渲染
+            let quoteHtml = '';
+            if (message.quote) {
+                quoteHtml = `<div class=\"quote-block\" style=\"background:#f5f5f5;border-left:3px solid #0084ff;padding:6px 12px;margin-bottom:4px;color:#555;font-size:13px;\">${message.quote.fromName ? `<b>${message.quote.fromName}：</b>` : ''}${message.quote.content}</div>`;
+            }
+
+            // 判断是否简洁模式
+            const chatMessagesDiv = document.getElementById('chatMessages');
+            const isSimpleMode = chatMessagesDiv.classList.contains('simple-mode');
+            let messageHtml = '';
+            if (isSimpleMode) {
+                // 简洁模式：名字在上，内容在下
+                messageHtml = `
+                <div class=\"message-item simple-mode ${isOwnMessage ? 'own' : ''}\">
+                    <div class=\"message-sender\" style=\"font-weight:bold;color:#333;margin-bottom:2px;\">${message.fromName}</div>
+                    ${quoteHtml}
+                    <div class=\"message-bubble ${message.revoked ? 'revoked' : ''} ${isOwnMessage ? 'own' : ''}\">
+                        ${message.revoked ? '此消息已被撤回' : message.content}
+                    </div>
+                </div>
+                `;
+            } else {
+                // 正常模式：时间横幅在消息上方
+                const timeBanner = `<div class=\"time-banner\" style=\"text-align:center;color:#aaa;font-size:12px;margin:4px 0 2px 0;\">${formatTime(message.timestamp)}</div>`;
+                messageHtml = `
+                ${timeBanner}
+                <div class=\"message-item ${isOwnMessage ? 'own' : ''}\">
+                    <img src=\"${getAvatarUrl(message.fromName)}\" alt=\"头像\" class=\"message-avatar\">
+                    <div class=\"message-content\">
+                        <div class=\"message-header\">
+                            <span class=\"message-name\">${message.fromName}</span>
+                            <span class=\"message-role role-${message.role}\">${getRoleName(message.role)}</span>
+                            <span class=\"message-country\">${message.country}</span>
+                            <button class=\"quote-btn\" data-msgid=\"${message.id}\" style=\"margin-left:8px;font-size:12px;color:#0084ff;background:none;border:none;cursor:pointer;\">引用</button>
+                        </div>
+                        ${quoteHtml}
+                        <div class=\"message-bubble ${message.revoked ? 'revoked' : ''} ${isOwnMessage ? 'own' : ''}\">
+                            ${message.revoked ? '此消息已被撤回' : message.content}
+                        </div>
+                    </div>
+                </div>
+                `;
+            }
+            chatMessages.insertAdjacentHTML('beforeend', messageHtml);
+        }
+
+        // 添加系统消息
+        function addSystemMessage(text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const systemHtml = `<div class="system-message">${text}</div>`;
+            chatMessages.insertAdjacentHTML('beforeend', systemHtml);
+            scrollToBottom();
+        }
+
+        // 处理消息撤回
+        function handleMessageRevoked(messageId) {
+            const messageElements = document.querySelectorAll('.message-item');
+            messageElements.forEach(element => {
+                const messageBubble = element.querySelector('.message-bubble');
+                if (messageBubble && !messageBubble.classList.contains('revoked')) {
+                    // 这里可以通过消息ID来精确定位，简化处理
+                    messageBubble.classList.add('revoked');
+                    messageBubble.textContent = '此消息已被撤回';
+                }
+            });
+        }
+
+        // 处理举手
+        function handleRaiseHand(message) {
+            addSystemMessage(`${message.from} 举手了`);
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const content = input.value.trim();
+            if (!content && !currentQuote) return;
+            if (!ws) {
+                alert('连接已断开，请刷新页面');
+                return;
+            }
+            ws.send(JSON.stringify({
+                type: 'chat',
+                content: content,
+                quote: currentQuote
+            }));
+            input.value = '';
+            currentQuote = null;
+            hideQuoteBar();
+        }
+
+        // 举手功能
+        function raiseHand() {
+            if (!ws) return;
+            
+            isRaisingHand = !isRaisingHand;
+            const btn = document.getElementById('raiseHandBtn');
+            
+            if (isRaisingHand) {
+                ws.send(JSON.stringify({ type: 'raiseHand' }));
+                btn.classList.add('active');
+                btn.textContent = '取消举手';
+            } else {
+                btn.classList.remove('active');
+                btn.textContent = '举手';
+            }
+        }
+
+        // 处理按键事件
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // 渲染用户列表
+        function renderUserList() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = users.map(user => `
+                <div class="user-item ${user.isSpeaking ? 'speaking' : ''} ${user.isRaisingHand ? 'raising-hand' : ''} ${!user.canSpeak ? 'muted' : ''}">
+                    <img src="${getAvatarUrl(user.name)}" alt="头像" class="user-avatar-small">
+                    <div class="user-info-small">
+                        <div class="user-name-small">${user.name}</div>
+                        <div class="user-role-small">${getRoleName(user.role)} • ${user.country}</div>
+                    </div>
+                    <div class="user-status-small ${getStatusClass(user)}"></div>
+                </div>
+            `).join('');
+        }
+
+        // 获取状态样式类
+        function getStatusClass(user) {
+            if (!user.canSpeak) return 'status-muted';
+            if (user.isSpeaking) return 'status-speaking';
+            if (user.isRaisingHand) return 'status-raising-hand';
+            return 'status-online';
+        }
+
+        // 更新在线人数
+        function updateOnlineCount() {
+            document.getElementById('onlineCount').textContent = users.length;
+            document.getElementById('userCount').textContent = users.length;
+        }
+
+        // 获取头像URL
+        function getAvatarUrl(username) {
+            // 统一的头像生成函数
+            if (!username) return `https://ui-avatars.com/api/?name=U&background=007bff&color=fff&size=40`;
+            return `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=007bff&color=fff&size=40`;
+        }
+
+        // 获取角色名称
+        function getRoleName(role) {
+            const roleNames = {
+                sys: '系统管理员',
+                admin: '管理员',
+                host: '主持人',
+                judge: '评委',
+                observer: '观察员',
+                delegate: '代表',
+                student: '学生'
+            };
+            return roleNames[role] || role;
+        }
+
+        // 格式化时间
+        function formatTime(timeString) {
+            const date = new Date(timeString);
+            return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // 滚动到底部
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initWebSocket();
+            
+            // 获取当前用户信息
+            const userInfo = localStorage.getItem('userInfo');
+            if (userInfo) {
+                currentUser = JSON.parse(userInfo);
+            }
+        });
+
+        // ========== 表情和图片按钮功能 ==========
+        const emojiBtn = document.getElementById('emojiBtn');
+        const emojiPanel = document.getElementById('emojiPanel');
+        const messageInput = document.getElementById('messageInput');
+        const emojis = [
+            '😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐','😑','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','👻','👽','🤖','💩','😈','👿','👹','👺','🤡','👻','💀','☠️','👽'
+        ];
+        emojiBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            emojiPanel.innerHTML = '<div class="emoji-grid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:5px;max-width:320px;">' +
+                emojis.map(emoji => `<span class='emoji-item' style='font-size:22px;cursor:pointer;'>${emoji}</span>`).join('') + '</div>';
+            emojiPanel.style.display = emojiPanel.style.display === 'block' ? 'none' : 'block';
+            emojiPanel.style.left = emojiBtn.offsetLeft + 'px';
+            emojiPanel.style.bottom = '60px';
+        });
+        emojiPanel.addEventListener('click', function(e) {
+            if (e.target.classList.contains('emoji-item')) {
+                const emoji = e.target.textContent;
+                const cursorPos = messageInput.selectionStart;
+                const textBefore = messageInput.value.substring(0, cursorPos);
+                const textAfter = messageInput.value.substring(cursorPos);
+                messageInput.value = textBefore + emoji + textAfter;
+                messageInput.focus();
+                messageInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
+                emojiPanel.style.display = 'none';
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!emojiPanel.contains(e.target) && e.target !== emojiBtn) {
+                emojiPanel.style.display = 'none';
+            }
+        });
+        // ========== 图片按钮功能 ==========
+        const imageBtn = document.getElementById('imageBtn');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreviewPanel = document.getElementById('imagePreviewPanel');
+        const previewImg = document.getElementById('previewImg');
+        const sendImageBtn = document.getElementById('sendImageBtn');
+        const cancelImageBtn = document.getElementById('cancelImageBtn');
+        let selectedImageFile = null;
+        imageBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            imageInput.value = '';
+            imageInput.click();
+        });
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                selectedImageFile = file;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target.result;
+                    imagePreviewPanel.style.display = 'block';
+                    imagePreviewPanel.style.left = imageBtn.offsetLeft + 'px';
+                    imagePreviewPanel.style.bottom = '60px';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        cancelImageBtn.addEventListener('click', () => {
+            imagePreviewPanel.style.display = 'none';
+            selectedImageFile = null;
+            imageInput.value = '';
+        });
+        sendImageBtn.addEventListener('click', async () => {
+            if (!selectedImageFile) return;
+            try {
+                const formData = new FormData();
+                formData.append('image', selectedImageFile);
+                formData.append('roomId', 'test-room');
+                const response = await fetch('/api/images/upload', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('token') },
+                    body: formData
+                });
+                if (!response.ok) throw new Error('图片上传失败');
+                const result = await response.json();
+                // 发送图片消息
+                ws.send(JSON.stringify({
+                    type: 'image',
+                    content: {
+                        url: result.imageUrl,
+                        imageId: result.image.id,
+                        alt: result.image.originalname || '图片'
+                    }
+                }));
+                imagePreviewPanel.style.display = 'none';
+                selectedImageFile = null;
+                imageInput.value = '';
+            } catch (err) {
+                alert('图片上传失败: ' + err.message);
+            }
+        });
+        document.addEventListener('click', function(e) {
+            if (!imagePreviewPanel.contains(e.target) && e.target !== imageBtn) {
+                imagePreviewPanel.style.display = 'none';
+            }
+        });
+
+        // ========== 引用对话功能 ==========
+        // 监听引用按钮点击
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('quote-btn')) {
+                const msgId = e.target.getAttribute('data-msgid');
+                const msg = messages.find(m => m.id === msgId);
+                if (msg) {
+                    currentQuote = {
+                        id: msg.id,
+                        fromName: msg.fromName,
+                        content: (msg.content && typeof msg.content === 'string') ? msg.content : '[图片]' // 简化图片引用
+                    };
+                    showQuoteBar();
+                }
+            }
+            // 关闭引用条
+            if (e.target.id === 'cancelQuoteBtn') {
+                currentQuote = null;
+                hideQuoteBar();
+            }
+        });
+        // 显示引用条
+        function showQuoteBar() {
+            let bar = document.getElementById('quoteBar');
+            if (!bar) {
+                bar = document.createElement('div');
+                bar.id = 'quoteBar';
+                bar.style = 'background:#f5f5f5;border-left:3px solid #0084ff;padding:6px 12px;margin-bottom:4px;color:#555;font-size:13px;display:flex;align-items:center;';
+                document.querySelector('.chat-input .input-container').insertAdjacentElement('beforebegin', bar);
+            }
+            bar.innerHTML = `<span style='flex:1;'><b>${currentQuote.fromName}：</b>${currentQuote.content}</span><button id='cancelQuoteBtn' style='margin-left:12px;background:none;border:none;color:#888;cursor:pointer;'>取消引用</button>`;
+            bar.style.display = 'flex';
+        }
+        function hideQuoteBar() {
+            const bar = document.getElementById('quoteBar');
+            if (bar) bar.style.display = 'none';
+        }
+
+        // 渲染图片消息
+        const oldRenderMessage = renderMessage;
+        renderMessage = function(message) {
+            // 判断是否图片消息
+            if (message.type === 'image' && message.content && message.content.url) {
+                message.content = `<img src='${message.content.url}' alt='${message.content.alt || '图片'}' style='max-width:220px;max-height:220px;border-radius:8px;'>`;
+            }
+            oldRenderMessage(message);
+        }
+    </script>
+</body>
+</html> 

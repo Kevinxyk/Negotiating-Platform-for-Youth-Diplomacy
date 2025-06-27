@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "test": "jest"
+    "test": "jest",
+    "test:multi-user": "node scripts/multi-user-test.js",
+    "test:all": "npm test && npm run test:multi-user"
   },
   "repository": {
     "type": "git",

@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多用户测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .controls {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .control-group label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        input, select, button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        button:hover {
+            background: #2980b9;
+        }
+        
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 10px 20px;
+            background: #ecf0f1;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+        }
+        
+        .users-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .user-panel {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .user-header {
+            padding: 10px 15px;
+            background: #34495e;
+            color: white;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .user-status {
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background: #27ae60;
+        }
+        
+        .user-status.disconnected {
+            background: #e74c3c;
+        }
+        
+        .user-messages {
+            height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            font-size: 12px;
+        }
+        
+        .message {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-radius: 4px;
+            background: white;
+            border-left: 3px solid #3498db;
+        }
+        
+        .message.sent {
+            border-left-color: #27ae60;
+        }
+        
+        .message.received {
+            border-left-color: #e74c3c;
+        }
+        
+        .message.system {
+            border-left-color: #f39c12;
+            font-style: italic;
+        }
+        
+        .user-input {
+            padding: 10px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 5px;
+        }
+        
+        .user-input input {
+            flex: 1;
+        }
+        
+        .user-input button {
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+        
+        .stats {
+            padding: 15px 20px;
+            background: #ecf0f1;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>多用户测试页面</h1>
+            <p>模拟多个用户同时连接和交互</p>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label>服务器地址</label>
+                <input type="text" id="serverUrl" value="ws://localhost:3000" placeholder="ws://localhost:3000">
+            </div>
+            
+            <div class="control-group">
+                <label>房间ID</label>
+                <input type="text" id="roomId" value="test-room" placeholder="test-room">
+            </div>
+            
+            <div class="control-group">
+                <label>用户数量</label>
+                <select id="userCount">
+                    <option value="2">2个用户</option>
+                    <option value="3">3个用户</option>
+                    <option value="5" selected>5个用户</option>
+                    <option value="10">10个用户</option>
+                    <option value="20">20个用户</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>自动发送消息</label>
+                <select id="autoMessage">
+                    <option value="true" selected>开启</option>
+                    <option value="false">关闭</option>
+                </select>
+            </div>
+            
+            <button id="startBtn" onclick="startTest()">开始测试</button>
+            <button id="stopBtn" onclick="stopTest()" disabled>停止测试</button>
+            <button id="clearBtn" onclick="clearLogs()">清空日志</button>
+        </div>
+        
+        <div class="status" id="status">
+            状态: 未连接
+        </div>
+        
+        <div class="users-container" id="usersContainer">
+            <!-- 用户面板将在这里动态生成 -->
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">总用户数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="connectedUsers">0</div>
+                <div class="stat-label">已连接</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="totalMessages">0</div>
+                <div class="stat-label">总消息数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="messageRate">0</div>
+                <div class="stat-label">消息/秒</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 用户配置
+        const USER_CONFIGS = [
+            { username: 'delegate1', role: 'delegate', country: '中国', color: '#e74c3c' },
+            { username: 'delegate2', role: 'delegate', country: '美国', color: '#3498db' },
+            { username: 'delegate3', role: 'delegate', country: '俄罗斯', color: '#9b59b6' },
+            { username: 'delegate4', role: 'delegate', country: '英国', color: '#f39c12' },
+            { username: 'delegate5', role: 'delegate', country: '法国', color: '#1abc9c' },
+            { username: 'judge1', role: 'judge', country: '联合国', color: '#2c3e50' },
+            { username: 'judge2', role: 'judge', country: '联合国', color: '#34495e' },
+            { username: 'host1', role: 'host', country: '联合国', color: '#e67e22' },
+            { username: 'observer1', role: 'observer', country: '观察员', color: '#95a5a6' },
+            { username: 'admin1', role: 'admin', country: '管理员', color: '#c0392b' }
+        ];
+
+        let connections = [];
+        let messageIntervals = [];
+        let isTestRunning = false;
+        let messageCount = 0;
+        let startTime = Date.now();
+
+        // 生成测试用的JWT token
+        function generateTestToken(userId, role) {
+            // 简单的token生成，实际项目中应该使用真实的JWT
+            return btoa(JSON.stringify({ userId, role, username: userId }));
+        }
+
+        // 创建用户面板
+        function createUserPanel(userConfig, index) {
+            const panel = document.createElement('div');
+            panel.className = 'user-panel';
+            panel.id = `user-${index}`;
+            
+            panel.innerHTML = `
+                <div class="user-header">
+                    <span>${userConfig.username} (${userConfig.country})</span>
+                    <span class="user-status disconnected" id="status-${index}">未连接</span>
+                </div>
+                <div class="user-messages" id="messages-${index}"></div>
+                <div class="user-input">
+                    <input type="text" id="input-${index}" placeholder="输入消息..." onkeypress="handleUserKeyPress(event, ${index})">
+                    <button onclick="sendUserMessage(${index})">发送</button>
+                    <button onclick="raiseHand(${index})">举手</button>
+                </div>
+            `;
+            
+            return panel;
+        }
+
+        // 添加消息到用户面板
+        function addUserMessage(userIndex, message, type = 'received') {
+            const messagesContainer = document.getElementById(`messages-${userIndex}`);
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            messageDiv.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            if (type === 'sent') {
+                messageCount++;
+                updateStats();
+            }
+        }
+
+        // 更新用户状态
+        function updateUserStatus(userIndex, status, isConnected = false) {
+            const statusElement = document.getElementById(`status-${userIndex}`);
+            statusElement.textContent = status;
+            statusElement.className = `user-status ${isConnected ? '' : 'disconnected'}`;
+        }
+
+        // 创建WebSocket连接
+        function createConnection(userConfig, userIndex) {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const roomId = document.getElementById('roomId').value;
+            
+            const ws = new WebSocket(serverUrl);
+            
+            ws.onopen = function() {
+                console.log(`用户 ${userConfig.username} 连接成功`);
+                updateUserStatus(userIndex, '已连接', true);
+                
+                // 发送加入房间消息
+                ws.send(JSON.stringify({
+                    type: 'join',
+                    token: generateTestToken(userConfig.username, userConfig.role),
+                    room: roomId,
+                    country: userConfig.country
+                }));
+                
+                addUserMessage(userIndex, '连接成功', 'system');
+            };
+            
+            ws.onmessage = function(event) {
+                try {
+                    const message = JSON.parse(event.data);
+                    console.log(`用户 ${userConfig.username} 收到消息:`, message);
+                    
+                    switch (message.type) {
+                        case 'system':
+                            addUserMessage(userIndex, `系统: ${message.message}`, 'system');
+                            break;
+                        case 'chat':
+                            addUserMessage(userIndex, `${message.fromName}: ${message.content}`, 'received');
+                            break;
+                        case 'userList':
+                            addUserMessage(userIndex, `在线用户: ${message.users.length}人`, 'system');
+                            break;
+                        default:
+                            addUserMessage(userIndex, `收到消息: ${message.type}`, 'received');
+                    }
+                } catch (error) {
+                    addUserMessage(userIndex, `消息解析错误: ${error.message}`, 'system');
+                }
+            };
+            
+            ws.onerror = function(error) {
+                console.error(`用户 ${userConfig.username} 连接错误:`, error);
+                updateUserStatus(userIndex, '连接错误', false);
+                addUserMessage(userIndex, '连接错误', 'system');
+            };
+            
+            ws.onclose = function() {
+                console.log(`用户 ${userConfig.username} 连接关闭`);
+                updateUserStatus(userIndex, '已断开', false);
+                addUserMessage(userIndex, '连接已关闭', 'system');
+            };
+            
+            return ws;
+        }
+
+        // 发送用户消息
+        function sendUserMessage(userIndex) {
+            const input = document.getElementById(`input-${userIndex}`);
+            const message = input.value.trim();
+            
+            if (message && connections[userIndex] && connections[userIndex].readyState === WebSocket.OPEN) {
+                connections[userIndex].send(JSON.stringify({
+                    type: 'chat',
+                    content: message
+                }));
+                
+                addUserMessage(userIndex, `我: ${message}`, 'sent');
+                input.value = '';
+            }
+        }
+
+        // 处理用户按键
+        function handleUserKeyPress(event, userIndex) {
+            if (event.key === 'Enter') {
+                sendUserMessage(userIndex);
+            }
+        }
+
+        // 举手功能
+        function raiseHand(userIndex) {
+            if (connections[userIndex] && connections[userIndex].readyState === WebSocket.OPEN) {
+                connections[userIndex].send(JSON.stringify({
+                    type: 'raiseHand'
+                }));
+                addUserMessage(userIndex, '举手', 'sent');
+            }
+        }
+
+        // 自动发送消息
+        function startAutoMessages() {
+            const autoMessage = document.getElementById('autoMessage').value === 'true';
+            if (!autoMessage) return;
+            
+            const messages = [
+                '大家好，我是代表',
+                '我认为我们应该讨论这个重要议题',
+                '我同意刚才的观点',
+                '让我们继续深入讨论',
+                '这是一个很好的建议',
+                '我们需要更多的信息',
+                '我建议我们投票决定',
+                '时间不多了，我们需要加快进度'
+            ];
+            
+            connections.forEach((ws, index) => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    const interval = setInterval(() => {
+                        if (ws.readyState === WebSocket.OPEN) {
+                            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                            const userConfig = USER_CONFIGS[index];
+                            const fullMessage = `${randomMessage} - ${userConfig.country}`;
+                            
+                            ws.send(JSON.stringify({
+                                type: 'chat',
+                                content: fullMessage
+                            }));
+                            
+                            addUserMessage(index, `我: ${fullMessage}`, 'sent');
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 3000 + Math.random() * 4000); // 3-7秒随机间隔
+                    
+                    messageIntervals.push(interval);
+                }
+            });
+        }
+
+        // 开始测试
+        function startTest() {
+            if (isTestRunning) return;
+            
+            const userCount = parseInt(document.getElementById('userCount').value);
+            const usersContainer = document.getElementById('usersContainer');
+            
+            // 清空容器
+            usersContainer.innerHTML = '';
+            
+            // 创建用户面板
+            for (let i = 0; i < userCount; i++) {
+                const userConfig = USER_CONFIGS[i];
+                const panel = createUserPanel(userConfig, i);
+                usersContainer.appendChild(panel);
+            }
+            
+            // 创建连接
+            connections = [];
+            for (let i = 0; i < userCount; i++) {
+                const userConfig = USER_CONFIGS[i];
+                const ws = createConnection(userConfig, i);
+                connections.push(ws);
+            }
+            
+            // 等待连接建立后开始自动发送消息
+            setTimeout(() => {
+                startAutoMessages();
+            }, 2000);
+            
+            isTestRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('status').textContent = '状态: 测试运行中';
+            
+            startTime = Date.now();
+            updateStats();
+        }
+
+        // 停止测试
+        function stopTest() {
+            if (!isTestRunning) return;
+            
+            // 停止自动发送消息
+            messageIntervals.forEach(interval => clearInterval(interval));
+            messageIntervals = [];
+            
+            // 关闭所有连接
+            connections.forEach(ws => {
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.close();
+                }
+            });
+            
+            connections = [];
+            isTestRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('status').textContent = '状态: 测试已停止';
+        }
+
+        // 清空日志
+        function clearLogs() {
+            const userCount = parseInt(document.getElementById('userCount').value);
+            for (let i = 0; i < userCount; i++) {
+                const messagesContainer = document.getElementById(`messages-${i}`);
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '';
+                }
+            }
+            messageCount = 0;
+            updateStats();
+        }
+
+        // 更新统计信息
+        function updateStats() {
+            const connectedCount = connections.filter(ws => ws.readyState === WebSocket.OPEN).length;
+            const elapsed = (Date.now() - startTime) / 1000;
+            const rate = elapsed > 0 ? (messageCount / elapsed).toFixed(1) : '0';
+            
+            document.getElementById('totalUsers').textContent = connections.length;
+            document.getElementById('connectedUsers').textContent = connectedCount;
+            document.getElementById('totalMessages').textContent = messageCount;
+            document.getElementById('messageRate').textContent = rate;
+        }
+
+        // 定期更新统计信息
+        setInterval(updateStats, 1000);
+
+        // 页面卸载时清理
+        window.addEventListener('beforeunload', () => {
+            stopTest();
+        });
+    </script>
+</body>
+</html> 

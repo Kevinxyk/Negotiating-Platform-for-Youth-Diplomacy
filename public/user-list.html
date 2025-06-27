@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户列表</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .user-details {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .user-status {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-speaking {
+            background: #28a745;
+            color: white;
+        }
+
+        .status-raising-hand {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .status-muted {
+            background: #dc3545;
+            color: white;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            color: white;
+        }
+
+        button.success {
+            background: #28a745;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .role-sys {
+            background: #dc3545;
+            color: white;
+        }
+
+        .role-admin {
+            background: #fd7e14;
+            color: white;
+        }
+
+        .role-host {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .role-judge {
+            background: #20c997;
+            color: white;
+        }
+
+        .role-observer {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .role-delegate {
+            background: #28a745;
+            color: white;
+        }
+
+        .role-student {
+            background: #6c757d;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>用户列表管理</h1>
+            <p>实时监控和管理房间用户状态</p>
+        </div>
+        <div class="controls">
+            <select id="sortBy">
+                <option value="role">按角色</option>
+                <option value="name">按姓名</option>
+                <option value="country">按国家</option>
+                <option value="score">按评分</option>
+            </select>
+            <select id="sortOrder">
+                <option value="asc">升序</option>
+                <option value="desc">降序</option>
+            </select>
+            <button onclick="refreshUserList()">刷新列表</button>
+        </div>
+        <div class="user-list" id="userList"></div>
+    </div>
+
+    <script>
+        let ws = null;
+        let users = [];
+
+        function initWebSocket() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('请先登录');
+                return;
+            }
+
+            ws = new WebSocket(`ws://${window.location.host}`);
+            
+            ws.onopen = function() {
+                ws.send(JSON.stringify({
+                    type: 'join',
+                    token: token,
+                    room: 'test-room',
+                    country: '中国'
+                }));
+            };
+
+            ws.onmessage = function(event) {
+                const message = JSON.parse(event.data);
+                if (message.type === 'userList') {
+                    users = message.users;
+                    renderUserList();
+                }
+            };
+        }
+
+        function renderUserList() {
+            const userList = document.getElementById('userList');
+            const sortBy = document.getElementById('sortBy').value;
+            const sortOrder = document.getElementById('sortOrder').value;
+
+            const sortedUsers = [...users].sort((a, b) => {
+                let comparison = 0;
+                if (sortBy === 'role') {
+                    const roleOrder = { sys: 1, admin: 2, host: 3, judge: 4, observer: 5, delegate: 6, student: 7 };
+                    comparison = (roleOrder[a.role] || 999) - (roleOrder[b.role] || 999);
+                } else if (sortBy === 'name') {
+                    comparison = a.name.localeCompare(b.name);
+                } else if (sortBy === 'country') {
+                    comparison = a.country.localeCompare(b.country);
+                } else if (sortBy === 'score') {
+                    comparison = a.score - b.score;
+                }
+                return sortOrder === 'asc' ? comparison : -comparison;
+            });
+
+            userList.innerHTML = sortedUsers.map(user => `
+                <div class="user-item">
+                    <div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>
+                    <div class="user-info">
+                        <div class="user-name">
+                            <span class="role-badge role-${user.role}">${getRoleName(user.role)}</span>
+                            ${user.name}
+                        </div>
+                        <div class="user-details">${user.country} • 评分: ${user.score || 0}</div>
+                        <div class="user-status">
+                            ${user.isSpeaking ? '<span class="status-badge status-speaking">正在发言</span>' : ''}
+                            ${user.isRaisingHand ? '<span class="status-badge status-raising-hand">举手</span>' : ''}
+                            ${!user.canSpeak ? '<span class="status-badge status-muted">禁言</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="user-actions">
+                        <button onclick="toggleUserSpeak('${user.id}')" class="${user.canSpeak ? 'danger' : 'success'}">
+                            ${user.canSpeak ? '禁言' : '允许发言'}
+                        </button>
+                        <button onclick="setUserScore('${user.id}')" class="success">评分</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getRoleName(role) {
+            const roleNames = {
+                sys: '系统管理员', admin: '管理员', host: '主持人', judge: '评委',
+                observer: '观察员', delegate: '代表', student: '学生'
+            };
+            return roleNames[role] || role;
+        }
+
+        function toggleUserSpeak(userId) {
+            if (!ws) return;
+            ws.send(JSON.stringify({
+                type: 'updateUserStatus',
+                targetUserId: userId,
+                action: 'toggleSpeak'
+            }));
+        }
+
+        function setUserScore(userId) {
+            const score = prompt('请输入评分 (0-100):');
+            if (score && !isNaN(score) && score >= 0 && score <= 100) {
+                ws.send(JSON.stringify({
+                    type: 'updateUserStatus',
+                    targetUserId: userId,
+                    action: 'setScore',
+                    score: parseInt(score)
+                }));
+            }
+        }
+
+        function refreshUserList() {
+            if (ws) ws.send(JSON.stringify({ type: 'ping' }));
+        }
+
+        document.getElementById('sortBy').addEventListener('change', renderUserList);
+        document.getElementById('sortOrder').addEventListener('change', renderUserList);
+        document.addEventListener('DOMContentLoaded', initWebSocket);
+    </script>
+</body>
+</html> 
