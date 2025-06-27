@@ -875,46 +875,16 @@
           console.log('WebSocket connection closed');
           // 处理连接关闭后的逻辑
         };
-        
-        // 发送聊天消息
-        document.getElementById('sendBtn').addEventListener('click', () => {
-          sendChatMessage();
-        });
-        
-        document.getElementById('messageInput').addEventListener('keydown', e => {
-          const sendMode = document.querySelector('input[name="sendMode"]:checked').value;
-          if ((sendMode === 'enter' && e.key === 'Enter' && !e.shiftKey) ||
-              (sendMode === 'ctrlEnter' && e.key === 'Enter' && e.ctrlKey)) {
-            e.preventDefault();
-            sendChatMessage();
-          }
-        });
-        
-        let editingMessage = null;
 
-        // 视图切换功能
-        const viewSwitch = document.getElementById('viewSwitch');
-        const chatMessages = document.getElementById('chatMessages');
-        
-        // 从localStorage读取用户偏好
-        const isSimpleMode = localStorage.getItem('simpleMode') === 'true';
-        viewSwitch.checked = isSimpleMode;
-        
-        function toggleView() {
-          if (viewSwitch.checked) {
-            chatMessages.classList.add('simple-mode');
-            localStorage.setItem('simpleMode', 'true');
-          } else {
-            chatMessages.classList.remove('simple-mode');
-            localStorage.setItem('simpleMode', 'false');
-          }
+        // 发送聊天消息函数供各事件处理调用
+        function sendChatMessage() {
+          const messageInput = document.getElementById('messageInput');
+          const message = messageInput.value.trim();
+          if (!message) return;
+          ws.send(JSON.stringify({ type: 'chat', content: message }));
+          messageInput.value = '';
         }
         
-        // 初始化视图
-        toggleView();
-        
-        // 监听开关变化
-        viewSwitch.addEventListener('change', toggleView);
 
         // 测试图标加载
         function testIcons() {
@@ -1519,13 +1489,6 @@
           sendChatMessage();
         }
       });
-      function sendChatMessage() {
-        const messageInput = document.getElementById('messageInput');
-        const message = messageInput.value.trim();
-        if (!message) return;
-        ws.send(JSON.stringify({ type: 'chat', content: message }));
-        messageInput.value = '';
-      }
 
       // ------------------ 视图切换 ------------------
       const viewSwitch = document.getElementById('viewSwitch');
