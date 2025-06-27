@@ -876,14 +876,9 @@
           // 处理连接关闭后的逻辑
         };
 
-        // 发送聊天消息函数供各事件处理调用
-        function sendChatMessage() {
-          const messageInput = document.getElementById('messageInput');
-          const message = messageInput.value.trim();
-          if (!message) return;
-          ws.send(JSON.stringify({ type: 'chat', content: message }));
-          messageInput.value = '';
-        }
+        // 发送聊天消息函数供各事件处理调用(将在初始化时绑定)
+        // 移至 initializeRoomFeatures 内部定义以避免引用错误
+
         
 
         // 测试图标加载
@@ -1478,6 +1473,14 @@
      */
     function initializeRoomFeatures(roomId, user, ws) {
       console.log("Initializing all room features...");
+
+      function sendChatMessage() {
+        const messageInput = document.getElementById('messageInput');
+        const message = messageInput.value.trim();
+        if (!message) return;
+        ws.send(JSON.stringify({ type: 'chat', content: message }));
+        messageInput.value = '';
+      }
 
       // ------------------ 发送消息逻辑 ------------------
       document.getElementById('sendBtn').addEventListener('click', sendChatMessage);
