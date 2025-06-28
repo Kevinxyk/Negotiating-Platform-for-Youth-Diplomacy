@@ -1,6 +1,7 @@
 "use strict";
 const bcrypt = require('bcryptjs');
 const userService = require('../services/userService');
+const userProfileService = require('../services/userProfileService');
 const { generateToken } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -32,6 +33,13 @@ async function register(req, res) {
     const user = await userService.addUser({
       username,
       passwordHash,
+      role
+    });
+
+    // 创建用户档案
+    userProfileService.createUser({
+      userId: user.userId,
+      username,
       role
     });
 
