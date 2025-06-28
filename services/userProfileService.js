@@ -19,42 +19,40 @@ class UserProfileService {
 
     // 初始化用户文件
     initializeUsersFile() {
-        if (!fs.existsSync(this.usersFile)) {
-            const defaultUsers = [
-                {
-                    userId: uuidv4(),
-                    username: 'admin',
-                    role: 'admin',
-                    email: 'admin@example.com',
-                    country: '中国',
-                    avatar: null,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    userId: uuidv4(),
-                    username: 'host',
-                    role: 'host',
-                    email: 'host@example.com',
-                    country: '中国',
-                    avatar: null,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                },
-                {
-                    userId: uuidv4(),
-                    username: 'student',
-                    role: 'student',
-                    email: 'student@example.com',
-                    country: '中国',
-                    avatar: null,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
-            ];
-            
-            fs.writeFileSync(this.usersFile, JSON.stringify(defaultUsers, null, 2));
+        const credFile = path.join(__dirname, '../data_files/users.json');
+        let profiles = [];
+
+        if (fs.existsSync(this.usersFile)) {
+            try {
+                profiles = JSON.parse(fs.readFileSync(this.usersFile, 'utf8'));
+            } catch (err) {
+                console.error('读取用户档案失败:', err);
+            }
         }
+
+        if (fs.existsSync(credFile)) {
+            try {
+                const creds = JSON.parse(fs.readFileSync(credFile, 'utf8'));
+                creds.forEach(u => {
+                    if (!profiles.find(p => p.userId === u.userId)) {
+                        profiles.push({
+                            userId: u.userId,
+                            username: u.username,
+                            role: u.role,
+                            email: `${u.username}@example.com`,
+                            country: '中国',
+                            avatar: null,
+                            createdAt: new Date().toISOString(),
+                            updatedAt: new Date().toISOString()
+                        });
+                    }
+                });
+            } catch (err) {
+                console.error('同步用户档案失败:', err);
+            }
+        }
+
+        fs.writeFileSync(this.usersFile, JSON.stringify(profiles, null, 2));
     }
 
     // 获取所有用户
@@ -84,7 +82,7 @@ class UserProfileService {
     createUser(userData) {
         const users = this.getAllUsers();
         const newUser = {
-            userId: uuidv4(),
+            userId: userData.userId || uuidv4(),
             username: userData.username,
             role: userData.role || 'observer',
             email: userData.email || '',

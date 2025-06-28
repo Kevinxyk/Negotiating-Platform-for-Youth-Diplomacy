@@ -5,53 +5,58 @@ const { v4: uuidv4 } = require('uuid');
 // 导入数据持久化模块
 const persistence = require('./persistence');
 
+// 读取持久化用户
+const persistedUsers = persistence.users.getAll();
+
+const DEFAULT_USERS = [
+  {
+    userId: 'b1e1e1e1-1111-1111-1111-111111111111',
+    username: 'admin',
+    passwordHash: bcrypt.hashSync('admin123', 10),
+    role: 'admin'
+  },
+  {
+    userId: 'b2e2e2e2-2222-2222-2222-222222222222',
+    username: 'host',
+    passwordHash: bcrypt.hashSync('host123', 10),
+    role: 'host'
+  },
+  {
+    userId: 'b3e3e3e3-3333-3333-3333-333333333333',
+    username: 'sys',
+    passwordHash: bcrypt.hashSync('sys123', 10),
+    role: 'sys'
+  },
+  {
+    userId: 'b4e4e4e4-4444-4444-4444-444444444444',
+    username: 'student',
+    passwordHash: bcrypt.hashSync('student123', 10),
+    role: 'student'
+  },
+  {
+    userId: 'b5e5e5e5-5555-5555-5555-555555555555',
+    username: 'observer',
+    passwordHash: bcrypt.hashSync('observer123', 10),
+    role: 'observer'
+  },
+  {
+    userId: 'b6e6e6e6-6666-6666-6666-666666666666',
+    username: 'judge',
+    passwordHash: bcrypt.hashSync('judge123', 10),
+    role: 'judge'
+  },
+  {
+    userId: 'b7e7e7e7-7777-7777-7777-777777777777',
+    username: 'delegate',
+    passwordHash: bcrypt.hashSync('delegate123', 10),
+    role: 'delegate'
+  }
+];
+
 // 内存存储
 const store = {
   // 用户存储
-  users: [
-    {
-      userId: uuidv4(),
-      username: 'admin',
-      passwordHash: bcrypt.hashSync('admin123', 10),
-      role: 'admin'
-    },
-    {
-      userId: uuidv4(),
-      username: 'host',
-      passwordHash: bcrypt.hashSync('host123', 10),
-      role: 'host'
-    },
-    {
-      userId: uuidv4(),
-      username: 'sys',
-      passwordHash: bcrypt.hashSync('sys123', 10),
-      role: 'sys'
-    },
-    {
-      userId: uuidv4(),
-      username: 'student',
-      passwordHash: bcrypt.hashSync('student123', 10),
-      role: 'student'
-    },
-    {
-      userId: uuidv4(),
-      username: 'observer',
-      passwordHash: bcrypt.hashSync('observer123', 10),
-      role: 'observer'
-    },
-    {
-      userId: uuidv4(),
-      username: 'judge',
-      passwordHash: bcrypt.hashSync('judge123', 10),
-      role: 'judge'
-    },
-    {
-      userId: uuidv4(),
-      username: 'delegate',
-      passwordHash: bcrypt.hashSync('delegate123', 10),
-      role: 'delegate'
-    }
-  ],
+  users: persistedUsers.length > 0 ? persistedUsers : DEFAULT_USERS,
 
   // 房间存储
   rooms: [],
@@ -83,6 +88,11 @@ const store = {
   // 表情统计存储
   emojiStats: {}
 };
+
+// 若持久化数据为空，初始化默认用户到持久化层
+if (persistedUsers.length === 0) {
+  DEFAULT_USERS.forEach(u => persistence.users.add(u));
+}
 
 // 用户相关方法
 store.findUserByUsername = (username) => {

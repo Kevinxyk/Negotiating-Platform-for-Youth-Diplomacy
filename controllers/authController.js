@@ -1,6 +1,7 @@
 "use strict";
 const bcrypt = require('bcryptjs');
 const userService = require('../services/userService');
+const userProfileService = require('../services/userProfileService');
 const { generateToken } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -35,6 +36,13 @@ async function register(req, res) {
       role
     });
 
+    // 创建用户档案
+    userProfileService.createUser({
+      userId: user.userId,
+      username,
+      role
+    });
+
     // 生成 token
     const token = jwt.sign({ userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
 
@@ -48,6 +56,7 @@ async function register(req, res) {
 
     res.status(201).json({
       message: '注册成功',
+      token,
       user: {
         userId: user.userId,
         username: user.username,
@@ -88,6 +97,7 @@ async function login(req, res) {
 
     res.json({
       message: '登录成功',
+      token,
       user: {
         userId: user.userId,
         username: user.username,
