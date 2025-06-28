@@ -48,6 +48,7 @@ async function register(req, res) {
 
     res.status(201).json({
       message: '注册成功',
+      token,
       user: {
         userId: user.userId,
         username: user.username,
@@ -88,6 +89,7 @@ async function login(req, res) {
 
     res.json({
       message: '登录成功',
+      token,
       user: {
         userId: user.userId,
         username: user.username,
