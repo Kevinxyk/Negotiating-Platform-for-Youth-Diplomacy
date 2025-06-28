@@ -45,8 +45,8 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.06);
             word-break: break-word;
             white-space: pre-wrap;
-            max-width: 260px;
-            min-width: 0;
+            max-width: 100%;
+            display: inline-block;
             margin: 1px 0;
             line-height: 1.5;
             font-size: 15px;
@@ -100,7 +100,7 @@
             padding: 8px;
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            width: 240px;
+            width: 280px;
         }
         .emoji-grid {
             display: grid;
@@ -108,6 +108,7 @@
             gap: 6px;
             max-height: 200px;
             overflow-y: auto;
+            overflow-x: hidden;
         }
         .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 4px; }
         .emoji-item:hover { background: #f0f0f0; }
