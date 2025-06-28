@@ -3,10 +3,11 @@
 const { recordings, userAudioStates, uuidv4 } = require('../data/audioData');
 
 /** Save uploaded audio file metadata */
-async function saveRecording(roomId, file, username) {
+async function saveRecording(roomId, file, userId, username) {
   const rec = {
     id: uuidv4(),
     roomId,
+    userId,
     username,
     filename: file.filename,
     path: file.path,
@@ -17,19 +18,19 @@ async function saveRecording(roomId, file, username) {
 }
 
 /** Control audio state for a user */
-async function controlAudio(roomId, username, action) {
+async function controlAudio(roomId, userId, action) {
   if (!userAudioStates[roomId]) {
     userAudioStates[roomId] = {};
   }
-  if (!userAudioStates[roomId][username]) {
-    userAudioStates[roomId][username] = {
+  if (!userAudioStates[roomId][userId]) {
+    userAudioStates[roomId][userId] = {
       muted: false,
       microphoneOn: true,
       hangup: false
     };
   }
 
-  const state = userAudioStates[roomId][username];
+  const state = userAudioStates[roomId][userId];
   switch (action) {
     case 'mute':
       state.muted = true;

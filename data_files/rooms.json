@@ -1,15 +1,16 @@
 [
   {
-    "name": "1",
-    "description": "",
-    "maxParticipants": 10,
+    "id": "test-room",
+    "name": "测试研讨室",
+    "description": "这是一个用于测试的研讨室，包含各种功能演示",
+    "maxParticipants": 50,
     "isPrivate": false,
-    "createdBy": "1",
+    "createdBy": "b1e1e1e1-1111-1111-1111-111111111111",
     "participants": [
       {
-        "userId": "1",
+        "userId": "b1e1e1e1-1111-1111-1111-111111111111",
         "role": "admin",
-        "joinedAt": "2025-06-27T02:40:13.704Z"
+        "joinedAt": "2025-06-27T10:00:00.000Z"
       }
     ],
     "schedule": [],
@@ -20,6 +21,7 @@
       "allowRaiseHand": true,
       "allowVoiceChat": true
     },
-    "id": "1750992013704"
+    "createdAt": "2025-06-27T10:00:00.000Z",
+    "updatedAt": "2025-06-27T10:00:00.000Z"
   }
 ]

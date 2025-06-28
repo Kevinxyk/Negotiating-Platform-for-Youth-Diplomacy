@@ -1,0 +1,25 @@
+{
+  "id": "test-room",
+  "name": "测试研讨室",
+  "description": "这是一个用于测试的研讨室，包含各种功能演示",
+  "maxParticipants": 50,
+  "isPrivate": false,
+  "createdBy": "b1e1e1e1-1111-1111-1111-111111111111",
+  "participants": [
+    {
+      "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+      "role": "admin",
+      "joinedAt": "2025-06-27T10:00:00.000Z"
+    }
+  ],
+  "schedule": [],
+  "settings": {
+    "autoSchedule": false,
+    "allowMessageDelete": true,
+    "allowMessageEdit": true,
+    "allowRaiseHand": true,
+    "allowVoiceChat": true
+  },
+  "createdAt": "2025-06-27T10:00:00.000Z",
+  "updatedAt": "2025-06-27T10:00:00.000Z"
+} 

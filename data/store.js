@@ -1,5 +1,6 @@
 "use strict";
 const bcrypt = require('bcryptjs');
+const { v4: uuidv4 } = require('uuid');
 
 // 导入数据持久化模块
 const persistence = require('./persistence');
@@ -9,43 +10,43 @@ const store = {
   // 用户存储
   users: [
     {
-      userId: '1',
+      userId: uuidv4(),
       username: 'admin',
       passwordHash: bcrypt.hashSync('admin123', 10),
       role: 'admin'
     },
     {
-      userId: '2',
+      userId: uuidv4(),
       username: 'host',
       passwordHash: bcrypt.hashSync('host123', 10),
       role: 'host'
     },
     {
-      userId: '3',
+      userId: uuidv4(),
       username: 'sys',
       passwordHash: bcrypt.hashSync('sys123', 10),
       role: 'sys'
     },
     {
-      userId: '4',
+      userId: uuidv4(),
       username: 'student',
       passwordHash: bcrypt.hashSync('student123', 10),
       role: 'student'
     },
     {
-      userId: '5',
+      userId: uuidv4(),
       username: 'observer',
       passwordHash: bcrypt.hashSync('observer123', 10),
       role: 'observer'
     },
     {
-      userId: '6',
+      userId: uuidv4(),
       username: 'judge',
       passwordHash: bcrypt.hashSync('judge123', 10),
       role: 'judge'
     },
     {
-      userId: '7',
+      userId: uuidv4(),
       username: 'delegate',
       passwordHash: bcrypt.hashSync('delegate123', 10),
       role: 'delegate'
@@ -94,7 +95,7 @@ store.findUserById = (userId) => {
 
 store.addUser = (user) => {
   const newUser = {
-    userId: String(store.users.length + 1),
+    userId: uuidv4(),
     ...user
   };
   store.users.push(newUser);
@@ -112,7 +113,42 @@ store.findRoomByInviteCode = (inviteCode) => {
 
 // 根据用户ID获取其参与的所有房间
 store.getRoomsByUser = (userId) => {
-  return store.rooms.filter(r => r.participants.some(p => p.userId === userId));
+  // 获取所有房间，并确保participants字段格式正确
+  const allRooms = persistence.rooms.getAll();
+  console.log('从persistence获取的房间:', allRooms);
+  
+  return allRooms.filter(room => {
+    // 确保participants字段存在且格式正确
+    if (!room.participants) {
+      room.participants = [];
+    }
+    // 如果participants是简单数组，转换为对象数组
+    if (Array.isArray(room.participants) && room.participants.length > 0 && typeof room.participants[0] === 'string') {
+      room.participants = room.participants.map(userId => ({
+        userId: userId,
+        role: 'observer',
+        joinedAt: new Date().toISOString()
+      }));
+    }
+    
+    // 检查用户是否在参与者列表中
+    return room.participants.some(p => p.userId === userId);
+  }).map(room => {
+    // 确保所有必要字段都存在
+    return {
+      id: room.id,
+      name: room.name || `房间 ${room.id}`,
+      description: room.description || '',
+      maxParticipants: room.maxParticipants || 10,
+      isPrivate: room.isPrivate || false,
+      createdBy: room.createdBy || '',
+      participants: room.participants || [],
+      schedule: room.schedule || [],
+      settings: room.settings || {},
+      createdAt: room.createdAt || new Date().toISOString(),
+      updatedAt: room.updatedAt || room.createdAt || new Date().toISOString()
+    };
+  });
 };
 
 store.addRoom = (room) => {

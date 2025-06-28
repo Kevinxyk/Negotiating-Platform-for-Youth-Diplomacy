@@ -92,6 +92,7 @@ const persistence = {
     },
     
     // 通过用户名获取用户
+    // 注意：仅用于展示/兼容，主链路请全部用 userId，userId/username 互查请用 userService 的 getUsernameById/getUserIdByUsername
     getByUsername(username) {
       const users = this.getAll();
       return users.find(user => user.username === username);

@@ -10,10 +10,13 @@ const { v4: uuidv4 } = require('uuid');
 const store = require('./data/store');
 const jwt = require('jsonwebtoken');
 const userService = require('./services/userService');
+const userProfileService = require('./services/userProfileService');
 const { processEmojiMessage } = require('./controllers/emojiController');
 const AvatarService = require('./services/avatarService');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const persistence = require('./data/persistence');
+const cookieParser = require('cookie-parser');
+const { requireAuth } = require('./middleware/auth');
 
 const app = express();
 const server = http.createServer(app);
@@ -64,6 +67,12 @@ function heartbeat() {
 
 // WebSocket连接处理
 wss.on('connection', (ws, req) => {
+  // 从cookie中读取token
+  let token = null;
+  if (req.headers.cookie) {
+    const match = req.headers.cookie.match(/token=([^;]+)/);
+    if (match) token = match[1];
+  }
   const userId = generateUserId();
   let userInfo = null;
   
@@ -92,10 +101,12 @@ wss.on('connection', (ws, req) => {
     
     try {
       const message = JSON.parse(data);
+      // 优先用cookie中的token
+      if (!message.token && token) message.token = token;
       console.log('📨 Received message:', {
         type: message.type,
         from: message.username || 'unknown',
-        content: message.content ? message.content.substring(0, 50) + '...' : 'no content'
+        content: getMessageContentPreview(message)
       });
       
       // 心跳检测
@@ -106,15 +117,27 @@ wss.on('connection', (ws, req) => {
       switch (message.type) {
         case 'join':
           try {
+            console.log('[WS-join] 收到join消息:', message);
             const decoded = jwt.verify(message.token || '', JWT_SECRET);
+            console.log('[WS-join] token解码结果:', decoded);
             const user = await userService.findById(decoded.userId);
             if (!user) {
+              console.error('[WS-join] userService找不到用户:', decoded.userId);
               ws.send(JSON.stringify({ type: 'error', message: '用户不存在' }));
+              return;
+            }
+
+            // 获取用户完整信息
+            const userProfile = userProfileService.getUserProfile(user.userId);
+            if (!userProfile) {
+              console.error('[WS-join] userProfileService找不到用户信息:', user.userId);
+              ws.send(JSON.stringify({ type: 'error', message: '用户信息不完整' }));
               return;
             }
 
             const roomId = message.room;
             if (!roomId || typeof roomId !== 'string') {
+              console.error('[WS-join] 无效的房间ID:', roomId);
               ws.send(JSON.stringify({ type: 'error', message: '无效的房间ID' }));
               return;
             }
@@ -122,10 +145,10 @@ wss.on('connection', (ws, req) => {
             if (!rooms.has(roomId)) rooms.set(roomId, new Set());
             rooms.get(roomId).add(ws);
             userInfo = {
-              id: userId,
-              name: user.username,
-              role: user.role,
-              country: message.country,
+              userId: userProfile.userId,
+              username: userProfile.username,
+              role: userProfile.role,
+              country: message.country || userProfile.country,
               ws: ws,
               room: roomId,
               canSpeak: true,
@@ -134,9 +157,10 @@ wss.on('connection', (ws, req) => {
               lastSpeakTime: null,
               speakTimeLimit: null,
               score: 0,
-              joinTime: new Date().toISOString()
+              joinTime: new Date().toISOString(),
+              avatarUrl: userProfile.avatarUrl
             };
-            onlineUsers.set(userId, userInfo);
+            onlineUsers.set(userInfo.userId, userInfo);
 
             broadcastUserList();
 
@@ -188,14 +212,13 @@ wss.on('connection', (ws, req) => {
           // 处理表情
           const processedContent = await processEmojiMessage(message.content.trim());
           
-          const username = message.username || userInfo.name;
+          const username = message.username || userInfo.username;
           const groupMessage = {
             type: 'chat',
             id: uuidv4(),
-            from: userId,
-            fromName: userInfo.name,
-            username: username,
-            userId: userInfo.id,
+            from: userInfo.userId,
+            fromName: username,
+            userId: userInfo.userId,
             role: userInfo.role,
             country: userInfo.country,
             content: processedContent,
@@ -204,7 +227,7 @@ wss.on('connection', (ws, req) => {
             revoked: false,
             edited: false,
             deleted: false,
-            avatarUrl: AvatarService.generateRoleBasedAvatar(userInfo.name, userInfo.role, 40)
+            avatarUrl: userInfo.avatarUrl || AvatarService.getUserAvatarUrl(userInfo.userId, userInfo.username, userInfo.role)
           };
 
           // 保存到历史记录
@@ -215,9 +238,9 @@ wss.on('connection', (ws, req) => {
           store.addMessage({
             id: groupMessage.id,
             room: userInfo.room,
-            sender: userId,
+            sender: userInfo.userId,
             username: username,
-            userId: userInfo.id,
+            userId: userInfo.userId,
             role: userInfo.role,
             country: userInfo.country,
             content: message.content,
@@ -265,14 +288,14 @@ wss.on('connection', (ws, req) => {
           
           const targetUser = onlineUsers.get(message.to);
           if (targetUser) {
-            const privateUsername = message.username || userInfo.name;
+            const privateUsername = message.username || userInfo.username;
             const privateMessage = {
               type: 'private',
-              from: userId,
-              fromName: userInfo.name,
+              from: userInfo.userId,
+              fromName: privateUsername,
               to: message.to,
               username: privateUsername,
-              userId: userInfo.id,
+              userId: userInfo.userId,
               role: userInfo.role,
               country: userInfo.country,
               content: processedPrivateContent,
@@ -282,29 +305,29 @@ wss.on('connection', (ws, req) => {
               revoked: false,
               edited: false,
               deleted: false,
-              avatarUrl: AvatarService.generateRoleBasedAvatar(userInfo.name, userInfo.role, 40)
+              avatarUrl: AvatarService.generateRoleBasedAvatar(privateUsername, userInfo.role, 40)
             };
             
             // 保存到历史记录
-            if (!chatHistory.private.has(userId)) {
-              chatHistory.private.set(userId, new Map());
+            if (!chatHistory.private.has(userInfo.userId)) {
+              chatHistory.private.set(userInfo.userId, new Map());
             }
             if (!chatHistory.private.has(message.to)) {
               chatHistory.private.set(message.to, new Map());
             }
             
-            const userHistory = chatHistory.private.get(userId);
+            const userHistory = chatHistory.private.get(userInfo.userId);
             const targetHistory = chatHistory.private.get(message.to);
             
             if (!userHistory.has(message.to)) {
               userHistory.set(message.to, []);
             }
-            if (!targetHistory.has(userId)) {
-              targetHistory.set(userId, []);
+            if (!targetHistory.has(userInfo.userId)) {
+              targetHistory.set(userInfo.userId, []);
             }
             
             userHistory.get(message.to).push(privateMessage);
-            targetHistory.get(userId).push(privateMessage);
+            targetHistory.get(userInfo.userId).push(privateMessage);
             
             // 发送给目标用户
             targetUser.ws.send(JSON.stringify(privateMessage));
@@ -329,15 +352,15 @@ wss.on('connection', (ws, req) => {
             }));
           } else if (message.mode === 'private' && message.targetUser) {
             const targetUser = Array.from(onlineUsers.values())
-              .find(u => u.name === message.targetUser);
+              .find(u => u.username === message.targetUser);
               
             if (targetUser) {
-              const userHistory = chatHistory.private.get(userId);
-              if (userHistory && userHistory.has(targetUser.id)) {
+              const userHistory = chatHistory.private.get(userInfo.userId);
+              if (userHistory && userHistory.has(targetUser.userId)) {
                 ws.send(JSON.stringify({
                   type: 'history',
                   mode: 'private',
-                  messages: userHistory.get(targetUser.id)
+                  messages: userHistory.get(targetUser.userId)
                 }));
               }
             }
@@ -348,15 +371,21 @@ wss.on('connection', (ws, req) => {
           if (userInfo && userInfo.room) {
             // 根据客户端发送的状态更新用户的举手状态
             userInfo.isRaisingHand = !!message.isRaising;
-            
-            // 广播一个内容清晰的系统通知
+            // 广播一个内容清晰的系统通知，补全所有字段
             const actionText = userInfo.isRaisingHand ? '举起了手' : '放下了手';
             broadcastMessage({
               type: 'system',
-              message: `${userInfo.name} ${actionText}`,
-              timestamp: new Date().toISOString()
+              action: 'raiseHand',
+              from: userInfo.userId,
+              fromName: userInfo.username,
+              userId: userInfo.userId,
+              role: userInfo.role,
+              avatarUrl: AvatarService.generateRoleBasedAvatar(userInfo.username, userInfo.role, 40),
+              message: `${userInfo.username} ${actionText}`,
+              isRaisingHand: userInfo.isRaisingHand,
+              timestamp: new Date().toISOString(),
+              room: userInfo.room
             });
-            
             // 广播更新后的用户列表，让所有客户端UI同步
             broadcastUserList();
           }
@@ -396,7 +425,7 @@ wss.on('connection', (ws, req) => {
           }
           
           // 检查权限：消息作者或管理员角色可以撤回
-          const isAuthor = targetMessage.username === userInfo.name;
+          const isAuthor = targetMessage.username === userInfo.username;
           const isAdmin = ['admin', 'sys', 'host'].includes(userInfo.role);
           
           if (!isAuthor && !isAdmin) {
@@ -410,14 +439,20 @@ wss.on('connection', (ws, req) => {
           // 撤回消息
           targetMessage.revoked = true;
           targetMessage.revokeTime = new Date().toISOString();
-          targetMessage.revokedBy = userInfo.name;
+          targetMessage.revokedBy = userInfo.username;
           
-          // 广播撤回状态
+          // 广播撤回状态，补全所有字段
           broadcastMessage({
             type: 'messageRevoked',
             messageId: message.messageId,
-            revokedBy: userInfo.name,
-            timestamp: new Date().toISOString()
+            revokedBy: userInfo.username,
+            from: userInfo.userId,
+            fromName: userInfo.username,
+            userId: userInfo.userId,
+            role: userInfo.role,
+            avatarUrl: AvatarService.generateRoleBasedAvatar(userInfo.username, userInfo.role, 40),
+            timestamp: new Date().toISOString(),
+            room: userInfo.room
           });
           
           // 发送成功响应
@@ -526,9 +561,9 @@ wss.on('connection', (ws, req) => {
           const imageMessage = {
             type: 'image',
             id: uuidv4(),
-            from: userId,
-            fromName: userInfo.name,
-            userId: userInfo.id,
+            from: userInfo.userId,
+            fromName: userInfo.username,
+            userId: userInfo.userId,
             role: userInfo.role,
             country: userInfo.country,
             content: message.content,
@@ -537,7 +572,7 @@ wss.on('connection', (ws, req) => {
             revoked: false,
             edited: false,
             deleted: false,
-            avatarUrl: AvatarService.generateRoleBasedAvatar(userInfo.name, userInfo.role, 40)
+            avatarUrl: userInfo.avatarUrl || AvatarService.getUserAvatarUrl(userInfo.userId, userInfo.username, userInfo.role)
           };
           // 保存到历史记录
           chatHistory.group.push(imageMessage);
@@ -547,13 +582,14 @@ wss.on('connection', (ws, req) => {
           store.addMessage({
             id: imageMessage.id,
             room: userInfo.room,
-            sender: userId,
-            username: userInfo.name,
-            userId: userInfo.id,
+            sender: userInfo.userId,
+            username: userInfo.username,
+            userId: userInfo.userId,
             role: userInfo.role,
             country: userInfo.country,
-            content: message.content.url,
+            content: message.content,
             text: message.content.alt,
+            type: 'image',
             timestamp: imageMessage.timestamp,
             edited: false,
             deleted: false,
@@ -581,13 +617,13 @@ wss.on('connection', (ws, req) => {
         set.delete(ws);
         if (set.size === 0) rooms.delete(userInfo.room);
       }
-      onlineUsers.delete(userId);
+      onlineUsers.delete(userInfo.userId);
       broadcastUserList();
     }
     
     // Clean up any timers associated with this connection
     // Note: Currently timers are global, but this prevents potential issues
-    console.log(`WebSocket connection closed for user: ${userInfo?.name || 'unknown'}`);
+    console.log(`WebSocket connection closed for user: ${userInfo?.username || 'unknown'}`);
   });
 });
 
@@ -625,8 +661,19 @@ function handleTimerMessage(data, ws) {
           clearInterval(timerData.interval);
           timers.delete(key);
           broadcastMessage({ type: 'timer', time: 0 });
-          // 时间到时的提示，包含时间戳
-          broadcastMessage({ type: 'system', message: '时间到！', timestamp: new Date().toISOString() });
+          // 时间到时的提示，补全所有字段
+          broadcastMessage({
+            type: 'system',
+            action: 'timerEnd',
+            message: '时间到！',
+            timestamp: new Date().toISOString(),
+            from: null,
+            fromName: '系统',
+            userId: null,
+            role: 'system',
+            avatarUrl: '',
+            room: null
+          });
         }
       }, 1000);
       // 立即推送当前值
@@ -650,7 +697,18 @@ function handleTimerMessage(data, ws) {
             clearInterval(timerData.interval);
             timers.delete(key);
             broadcastMessage({ type: 'timer', time: 0 });
-            broadcastMessage({ type: 'system', message: '时间到！', timestamp: new Date().toISOString() });
+            broadcastMessage({
+              type: 'system',
+              action: 'timerEnd',
+              message: '时间到！',
+              timestamp: new Date().toISOString(),
+              from: null,
+              fromName: '系统',
+              userId: null,
+              role: 'system',
+              avatarUrl: '',
+              room: null
+            });
           }
         }, 1000);
       }
@@ -691,8 +749,8 @@ function handleTimerMessage(data, ws) {
 // 广播用户列表
 function broadcastUserList() {
   const userList = Array.from(onlineUsers.values()).map(user => ({
-    id: user.id,
-    name: user.name,
+    userId: user.userId,
+    username: user.username,
     role: user.role,
     country: user.country,
     canSpeak: user.canSpeak,
@@ -702,7 +760,7 @@ function broadcastUserList() {
     speakTimeLimit: user.speakTimeLimit,
     score: user.score,
     joinTime: user.joinTime,
-    avatarUrl: AvatarService.generateRoleBasedAvatar(user.name, user.role, 32)
+    avatarUrl: user.avatarUrl || AvatarService.getUserAvatarUrl(user.userId, user.username, user.role)
   }));
   
   const message = JSON.stringify({
@@ -744,6 +802,61 @@ function generateUserId() {
   return Math.random().toString(36).substr(2, 9);
 }
 
+// 获取消息内容预览
+function getMessageContentPreview(message) {
+  if (!message.content) {
+    return 'no content';
+  }
+  
+  // 根据消息类型处理内容
+  switch (message.type) {
+    case 'chat':
+      // 文本消息
+      if (typeof message.content === 'string') {
+        return message.content.length > 50 ? message.content.substring(0, 50) + '...' : message.content;
+      }
+      break;
+      
+    case 'image':
+      // 图片消息
+      if (typeof message.content === 'object' && message.content.url) {
+        return `[图片] ${message.content.alt || '图片消息'}`;
+      }
+      break;
+      
+    case 'audio':
+      // 音频消息
+      if (typeof message.content === 'object' && message.content.url) {
+        return `[音频] ${message.content.duration ? `${message.content.duration}s` : '音频消息'}`;
+      }
+      break;
+      
+    case 'video':
+      // 视频消息
+      if (typeof message.content === 'object' && message.content.url) {
+        return `[视频] ${message.content.duration ? `${message.content.duration}s` : '视频消息'}`;
+      }
+      break;
+      
+    case 'file':
+      // 文件消息
+      if (typeof message.content === 'object' && message.content.filename) {
+        return `[文件] ${message.content.filename}`;
+      }
+      break;
+      
+    default:
+      // 其他类型或未知类型
+      if (typeof message.content === 'string') {
+        return message.content.length > 50 ? message.content.substring(0, 50) + '...' : message.content;
+      } else if (typeof message.content === 'object') {
+        return `[${message.type || 'object'}] ${JSON.stringify(message.content).substring(0, 30)}...`;
+      }
+  }
+  
+  return 'unknown content type';
+}
+
 // 心跳检测
 const interval = setInterval(() => {
   wss.clients.forEach(ws => {
@@ -761,44 +874,42 @@ wss.on('close', () => {
 
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 
-// 静态文件服务配置
+// 静态资源服务，必须最先注册
 app.use(express.static(path.join(__dirname, "public")));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// 前端页面路由
-app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
-app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'register.html'));
-});
-app.get('/forgot-password', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'forgot-password.html'));
-});
-app.get('/reset-password', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'reset-password.html'));
-});
+// 登录/注册路由必须放在 requireAuth 之前
+app.use('/api/auth', require('./routes/authRoutes'));
+
+// 需要登录的API统一加requireAuth
+app.use('/api', requireAuth, routes);
+
+// 其他业务路由...
 
 // 研讨室列表与创建页面
 app.get('/rooms', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'rooms.html'));
+  res.sendFile(path.join(__dirname, 'public', 'rooms', 'rooms.html'));
 });
 app.get('/rooms/create', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'create-room.html'));
+  res.sendFile(path.join(__dirname, 'public', 'rooms', 'create-room.html'));
 });
 app.get('/rooms/:roomId', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'room.html'));
+  const template = req.query.template;
+  if (template === 'classic') {
+    res.sendFile(path.join(__dirname, 'public', 'chat', 'room.html'));
+  } else {
+    // 默认模板为新版 chat-room.html
+    res.sendFile(path.join(__dirname, 'public', 'chat', 'chat-room.html'));
+  }
 });
 
 app.use('/frontend', express.static(path.join(__dirname, "..", "frontend")));
 
 // 在 /api 之前加一个根路由
 app.get("/", (req, res) => {
-  res.json({ status: "OK", message: "API is running" });
+  res.sendFile(path.join(__dirname, 'public', 'index', 'index.html'));
 });
-
-app.use('/api', routes);
 
 // 认证路由
 app.use('/api/auth', require('./routes/authRoutes'));
@@ -821,6 +932,9 @@ app.use('/api/messages', require('./routes/messageRoutes'));
 // 管理员管理端口
 app.use('/api/admin', require('./routes/adminRoutes'));
 
+// 新增调试路由 /api/debug，指向前端调试页面
+app.use('/api/debug', require('./routes/debugRoutes'));
+
 // 保留原 /test 路由，指向原始 API 测试页面
 app.get('/test', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'test.html'));
@@ -839,6 +953,20 @@ app.get('/user-list', (req, res) => {
 // 聊天室页面
 app.get('/chat-room', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'chat-room.html'));
+});
+
+// 登录/注册相关路由
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'auth', 'login.html'));
+});
+app.get('/register', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'auth', 'register.html'));
+});
+app.get('/forgot-password', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'auth', 'forgot-password.html'));
+});
+app.get('/reset-password', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'auth', 'reset-password.html'));
 });
 
 // 404 & 错误中间件

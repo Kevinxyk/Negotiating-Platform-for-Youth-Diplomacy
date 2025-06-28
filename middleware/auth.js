@@ -18,11 +18,18 @@ const generateToken = (user) => {
   );
 };
 
-// 验证 JWT token
+// 统一认证中间件，支持header和cookie
 const verifyToken = async (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
-  
-  // Test environment bypass
+  let token = null;
+  // 优先用header
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+  // 没有header再用cookie
+  if (!token && req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+  // Test环境bypass
   if (process.env.NODE_ENV === 'test') {
     req.user = {
       userId: 'test',
@@ -31,19 +38,15 @@ const verifyToken = async (req, res, next) => {
     };
     return next();
   }
-  
   if (!token) {
     return res.status(401).json({ error: '未提供认证令牌' });
   }
-
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
     const user = await userService.findById(decoded.userId);
-    
     if (!user) {
       return res.status(401).json({ error: '用户不存在' });
     }
-
     req.user = {
       userId: user.userId,
       username: user.username,

@@ -1,0 +1,32 @@
+[
+  {
+    "userId": "d73598bb-eb4f-4677-a09f-70350bf45f85",
+    "username": "admin",
+    "role": "admin",
+    "email": "admin@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T07:17:12.319Z",
+    "updatedAt": "2025-06-28T07:17:12.319Z"
+  },
+  {
+    "userId": "5dc8c631-e9dc-4478-b8f0-7a2f7184b54a",
+    "username": "host",
+    "role": "host",
+    "email": "host@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T07:17:12.319Z",
+    "updatedAt": "2025-06-28T07:17:12.319Z"
+  },
+  {
+    "userId": "5283622a-e452-45f9-83fe-621cbb6b3de8",
+    "username": "student",
+    "role": "student",
+    "email": "student@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T07:17:12.319Z",
+    "updatedAt": "2025-06-28T07:17:12.319Z"
+  }
+]

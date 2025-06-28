@@ -1,0 +1,38 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+.container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 15px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
+.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; }
+.controls { padding: 20px; background: #f8f9fa; border-bottom: 1px solid #e9ecef; display: flex; gap: 15px; align-items: center; }
+.user-list { max-height: 600px; overflow-y: auto; }
+.user-item { display: flex; align-items: center; padding: 15px 20px; border-bottom: 1px solid #e9ecef; }
+.user-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 15px; }
+.user-info { flex: 1; }
+.user-name { font-weight: bold; font-size: 16px; margin-bottom: 4px; }
+.user-details { color: #666; font-size: 14px; }
+.user-status { display: flex; gap: 10px; margin-top: 8px; }
+.status-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+.status-speaking { background: #28a745; color: white; }
+.status-raising-hand { background: #ffc107; color: #212529; }
+.status-muted { background: #dc3545; color: white; }
+.user-actions { display: flex; gap: 8px; }
+button { padding: 8px 12px; border: none; border-radius: 6px; cursor: pointer; color: white; }
+button.success { background: #28a745; }
+button.danger { background: #dc3545; }
+.role-badge { padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: bold; margin-right: 10px; }
+.role-sys { background: #dc3545; color: white; }
+.role-admin { background: #fd7e14; color: white; }
+.role-host { background: #6f42c1; color: white; }
+.role-judge { background: #20c997; color: white; }
+.role-observer { background: #17a2b8; color: white; }
+.role-delegate { background: #28a745; color: white; }
+.role-student { background: #6c757d; color: white; }
+.profile-header { background-color: #f8f9fa; border-radius: 0.5rem; padding: 2rem 1rem; margin-bottom: 2rem; text-align: center; }
+.profile-avatar { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 1rem; object-fit: cover; border: 5px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.profile-role { display: inline-block; padding: 0.25rem 0.5rem; font-size: 0.875rem; border-radius: 0.25rem; background-color: #e9ecef; margin-top: 0.5rem; }
+.profile-stats { display: flex; justify-content: center; margin-top: 1.5rem; gap: 2rem; }
+.profile-stat { text-align: center; }
+.profile-stat-value { font-weight: bold; font-size: 1.5rem; }
+.profile-stat-label { color: #6c757d; font-size: 0.875rem; }
+.card-header-tab { display: flex; padding: 0; }
+.nav-link-header { padding: 1rem; flex: 1; text-align: center; border-bottom: 2px solid transparent; }
+.nav-link-header.active { border-bottom-color: #007bff; font-weight: bold; } 

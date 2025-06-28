@@ -7,10 +7,10 @@
  *  3. Text-to-Speech (TTS) to produce audio reply
  * @param {string} room - room identifier
  * @param {object} file - uploaded audio file object
- * @param {string} username - name of the user who sent the audio
+ * @param {string} userId - userId of the user who sent the audio
  * @returns {Promise<{ transcript: string, replyText: string }>} result of processing
  */
-async function processVoiceChat(room, file, username) {
+async function processVoiceChat(room, file, userId) {
   // TODO: Integrate real STT service
   const transcript = '【STT 结果（占位）】';
 

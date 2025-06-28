@@ -28,6 +28,7 @@ async function getHistory(room, limit = 50, offset = 0) {
         id:        dm.id || uuidv4(),
         room,
         username:  dm.username,
+        userId:    dm.userId || null, // 补全 userId
         text:      dm.text,
         timestamp: dm.timestamp,
         revoked:   false
@@ -73,16 +74,14 @@ async function getMessageById(id) {
 // 按用户汇总：不仅返回数量，也返回消息列表
 async function getUserSummary(room) {
   const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
-  
   const byUser = {};
   roomMsgs.forEach(m => {
-    if (!byUser[m.username]) {
-      byUser[m.username] = { count: 0, messages: [] };
+    if (!byUser[m.userId]) {
+      byUser[m.userId] = { count: 0, messages: [], username: m.username };
     }
-    byUser[m.username].count++;
-    byUser[m.username].messages.push(m);
+    byUser[m.userId].count++;
+    byUser[m.userId].messages.push(m);
   });
-  
   return byUser;
 }
 

@@ -1,5 +1,6 @@
 const store = require('../data/store');
 const mysqlService = require('./mysqlService');
+const bcrypt = require('bcryptjs');
 
 const useMysql = process.env.USE_MYSQL === 'true';
 
@@ -43,8 +44,28 @@ async function addUser(user) {
   return store.addUser(user);
 }
 
+// 通过 userId 查 username
+async function getUsernameById(userId) {
+  const user = await findById(userId);
+  return user ? user.username : null;
+}
+
+// 通过 username 查 userId
+async function getUserIdByUsername(username) {
+  const user = await findByUsername(username);
+  return user ? user.userId : null;
+}
+
+function verifyPassword(user, password) {
+    if (!user || !user.passwordHash) return false;
+    return bcrypt.compareSync(password, user.passwordHash);
+}
+
 module.exports = {
   findByUsername,
   findById,
-  addUser
+  addUser,
+  getUsernameById,
+  getUserIdByUsername,
+  verifyPassword
 };

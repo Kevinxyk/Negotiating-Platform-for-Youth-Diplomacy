@@ -77,22 +77,17 @@ async function revokeMessage(req, res) {
   try {
     const id = req.params.messageId;
     const message = await textChatService.getMessageById(id);
-    
     if (!message) {
       return res.status(404).json({ error: '消息不存在' });
     }
-    
     // 检查权限：消息作者或管理员角色可以撤回
-    const isAuthor = message.username === req.user.username;
+    const isAuthor = message.userId === req.user.userId;
     const isAdmin = ['admin', 'sys', 'host'].includes(req.user.role);
-    
-    // 测试环境特殊处理
     if (process.env.NODE_ENV === 'test' && req.user.userId === 'test') {
       // 测试用户拥有所有权限
     } else if (!isAuthor && !isAdmin) {
       return res.status(403).json({ error: '没有权限撤回此消息' });
     }
-
     await textChatService.revokeMessage(id);
     res.json({ status: "revoked" });
   } catch (err) {
@@ -108,10 +103,10 @@ async function getUserSummary(req, res) {
   try {
     const room = req.params.room;
     const raw  = await textChatService.getUserSummary(room);
-    // raw: { [username]: { count: Number, messages: Array<msg> } }
+    // raw: { [userId]: { count: Number, messages: Array<msg>, username: string } }
     const simple = {};
-    Object.keys(raw).forEach(u => {
-      simple[u] = raw[u].count;
+    Object.keys(raw).forEach(userId => {
+      simple[userId] = raw[userId].count;
     });
     res.json(simple);
   } catch (err) {

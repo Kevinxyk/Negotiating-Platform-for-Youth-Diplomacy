@@ -2,7 +2,7 @@
 "use strict";
 
 // 内存存储各房间的参会者列表
-// 默认房间 default 包含一个系统提示
+// 注意：所有链路只认 userId，username 仅用于展示，userId/username 互查统一用 userService 的 getUsernameById/getUserIdByUsername
 let participants = {
   default: [
     {

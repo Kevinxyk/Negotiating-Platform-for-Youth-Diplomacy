@@ -113,7 +113,7 @@ async function joinRoom(req, res) {
     const user = await userService.findById(req.user.userId);
     
     // 检查是否已加入
-    if (room.participants.some(p => p.user === user.userId)) {
+    if (room.participants.some(p => p.userId === user.userId)) {
       return res.status(400).json({ error: '已经加入该房间' });
     }
     
@@ -124,7 +124,7 @@ async function joinRoom(req, res) {
     
     // 添加参与者
     room.participants.push({
-      user: user.userId,
+      userId: user.userId,
       role: 'observer'
     });
     
@@ -150,7 +150,7 @@ async function deleteRoom(req, res) {
     // 检查权限
     const user = await userService.findById(req.user.userId);
     const isCreator = room.createdBy === user.userId;
-    const isRoomAdmin = room.participants.some(p => p.user === user.userId && p.role === 'admin');
+    const isRoomAdmin = room.participants.some(p => p.userId === user.userId && p.role === 'admin');
 
     // 允许房间创建者、房间管理员或具有全局 admin 角色的用户删除房间
     if (!(isCreator || isRoomAdmin || user.role === 'admin')) {
@@ -211,7 +211,7 @@ async function joinRoomByInviteCode(req, res) {
     const user = await userService.findById(req.user.userId);
     
     // 检查是否已加入
-    if (room.participants.some(p => p.user === user.userId)) {
+    if (room.participants.some(p => p.userId === user.userId)) {
       return res.status(400).json({ error: '已经加入该房间' });
     }
     
@@ -222,7 +222,7 @@ async function joinRoomByInviteCode(req, res) {
     
     // 添加参与者
     room.participants.push({
-      user: user.userId,
+      userId: user.userId,
       role: 'observer'
     });
     
@@ -248,7 +248,7 @@ async function leaveRoom(req, res) {
     const user = await userService.findById(req.user.userId);
     
     // 移除参与者
-    room.participants = room.participants.filter(p => p.user !== user.userId);
+    room.participants = room.participants.filter(p => p.userId !== user.userId);
     
     // 如果房间空了，删除房间
     if (room.participants.length === 0) {
@@ -260,7 +260,7 @@ async function leaveRoom(req, res) {
     if (room.createdBy === user.userId) {
       const admin = room.participants.find(p => p.role === 'admin');
       if (admin) {
-        room.createdBy = admin.user;
+        room.createdBy = admin.userId;
         admin.role = 'host';
       }
     }
@@ -284,11 +284,11 @@ async function updateParticipantRole(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId && p.role === 'admin')) {
+    if (!room.participants.some(p => p.userId === user.userId && p.role === 'admin')) {
       return res.status(403).json({ error: '没有权限修改角色' });
     }
     
-    const participant = room.participants.find(p => p.user === userId);
+    const participant = room.participants.find(p => p.userId === userId);
     
     if (!participant) {
       return res.status(404).json({ error: '参与者不存在' });
@@ -313,7 +313,7 @@ async function startSchedule(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId && p.role === 'admin')) {
+    if (!room.participants.some(p => p.userId === user.userId && p.role === 'admin')) {
       return res.status(403).json({ error: '没有权限开始日程' });
     }
     
@@ -341,7 +341,7 @@ async function pauseSchedule(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId && p.role === 'admin')) {
+    if (!room.participants.some(p => p.userId === user.userId && p.role === 'admin')) {
       return res.status(403).json({ error: '没有权限暂停日程' });
     }
     
@@ -364,7 +364,7 @@ async function resumeSchedule(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId && p.role === 'admin')) {
+    if (!room.participants.some(p => p.userId === user.userId && p.role === 'admin')) {
       return res.status(403).json({ error: '没有权限继续日程' });
     }
     
@@ -387,7 +387,7 @@ async function completeCurrentScheduleItem(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId && p.role === 'admin')) {
+    if (!room.participants.some(p => p.userId === user.userId && p.role === 'admin')) {
       return res.status(403).json({ error: '没有权限完成日程项' });
     }
     
@@ -413,7 +413,7 @@ async function getMessages(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId)) {
+    if (!room.participants.some(p => p.userId === user.userId)) {
       return res.status(403).json({ error: '没有权限查看消息' });
     }
     
@@ -442,7 +442,7 @@ async function sendMessage(req, res) {
     
     // 检查权限
     const user = await userService.findById(req.user.userId);
-    if (!room.participants.some(p => p.user === user.userId)) {
+    if (!room.participants.some(p => p.userId === user.userId)) {
       return res.status(403).json({ error: '没有权限发送消息' });
     }
     

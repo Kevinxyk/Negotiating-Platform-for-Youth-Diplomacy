@@ -78,7 +78,7 @@ async function updateUser(req, res) {
   const { userId } = req.params;
   const { username, email, role, status } = req.body;
   
-  const user = store.users.find(u => u.id === userId);
+  const user = store.users.find(u => u.userId === userId);
   if (!user) {
     return res.status(404).json({ error: '用户不存在' });
   }
@@ -98,13 +98,13 @@ async function updateUser(req, res) {
 async function deleteUser(req, res) {
   const { userId } = req.params;
   
-  const userIndex = store.users.findIndex(u => u.id === userId);
+  const userIndex = store.users.findIndex(u => u.userId === userId);
   if (userIndex === -1) {
     return res.status(404).json({ error: '用户不存在' });
   }
   
   // 不能删除自己
-  if (userId === req.user.id) {
+  if (userId === req.user.userId) {
     return res.status(400).json({ error: '不能删除自己的账户' });
   }
   

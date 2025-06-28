@@ -36,11 +36,18 @@ async function register(req, res) {
     });
 
     // 生成 token
-    const token = generateToken(user);
+    const token = jwt.sign({ userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
+
+    // 注册成功后同样写cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2 * 60 * 60 * 1000
+    });
 
     res.status(201).json({
       message: '注册成功',
-      token,
       user: {
         userId: user.userId,
         username: user.username,
@@ -64,22 +71,23 @@ async function login(req, res) {
 
     // 查找用户
     const user = await userService.findByUsername(username);
-    if (!user) {
-      return res.status(401).json({ error: '用户名或密码错误' });
-    }
-
-    // 验证密码
-    const isValid = await bcrypt.compare(password, user.passwordHash);
-    if (!isValid) {
+    if (!user || !userService.verifyPassword(user, password)) {
       return res.status(401).json({ error: '用户名或密码错误' });
     }
 
     // 生成 token
-    const token = generateToken(user);
+    const token = jwt.sign({ userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '2h' });
+
+    // 登录成功后用Set-Cookie写入token
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2 * 60 * 60 * 1000
+    });
 
     res.json({
       message: '登录成功',
-      token,
       user: {
         userId: user.userId,
         username: user.username,

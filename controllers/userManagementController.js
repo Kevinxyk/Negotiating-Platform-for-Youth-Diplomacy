@@ -13,8 +13,8 @@ async function getRoomUsers(req, res) {
     let users = Array.from(onlineUsers.values())
       .filter(user => !roomId || user.room === roomId)
       .map(user => ({
-        id: user.id,
-        name: user.name,
+        userId: user.userId,
+        username: user.username,
         role: user.role,
         country: user.country,
         canSpeak: user.canSpeak,
@@ -43,7 +43,7 @@ async function getRoomUsers(req, res) {
         const orderB = roleOrder[b.role] || 999;
         return sortOrder === 'asc' ? orderA - orderB : orderB - orderA;
       } else if (sortBy === 'name') {
-        return sortOrder === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
+        return sortOrder === 'asc' ? a.username.localeCompare(b.username) : b.username.localeCompare(a.username);
       } else if (sortBy === 'country') {
         return sortOrder === 'asc' ? a.country.localeCompare(b.country) : b.country.localeCompare(a.country);
       } else if (sortBy === 'score') {

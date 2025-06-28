@@ -1,0 +1,9 @@
+body { padding-top: 56px; min-height: 100vh; }
+.container { margin-top: 2rem; padding-top: 1rem; }
+.navbar { z-index: 1030; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.card { transition: all 0.2s ease; margin-bottom: 1rem; }
+.card:hover { transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+.badge-role { margin-left: 0.5rem; }
+.room-card-body { display: flex; flex-direction: column; height: 100%; }
+.room-card-footer { margin-top: auto; padding-top: 1rem; }
+.room-tabs .nav-link { cursor: pointer; } 

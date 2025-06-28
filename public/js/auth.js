@@ -109,7 +109,8 @@ window.auth = {
       const res = await fetch(`/api/rooms/${roomId}`, {
         headers: {
           'Authorization': 'Bearer ' + localStorage.getItem('token')
-        }
+        },
+        credentials: 'include'
       });
       
       if (!res.ok) return null;
@@ -139,7 +140,8 @@ window.auth = {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ username, password })
+        body: JSON.stringify({ username, password }),
+        credentials: 'include'
       });
       
       if (!res.ok) {
