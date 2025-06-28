@@ -59,6 +59,9 @@ const verifyToken = async (req, res, next) => {
   }
 };
 
+// 兼容旧代码的别名
+const requireAuth = verifyToken;
+
 // 检查用户角色
 const requireRoles = (roles) => {
   return (req, res, next) => {
@@ -114,7 +117,8 @@ const requireRoomParticipant = async (req, res, next) => {
 module.exports = {
   generateToken,
   verifyToken,
+  requireAuth,
   requireRoles,
   requireRoomAdmin,
   requireRoomParticipant
-}; 
+};
