@@ -45,8 +45,8 @@
             box-shadow: 0 1px 2px rgba(0,0,0,0.06);
             word-break: break-word;
             white-space: pre-wrap;
-            max-width: 260px;
-            min-width: 0;
+            max-width: 100%;
+            display: inline-block;
             margin: 1px 0;
             line-height: 1.5;
             font-size: 15px;
@@ -90,8 +90,26 @@
         .status-speaking { background: #2196f3; }
         .status-raising-hand { background: #ff9800; }
         .status-muted { background: #f44336; }
-        .emoji-picker { position: absolute; bottom: 100%; right: 0; background: white; border: 1px solid #ddd; border-radius: 8px; padding: 10px; display: none; }
-        .emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+        .emoji-picker {
+            position: absolute;
+            bottom: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            display: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            width: 280px;
+        }
+        .emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
         .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 4px; }
         .emoji-item:hover { background: #f0f0f0; }
         .system-message { text-align: center; color: #666; font-style: italic; margin: 10px 0; }
@@ -494,6 +512,7 @@
                             <span class="message-role role-${message.role}">${getRoleName(message.role)}</span>
                             <span class="message-country">${message.country}</span>
                             <button class="quote-btn" data-msgid="${message.id}" data-from="${message.userId || ''}" style="margin-left:8px;font-size:12px;color:#0084ff;background:none;border:none;cursor:pointer;">引用</button>
+                            ${isOwnMessage ? `<button class="edit-btn" data-msgid="${message.id}" style="margin-left:6px;font-size:12px;color:#28a745;background:none;border:none;cursor:pointer;">编辑</button><button class="revoke-btn" data-msgid="${message.id}" style="margin-left:6px;font-size:12px;color:#dc3545;background:none;border:none;cursor:pointer;">撤回</button>` : ''}
                         </div>
                         ${quoteHtml}
                         <div class="message-bubble${message.revoked ? ' revoked' : ''}${isOwnMessage ? ' own' : ''}">
@@ -898,10 +917,25 @@ emojiPanel.addEventListener('click', function(e) {
                     showQuoteBar();
                 }
             }
-            // 关闭引用条
             if (e.target.id === 'cancelQuoteBtn') {
                 currentQuote = null;
                 hideQuoteBar();
+            }
+            if (e.target.classList.contains('revoke-btn')) {
+                const id = e.target.getAttribute('data-msgid');
+                if (confirm('确定撤回此消息?')) {
+                    sendRevoke(id);
+                }
+            }
+            if (e.target.classList.contains('edit-btn')) {
+                const id = e.target.getAttribute('data-msgid');
+                const msg = messages.find(m => m.id === id);
+                if (msg) {
+                    const newText = prompt('修改消息内容', typeof msg.content === 'string' ? msg.content : '');
+                    if (newText !== null) {
+                        sendEdit(id, newText);
+                    }
+                }
             }
         });
         // 显示引用条
@@ -942,6 +976,42 @@ emojiPanel.addEventListener('click', function(e) {
 
         function closeImageModal() {
             document.getElementById('imageModal').style.display = "none";
+        }
+
+        // 发送撤回消息
+        function sendRevoke(id) {
+            if (ws) {
+                ws.send(JSON.stringify({ type: 'revokeMessage', messageId: id }));
+            }
+        }
+
+        // 编辑消息
+        async function sendEdit(id, newText) {
+            try {
+                const res = await fetch('/api/messages/' + id, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify({ content: newText })
+                });
+                await handleApiResponse(res);
+                if (res.ok) {
+                    const msg = messages.find(m => m.id === id);
+                    if (msg) {
+                        msg.content = newText;
+                        msg.edited = true;
+                    }
+                    const bubble = document.querySelector('#msg-' + id + ' .message-bubble');
+                    if (bubble) bubble.textContent = newText + ' (已编辑)';
+                } else {
+                    const err = await res.json();
+                    alert(err.error || '编辑失败');
+                }
+            } catch (err) {
+                alert('编辑失败: ' + err.message);
+            }
         }
 
         // 滚动到指定消息
