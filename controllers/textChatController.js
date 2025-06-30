@@ -77,7 +77,6 @@ async function sendMessage(req, res) {
     };
     
     const message = await textChatService.saveMessage(room, messageData);
-
     const enrichedMessage = {
       ...message,
       username: maybeSanitize(message.username),
