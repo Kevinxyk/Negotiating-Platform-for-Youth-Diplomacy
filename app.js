@@ -949,6 +949,8 @@ app.use(cookieParser());
 
 // 静态资源服务，必须最先注册
 app.use(express.static(path.join(__dirname, "public")));
+// 允许直接访问上传的文件，如 /uploads/images/xxx.png
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // 登录/注册路由必须放在 requireAuth 之前
 app.use('/api/auth', require('./routes/authRoutes'));
