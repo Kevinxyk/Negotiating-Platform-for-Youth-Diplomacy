@@ -2,6 +2,7 @@
 const { v4: uuidv4 } = require("uuid");
 const { messages: defaults } = require("../data/messages");
 const store = require('../data/store');
+const { sanitizeString } = require('../utils/sanitize');
 
 // 全局消息存储
 const messages = store.messages;
@@ -44,11 +45,11 @@ async function saveMessage(room, { username, country, role, text, userId }) {
   const entry = {
     id:        uuidv4(),
     room,
-    username,
+    username: sanitizeString(username),
     userId: userId || null, // 用户ID
     country: country || '',
     role: role || 'user',
-    text,
+    text: sanitizeString(text),
     timestamp: new Date().toISOString(),
     revoked:   false
   };
