@@ -216,7 +216,6 @@ body {
 .emoji-picker {
   width: fit-content !important;
   max-width: 220px !important;
-
   max-height: 200px !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
@@ -256,7 +255,7 @@ body {
 .message-header {
   display: flex;
   align-items: center;
-  /* 不设置宽度，允许内容超出气泡 */
+  width: fit-content;
 }
 .message-bubble {
   width: fit-content;
@@ -292,6 +291,7 @@ body {
   display: flex;
   align-items: center;
   margin-bottom: 2px;
+  width: fit-content;
 }
 .message-item.own .message-header {
   justify-content: flex-end;
