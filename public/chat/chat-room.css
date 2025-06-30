@@ -244,15 +244,14 @@ body {
   white-space: pre-wrap !important;
   box-sizing: border-box !important;
 }
-.message-content {
-  width: fit-content !important;
-}
 
 /* 保证消息头和气泡左对齐，且头部可更长 */
 .message-content {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: fit-content;
+  max-width: 33vw;
 }
 .message-header {
   display: flex;
@@ -285,11 +284,6 @@ body {
 .message-item.own .message-avatar {
   margin-left: 12px;
   margin-right: 0;
-}
-.message-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
 }
 .message-item.own .message-content {
   align-items: flex-end;
