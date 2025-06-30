@@ -78,6 +78,8 @@ async function revokeMessage(id) {
   const msg = getMessagesArray().find(m => m.id === id);
   if (!msg) return false;
   msg.revoked = true;
+  // persist the change so reloads keep the revoke status
+  store.updateMessage(msg);
   return true;
 }
 

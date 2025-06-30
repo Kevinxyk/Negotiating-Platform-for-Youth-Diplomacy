@@ -1,4 +1,5 @@
 "use strict";
+
 function sanitizeString(input) {
   return String(input || "")
     .replace(/&/g, "&amp;")
@@ -7,6 +8,7 @@ function sanitizeString(input) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
+
 /**
  * Sanitize the value only if it is a non-empty string. Otherwise return
  * the value unchanged so objects like image payloads remain intact.
