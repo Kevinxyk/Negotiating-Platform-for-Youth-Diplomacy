@@ -1198,5 +1198,55 @@
     "edited": false,
     "deleted": false,
     "revoked": false
+  },
+  {
+    "id": "42877ec6-7161-466f-bcd7-071e0dab3ae8",
+    "room": "test-room",
+    "sender": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "role": "admin",
+    "country": "中国",
+    "content": "111111",
+    "text": "111111",
+    "timestamp": "2025-06-30T13:00:55.147Z",
+    "edited": false,
+    "deleted": false,
+    "revoked": false
+  },
+  {
+    "id": "71f7469b-3294-4fd1-a41b-25fd1e0df3e7",
+    "room": "test-room",
+    "sender": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "role": "admin",
+    "country": "中国",
+    "content": {
+      "url": "/uploads/images/1751288730117______________2024-11-18_105812.png",
+      "imageId": "1751288730123",
+      "alt": "å±å¹æªå¾ 2024-11-18 105812.png"
+    },
+    "text": "å±å¹æªå¾ 2024-11-18 105812.png",
+    "type": "image",
+    "timestamp": "2025-06-30T13:05:30.129Z",
+    "edited": false,
+    "deleted": false,
+    "revoked": false
+  },
+  {
+    "id": "860d1f84-fedd-4dda-867d-c919e760a41b",
+    "room": "test-room",
+    "sender": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "role": "admin",
+    "country": "中国",
+    "content": "0",
+    "text": "0",
+    "timestamp": "2025-06-30T13:10:51.173Z",
+    "edited": false,
+    "deleted": false,
+    "revoked": false
   }
 ]

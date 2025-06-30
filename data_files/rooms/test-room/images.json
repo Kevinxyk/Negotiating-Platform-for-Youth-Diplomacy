@@ -98,5 +98,15 @@
     "mimetype": "image/png",
     "size": 82497,
     "roomId": "test-room"
+  },
+  {
+    "id": "1751288730123",
+    "filename": "1751288730117______________2024-11-18_105812.png",
+    "originalname": "å±å¹æªå¾ 2024-11-18 105812.png",
+    "uploader": "admin",
+    "uploadTime": "2025-06-30T13:05:30.123Z",
+    "mimetype": "image/png",
+    "size": 119571,
+    "roomId": "test-room"
   }
 ]
