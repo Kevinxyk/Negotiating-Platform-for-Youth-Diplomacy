@@ -33,7 +33,7 @@ body {
   color: #555;
 }
 #chatMessages:not(.simple-mode) .message-bubble {
-  max-width: 75%;
+  max-width: 33%;
   padding: 0.6rem 1rem;
   border-radius: 1rem;
   word-wrap: break-word;
@@ -214,7 +214,8 @@ body {
 
 /* === patched 2025‑06‑27c === */
 .emoji-picker {
-  width: 260px !important;
+  width: auto !important;
+  max-width: 220px !important;
   max-height: 200px !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
@@ -222,21 +223,25 @@ body {
 }
 .emoji-grid {
   display: grid !important;
-  grid-template-columns: repeat(8, 1fr) !important;
+  grid-template-columns: repeat(8, 28px) !important;
   gap: 4px !important;
   padding: 8px !important;
+}
+.emoji-item {
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .message-bubble {
   display: inline-block !important;
   width: auto !important;
-  max-width: 280px !important;
+  max-width: 33% !important;
   min-width: 0 !important;
   padding: 6px 10px !important;
   white-space: pre-wrap !important;
   box-sizing: border-box !important;
-}
-.message-content {
-  width: fit-content !important;
 }
 
 /* 保证消息头和气泡左对齐，且头部可更长 */
@@ -244,15 +249,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  width: fit-content;
+  max-width: 33%;
 }
 .message-header {
   display: flex;
   align-items: center;
-  /* 不设置宽度，允许内容超出气泡 */
+  width: fit-content;
 }
 .message-bubble {
   width: fit-content;
-  max-width: 380px;
+  max-width: 33%;
   min-width: 0;
 }
 
@@ -277,11 +284,6 @@ body {
   margin-left: 12px;
   margin-right: 0;
 }
-.message-content {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
 .message-item.own .message-content {
   align-items: flex-end;
 }
@@ -289,13 +291,14 @@ body {
   display: flex;
   align-items: center;
   margin-bottom: 2px;
+  width: fit-content;
 }
 .message-item.own .message-header {
   justify-content: flex-end;
 }
 .message-bubble {
   width: fit-content;
-  max-width: 380px;
+  max-width: 33%;
   min-width: 0;
   word-break: break-word;
   white-space: pre-wrap;
@@ -313,4 +316,9 @@ body {
   color: #fff;
   border-top-right-radius: 4px;
   border-top-left-radius: 18px;
+}
+
+.re-edit {
+  color: #0084ff;
+  cursor: pointer;
 }

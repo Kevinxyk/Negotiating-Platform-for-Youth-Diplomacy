@@ -4,6 +4,7 @@ const { messages: defaults } = require("../data/messages");
 const store = require('../data/store');
 const persistence = require('../data/persistence');
 
+
 // 直接使用 store.messages，避免引用失效
 function getMessagesArray() {
   return store.messages;
@@ -49,11 +50,11 @@ async function saveMessage(room, { username, country, role, text, userId, quoteI
   const entry = {
     id:        uuidv4(),
     room,
-    username,
+    username: sanitizeString(username),
     userId: userId || null, // 用户ID
     country: country || '',
     role: role || 'user',
-    text,
+    text: sanitizeString(text),
     timestamp: new Date().toISOString(),
     revoked:   false,
     quote: null
