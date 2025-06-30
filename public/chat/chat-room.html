@@ -22,7 +22,7 @@
         .chat-header { background: white; padding: 20px; border-bottom: 1px solid #e1e5e9; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .chat-messages { flex: 1; overflow-y: auto; padding: 12px; background: #f8f9fa; }
         .message-item { display: flex; align-items: flex-start; margin-bottom: 10px; }
-        .message-item.own { flex-direction: row-reverse; }
+        .message-item.own { flex-direction: row-reverse; justify-content: flex-end; }
         .message-item.own .message-content { margin-left: 0; margin-right: 12px; align-items: flex-end; }
         .message-item.own .message-bubble { background-color: #0084ff; color: white; }
         .message-item.own .message-bubble.own { background-color: #0084ff; color: white; }
@@ -37,7 +37,7 @@
         }
         .message-header { display: flex; align-items: center; margin-bottom: 2px; }
         .message-name { font-weight: bold; color: #1a1a1a; margin-right: 8px; }
-        .message-role { font-size: 12px; padding: 2px 6px; border-radius: 10px; color: white; }
+        .message-role { font-size: 12px; padding: 2px 6px; border-radius: 10px; color: #333; background:#f0f0f0; }
         .message-country { font-size: 12px; color: #666; margin-left: 8px; }
         .message-time { font-size: 12px; color: #999; margin-left: auto; }
         .message-bubble {
@@ -215,6 +215,8 @@
                 </div>
                 <!-- 表情面板 -->
                 <div id="emojiPanel" class="emoji-picker" style="display:none;position:absolute;z-index:1001;"></div>
+                <!-- 图片预览面板 -->
+                <div id="imagePreviewPanel" style="display:none;position:absolute;z-index:1002;background:#fff;border:1px solid #ddd;padding:8px;"></div>
                 <!-- 引用条 -->
                 <div id="quoteBar" style="display:none;background:#f5f5f5;border-left:3px solid #0084ff;padding:6px 12px;margin-bottom:4px;color:#555;font-size:13px;">
                     <div style="display:flex;align-items:center;">
@@ -517,7 +519,7 @@
                             <span class="message-role role-${message.role}">${getRoleName(message.role)}</span>
                             <span class="message-country">${message.country}</span>
                             <button class="quote-btn" data-msgid="${message.id}" data-from="${message.userId || ''}" style="margin-left:8px;font-size:12px;color:#0084ff;background:none;border:none;cursor:pointer;">引用</button>
-                            ${isOwnMessage ? `<button class="edit-btn" data-msgid="${message.id}" style="margin-left:6px;font-size:12px;color:#28a745;background:none;border:none;cursor:pointer;">编辑</button><button class="revoke-btn" data-msgid="${message.id}" style="margin-left:6px;font-size:12px;color:#dc3545;background:none;border:none;cursor:pointer;">撤回</button>` : ''}
+                            ${isOwnMessage ? `<button class="revoke-btn" data-msgid="${message.id}" style="margin-left:6px;font-size:12px;color:#dc3545;background:none;border:none;cursor:pointer;">撤回</button>` : ''}
                         </div>
                         ${quoteHtml}
                         <div class="message-bubble${message.revoked ? ' revoked' : ''}${isOwnMessage ? ' own' : ''}">
@@ -816,6 +818,8 @@ emojiBtn.addEventListener('click', e => {
   // 切换显示/隐藏
   if (emojiPanel.style.display === 'block') {
     emojiPanel.style.display = 'none';
+    emojiPanel.style.left = '';
+    emojiPanel.style.top = '';
     return;
   }
   // 显示前隐式隐藏、设置定位
@@ -853,16 +857,21 @@ emojiPanel.addEventListener('click', function(e) {
                 messageInput.focus();
                 messageInput.setSelectionRange(cursorPos + emoji.length, cursorPos + emoji.length);
                 emojiPanel.style.display = 'none';
+                emojiPanel.style.left = '';
+                emojiPanel.style.top = '';
             }
         });
         document.addEventListener('click', function(e) {
             if (!emojiPanel.contains(e.target) && e.target !== emojiBtn) {
                 emojiPanel.style.display = 'none';
+                emojiPanel.style.left = '';
+                emojiPanel.style.top = '';
             }
         });
         // ========== 图片按钮功能 ==========
         const imageBtn = document.getElementById('imageBtn');
         const imageInput = document.getElementById('imageInput');
+        const imagePreviewPanel = document.getElementById('imagePreviewPanel');
         let selectedImageFile = null;
         imageBtn.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -873,10 +882,48 @@ emojiPanel.addEventListener('click', function(e) {
             const file = e.target.files[0];
             if (file && file.type.startsWith('image/')) {
                 selectedImageFile = file;
-                // 直接上传图片
-                sendImageFile(selectedImageFile);
+                showImagePreview(file);
             }
         });
+
+        function showImagePreview(data) {
+            let src = '';
+            let alt = '';
+            let imageId = '';
+            if (data instanceof File) {
+                src = URL.createObjectURL(data);
+                alt = data.name;
+                imagePreviewPanel.dataset.type = 'file';
+                imagePreviewPanel.dataset.alt = alt;
+            } else if (data && data.url) {
+                src = data.url;
+                alt = data.alt || '图片';
+                imageId = data.imageId || '';
+                imagePreviewPanel.dataset.type = 'url';
+                imagePreviewPanel.dataset.url = src;
+                imagePreviewPanel.dataset.imageId = imageId;
+                imagePreviewPanel.dataset.alt = alt;
+            } else {
+                return;
+            }
+            imagePreviewPanel.innerHTML = `<img src="${src}" alt="${alt}" style="max-width:150px;max-height:150px;border-radius:6px;display:block;margin-bottom:6px;">`+
+                `<div style="text-align:right;"><button id="sendImageConfirmBtn" style="margin-right:8px;">发送</button><button id="cancelImageBtn">取消</button></div>`;
+            imagePreviewPanel.style.display = 'block';
+            const rect = imageBtn.getBoundingClientRect();
+            const { scrollLeft, scrollTop } = document.documentElement;
+            imagePreviewPanel.style.left = (scrollLeft + rect.left) + 'px';
+            imagePreviewPanel.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+        }
+
+        function hideImagePreview() {
+            imagePreviewPanel.style.display = 'none';
+            imagePreviewPanel.innerHTML = '';
+            delete imagePreviewPanel.dataset.type;
+            delete imagePreviewPanel.dataset.url;
+            delete imagePreviewPanel.dataset.imageId;
+            delete imagePreviewPanel.dataset.alt;
+            selectedImageFile = null;
+        }
         async function sendImageFile(file) {
             try {
                 const formData = new FormData();
@@ -900,6 +947,7 @@ emojiPanel.addEventListener('click', function(e) {
                 }));
                 selectedImageFile = null;
                 imageInput.value = '';
+                hideImagePreview();
             } catch (err) {
                 alert('图片上传失败: ' + err.message);
             }
@@ -931,15 +979,37 @@ emojiPanel.addEventListener('click', function(e) {
                     sendRevoke(id);
                 }
             }
-            if (e.target.classList.contains('edit-btn')) {
-                const id = e.target.getAttribute('data-msgid');
-                const msg = messages.find(m => m.id === id);
-                if (msg) {
-                    const newText = prompt('修改消息内容', typeof msg.content === 'string' ? msg.content : '');
-                    if (newText !== null) {
-                        sendEdit(id, newText);
-                    }
+            if (e.target.classList.contains('re-edit')) {
+                const id = e.target.getAttribute('data-id');
+                const content = revokedCache[id];
+                if (content && typeof content === 'object') {
+                    showImagePreview(content);
+                } else {
+                    const input = document.getElementById('messageInput');
+                    input.value = content || '';
+                    input.focus();
                 }
+            }
+            if (e.target.id === 'sendImageConfirmBtn') {
+                if (imagePreviewPanel.dataset.type === 'file' && selectedImageFile) {
+                    sendImageFile(selectedImageFile);
+                } else if (imagePreviewPanel.dataset.type === 'url') {
+                    ws.send(JSON.stringify({
+                        type: 'image',
+                        content: {
+                            url: imagePreviewPanel.dataset.url,
+                            imageId: imagePreviewPanel.dataset.imageId,
+                            alt: imagePreviewPanel.dataset.alt || '图片'
+                        }
+                    }));
+                }
+                hideImagePreview();
+            }
+            if (e.target.id === 'cancelImageBtn') {
+                hideImagePreview();
+            }
+            if (imagePreviewPanel.style.display === 'block' && !imagePreviewPanel.contains(e.target) && e.target !== imageBtn) {
+                hideImagePreview();
             }
             if (e.target.classList.contains('re-edit')) {
                 const id = e.target.getAttribute('data-id');
@@ -993,35 +1063,6 @@ emojiPanel.addEventListener('click', function(e) {
         function sendRevoke(id) {
             if (ws) {
                 ws.send(JSON.stringify({ type: 'revokeMessage', messageId: id }));
-            }
-        }
-
-        // 编辑消息
-        async function sendEdit(id, newText) {
-            try {
-                const res = await fetch('/api/messages/' + id, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + localStorage.getItem('token')
-                    },
-                    body: JSON.stringify({ content: newText })
-                });
-                await handleApiResponse(res);
-                if (res.ok) {
-                    const msg = messages.find(m => m.id === id);
-                    if (msg) {
-                        msg.content = newText;
-                        msg.edited = true;
-                    }
-                    const bubble = document.querySelector('#msg-' + id + ' .message-bubble');
-                    if (bubble) bubble.textContent = newText + ' (已编辑)';
-                } else {
-                    const err = await res.json();
-                    alert(err.error || '编辑失败');
-                }
-            } catch (err) {
-                alert('编辑失败: ' + err.message);
             }
         }
 
