@@ -58,5 +58,45 @@
     "mimetype": "image/png",
     "size": 119571,
     "roomId": "test-room"
+  },
+  {
+    "id": "1751271923137",
+    "filename": "1751271923134______________2024-11-17_172106.png",
+    "originalname": "å±å¹æªå¾ 2024-11-17 172106.png",
+    "uploader": "admin",
+    "uploadTime": "2025-06-30T08:25:23.137Z",
+    "mimetype": "image/png",
+    "size": 82497,
+    "roomId": "test-room"
+  },
+  {
+    "id": "1751271931005",
+    "filename": "1751271931003______________2024-11-17_172106.png",
+    "originalname": "å±å¹æªå¾ 2024-11-17 172106.png",
+    "uploader": "admin",
+    "uploadTime": "2025-06-30T08:25:31.005Z",
+    "mimetype": "image/png",
+    "size": 82497,
+    "roomId": "test-room"
+  },
+  {
+    "id": "1751272028251",
+    "filename": "1751272028250______________2024-11-18_105812.png",
+    "originalname": "å±å¹æªå¾ 2024-11-18 105812.png",
+    "uploader": "admin",
+    "uploadTime": "2025-06-30T08:27:08.251Z",
+    "mimetype": "image/png",
+    "size": 119571,
+    "roomId": "test-room"
+  },
+  {
+    "id": "1751281208396",
+    "filename": "1751281208385______________2024-11-17_172106.png",
+    "originalname": "å±å¹æªå¾ 2024-11-17 172106.png",
+    "uploader": "admin",
+    "uploadTime": "2025-06-30T11:00:08.396Z",
+    "mimetype": "image/png",
+    "size": 82497,
+    "roomId": "test-room"
   }
 ]

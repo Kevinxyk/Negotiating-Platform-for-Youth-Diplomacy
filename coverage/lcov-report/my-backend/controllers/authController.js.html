@@ -23,9 +23,9 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.32% </span>
+                <span class="strong">12.96% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>6/53</span>
+                <span class='fraction'>7/54</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">11.32% </span>
+                <span class="strong">12.96% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>6/53</span>
+                <span class='fraction'>7/54</span>
             </div>
         
             
@@ -196,12 +196,31 @@
 <a name='L131'></a><a href='#L131'>131</a>
 <a name='L132'></a><a href='#L132'>132</a>
 <a name='L133'></a><a href='#L133'>133</a>
-<a name='L134'></a><a href='#L134'>134</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L134'></a><a href='#L134'>134</a>
+<a name='L135'></a><a href='#L135'>135</a>
+<a name='L136'></a><a href='#L136'>136</a>
+<a name='L137'></a><a href='#L137'>137</a>
+<a name='L138'></a><a href='#L138'>138</a>
+<a name='L139'></a><a href='#L139'>139</a>
+<a name='L140'></a><a href='#L140'>140</a>
+<a name='L141'></a><a href='#L141'>141</a>
+<a name='L142'></a><a href='#L142'>142</a>
+<a name='L143'></a><a href='#L143'>143</a>
+<a name='L144'></a><a href='#L144'>144</a>
+<a name='L145'></a><a href='#L145'>145</a>
+<a name='L146'></a><a href='#L146'>146</a>
+<a name='L147'></a><a href='#L147'>147</a>
+<a name='L148'></a><a href='#L148'>148</a>
+<a name='L149'></a><a href='#L149'>149</a>
+<a name='L150'></a><a href='#L150'>150</a>
+<a name='L151'></a><a href='#L151'>151</a>
+<a name='L152'></a><a href='#L152'>152</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -236,6 +255,21 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -268,12 +302,14 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -332,6 +368,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">"use strict";
 const bcrypt = require('bcryptjs');
 const userService = require('../services/userService');
+const userProfileService = require('../services/userProfileService');
 const { generateToken } = require('../middleware/auth');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -366,8 +403,23 @@ async function <span class="fstat-no" title="function not covered" >register(</s
       role
     });
 &nbsp;
+    // 创建用户档案
+<span class="cstat-no" title="statement not covered" >    userProfileService.createUser({</span>
+      userId: user.userId,
+      username,
+      role
+    });
+&nbsp;
     // 生成 token
-    const token = <span class="cstat-no" title="statement not covered" >generateToken(user);</span>
+    const token = <span class="cstat-no" title="statement not covered" >jwt.sign({ userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '2h' });</span>
+&nbsp;
+    // 注册成功后同样写cookie
+<span class="cstat-no" title="statement not covered" >    res.cookie('token', token, {</span>
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2 * 60 * 60 * 1000
+    });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.status(201).json({</span>
       message: '注册成功',
@@ -395,18 +447,20 @@ async function <span class="fstat-no" title="function not covered" >login(</span
 &nbsp;
     // 查找用户
     const user = <span class="cstat-no" title="statement not covered" >await userService.findByUsername(username);</span>
-<span class="cstat-no" title="statement not covered" >    if (!user) {</span>
-<span class="cstat-no" title="statement not covered" >      return res.status(401).json({ error: '用户名或密码错误' });</span>
-    }
-&nbsp;
-    // 验证密码
-    const isValid = <span class="cstat-no" title="statement not covered" >await bcrypt.compare(password, user.passwordHash);</span>
-<span class="cstat-no" title="statement not covered" >    if (!isValid) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!user || !userService.verifyPassword(user, password)) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(401).json({ error: '用户名或密码错误' });</span>
     }
 &nbsp;
     // 生成 token
-    const token = <span class="cstat-no" title="statement not covered" >generateToken(user);</span>
+    const token = <span class="cstat-no" title="statement not covered" >jwt.sign({ userId: user.userId, role: user.role }, JWT_SECRET, { expiresIn: '2h' });</span>
+&nbsp;
+    // 登录成功后用Set-Cookie写入token
+<span class="cstat-no" title="statement not covered" >    res.cookie('token', token, {</span>
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 2 * 60 * 60 * 1000
+    });
 &nbsp;
 <span class="cstat-no" title="statement not covered" >    res.json({</span>
       message: '登录成功',
@@ -469,7 +523,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-19T11:28:51.984Z
+                at 2025-06-30T08:32:22.047Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
