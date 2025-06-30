@@ -394,11 +394,25 @@ const persistence = {
       writeData(FILES.ROOMS, store.rooms);
     }
     
-    // 加载消息数据
+    // 加载消息数据（包含按房间存储的消息）
     const messages = this.messages.getAll();
-    if (messages.length > 0) {
-      store.messages = messages;
-    } else if (store.messages.length > 0) {
+    store.messages = messages.length > 0 ? messages : [];
+
+    // 兼容 rooms 目录中的历史消息
+    const roomsRoot = path.join(DATA_DIR, 'rooms');
+    if (fs.existsSync(roomsRoot)) {
+      const roomIds = fs
+        .readdirSync(roomsRoot)
+        .filter(f => fs.statSync(path.join(roomsRoot, f)).isDirectory());
+      roomIds.forEach(roomId => {
+        const roomMsgs = this.rooms.getRoomData(roomId, 'messages');
+        if (Array.isArray(roomMsgs) && roomMsgs.length > 0) {
+          store.messages.push(...roomMsgs);
+        }
+      });
+    }
+    if (messages.length === 0 && store.messages.length > 0) {
+      // 若旧全局文件为空但内存有数据，保存回文件
       writeData(FILES.MESSAGES, store.messages);
     }
     
