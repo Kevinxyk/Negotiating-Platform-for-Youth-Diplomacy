@@ -521,6 +521,7 @@
                             <span class="message-country">${message.country}</span>
                             <button class="quote-btn" data-msgid="${message.id}" data-from="${message.userId || ''}" style="margin-left:8px;font-size:12px;color:#0084ff;background:none;border:none;cursor:pointer;">引用</button>
                             ${canRevoke ? `<button class="revoke-btn" data-msgid="${message.id}" style="margin-left:6px;font-size:12px;color:#dc3545;background:none;border:none;cursor:pointer;">撤回</button>` : ''}
+
                         </div>
                         ${quoteHtml}
                         <div class="message-bubble${message.revoked ? ' revoked' : ''}${isOwnMessage ? ' own' : ''}">
@@ -1003,6 +1004,34 @@ emojiPanel.addEventListener('click', function(e) {
             }
             if (imagePreviewPanel.style.display === 'block' && !imagePreviewPanel.contains(e.target) && e.target !== imageBtn) {
                 hideImagePreview();
+            }
+            if (e.target.id === 'sendImageConfirmBtn') {
+                if (imagePreviewPanel.dataset.type === 'file' && selectedImageFile) {
+                    sendImageFile(selectedImageFile);
+                } else if (imagePreviewPanel.dataset.type === 'url') {
+                    ws.send(JSON.stringify({
+                        type: 'image',
+                        content: {
+                            url: imagePreviewPanel.dataset.url,
+                            imageId: imagePreviewPanel.dataset.imageId,
+                            alt: imagePreviewPanel.dataset.alt || '图片'
+                        }
+                    }));
+                }
+                hideImagePreview();
+            }
+            if (e.target.id === 'cancelImageBtn') {
+                hideImagePreview();
+            }
+            if (imagePreviewPanel.style.display === 'block' && !imagePreviewPanel.contains(e.target) && e.target !== imageBtn) {
+                hideImagePreview();
+            }
+            if (e.target.classList.contains('re-edit')) {
+                const id = e.target.getAttribute('data-id');
+                const content = revokedCache[id] || '';
+                const input = document.getElementById('messageInput');
+                input.value = content;
+                input.focus();
             }
         });
         // 显示引用条
