@@ -1956,7 +1956,7 @@ async function <span class="fstat-no" title="function not covered" >joinRoom(</s
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
     
     // 检查是否已加入
-<span class="cstat-no" title="statement not covered" >    if (room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId)</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId)</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: '已经加入该房间' });</span>
     }
     
@@ -1967,7 +1967,7 @@ async function <span class="fstat-no" title="function not covered" >joinRoom(</s
     
     // 添加参与者
 <span class="cstat-no" title="statement not covered" >    room.participants.push({</span>
-      user: user.userId,
+      userId: user.userId,
       role: 'observer'
     });
     
@@ -1993,7 +1993,7 @@ async function <span class="fstat-no" title="function not covered" >deleteRoom(<
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
     const isCreator = <span class="cstat-no" title="statement not covered" >room.createdBy === user.userId;</span>
-    const isRoomAdmin = <span class="cstat-no" title="statement not covered" >room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId &amp;&amp; p.role === 'admin')</span>;</span>
+    const isRoomAdmin = <span class="cstat-no" title="statement not covered" >room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId &amp;&amp; p.role === 'admin')</span>;</span>
 &nbsp;
     // 允许房间创建者、房间管理员或具有全局 admin 角色的用户删除房间
 <span class="cstat-no" title="statement not covered" >    if (!(isCreator || isRoomAdmin || user.role === 'admin')) {</span>
@@ -2054,7 +2054,7 @@ async function <span class="fstat-no" title="function not covered" >joinRoomByIn
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
     
     // 检查是否已加入
-<span class="cstat-no" title="statement not covered" >    if (room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId)</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId)</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(400).json({ error: '已经加入该房间' });</span>
     }
     
@@ -2065,7 +2065,7 @@ async function <span class="fstat-no" title="function not covered" >joinRoomByIn
     
     // 添加参与者
 <span class="cstat-no" title="statement not covered" >    room.participants.push({</span>
-      user: user.userId,
+      userId: user.userId,
       role: 'observer'
     });
     
@@ -2091,7 +2091,7 @@ async function <span class="fstat-no" title="function not covered" >leaveRoom(</
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
     
     // 移除参与者
-<span class="cstat-no" title="statement not covered" >    room.participants = room.participants.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user !== user.userId)</span>;</span>
+<span class="cstat-no" title="statement not covered" >    room.participants = room.participants.filter(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId !== user.userId)</span>;</span>
     
     // 如果房间空了，删除房间
 <span class="cstat-no" title="statement not covered" >    if (room.participants.length === 0) {</span>
@@ -2103,7 +2103,7 @@ async function <span class="fstat-no" title="function not covered" >leaveRoom(</
 <span class="cstat-no" title="statement not covered" >    if (room.createdBy === user.userId) {</span>
       const admin = <span class="cstat-no" title="statement not covered" >room.participants.find(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.role === 'admin')</span>;</span>
 <span class="cstat-no" title="statement not covered" >      if (admin) {</span>
-<span class="cstat-no" title="statement not covered" >        room.createdBy = admin.user;</span>
+<span class="cstat-no" title="statement not covered" >        room.createdBy = admin.userId;</span>
 <span class="cstat-no" title="statement not covered" >        admin.role = 'host';</span>
       }
     }
@@ -2127,11 +2127,11 @@ async function <span class="fstat-no" title="function not covered" >updatePartic
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限修改角色' });</span>
     }
     
-    const participant = <span class="cstat-no" title="statement not covered" >room.participants.find(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === userId)</span>;</span>
+    const participant = <span class="cstat-no" title="statement not covered" >room.participants.find(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === userId)</span>;</span>
     
 <span class="cstat-no" title="statement not covered" >    if (!participant) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(404).json({ error: '参与者不存在' });</span>
@@ -2156,7 +2156,7 @@ async function <span class="fstat-no" title="function not covered" >startSchedul
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限开始日程' });</span>
     }
     
@@ -2184,7 +2184,7 @@ async function <span class="fstat-no" title="function not covered" >pauseSchedul
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限暂停日程' });</span>
     }
     
@@ -2207,7 +2207,7 @@ async function <span class="fstat-no" title="function not covered" >resumeSchedu
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限继续日程' });</span>
     }
     
@@ -2230,7 +2230,7 @@ async function <span class="fstat-no" title="function not covered" >completeCurr
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId &amp;&amp; p.role === 'admin')</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限完成日程项' });</span>
     }
     
@@ -2256,7 +2256,7 @@ async function <span class="fstat-no" title="function not covered" >getMessages(
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId)</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId)</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限查看消息' });</span>
     }
     
@@ -2285,7 +2285,7 @@ async function <span class="fstat-no" title="function not covered" >sendMessage(
     
     // 检查权限
     const user = <span class="cstat-no" title="statement not covered" >await userService.findById(req.user.userId);</span>
-<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.user === user.userId)</span>) {</span>
+<span class="cstat-no" title="statement not covered" >    if (!room.participants.some(<span class="fstat-no" title="function not covered" >p </span>=&gt; <span class="cstat-no" title="statement not covered" >p.userId === user.userId)</span>) {</span>
 <span class="cstat-no" title="statement not covered" >      return res.status(403).json({ error: '没有权限发送消息' });</span>
     }
     
@@ -2737,7 +2737,7 @@ module.exports = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-06-19T11:28:51.984Z
+                at 2025-06-30T08:32:22.047Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
