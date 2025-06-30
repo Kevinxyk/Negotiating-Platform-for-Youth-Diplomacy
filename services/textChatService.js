@@ -4,12 +4,10 @@ const { messages: defaults } = require("../data/messages");
 const store = require('../data/store');
 const persistence = require('../data/persistence');
 
-
 // 直接使用 store.messages，避免引用失效
 function getMessagesArray() {
   return store.messages;
 }
-
 const _clearedRooms = new Set();
 async function clearRoomMessages(room) {
   if (_clearedRooms.has(room)) return;
