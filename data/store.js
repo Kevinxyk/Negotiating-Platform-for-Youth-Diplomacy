@@ -192,6 +192,8 @@ store.addMessage = function(message) {
   const msgs = persistence.rooms.getRoomData(message.room, 'messages');
   msgs.push(message);
   persistence.rooms.setRoomData(message.room, 'messages', msgs);
+  // 同步到内存存储，便于即时查询
+  store.messages.push(message);
   return message;
 };
 
@@ -433,6 +435,7 @@ store.addMessage = function(message) {
   const msgs = persistence.rooms.getRoomData(message.room, 'messages');
   msgs.push(message);
   persistence.rooms.setRoomData(message.room, 'messages', msgs);
+  store.messages.push(message);
   return message;
 };
 
