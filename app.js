@@ -199,7 +199,6 @@ wss.on('connection', (ws, req) => {
             }));
             return;
           }
-          
           // Validate message content
           if (!message.content || typeof message.content !== 'string' || message.content.trim().length === 0) {
             ws.send(JSON.stringify({
@@ -208,10 +207,8 @@ wss.on('connection', (ws, req) => {
             }));
             return;
           }
-          
           // 处理表情
           const processedContent = await processEmojiMessage(message.content.trim());
-          
           const username = message.username || userInfo.username;
           const groupMessage = {
             type: 'chat',
@@ -227,9 +224,9 @@ wss.on('connection', (ws, req) => {
             revoked: false,
             edited: false,
             deleted: false,
-            avatarUrl: userInfo.avatarUrl || AvatarService.getUserAvatarUrl(userInfo.userId, userInfo.username, userInfo.role)
+            avatarUrl: userInfo.avatarUrl || AvatarService.getUserAvatarUrl(userInfo.userId, userInfo.username, userInfo.role),
+            ...(message.quote ? { quote: message.quote } : {}) // 支持引用消息
           };
-
           // 保存到历史记录
           chatHistory.group.push(groupMessage);
           if (chatHistory.group.length > 100) {
@@ -248,9 +245,9 @@ wss.on('connection', (ws, req) => {
             timestamp: groupMessage.timestamp,
             edited: false,
             deleted: false,
-            revoked: false
+            revoked: false,
+            ...(message.quote ? { quote: message.quote } : {})
           });
-
           // 广播消息
           broadcastMessage(groupMessage);
           break;
@@ -396,6 +393,74 @@ wss.on('connection', (ws, req) => {
           handleTimerMessage(message, ws);
           break;
           
+        case 'editMessage':
+          // 编辑消息（WebSocket）
+          if (!userInfo) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: '请先加入聊天室'
+            }));
+            return;
+          }
+          if (!message.messageId || !message.newContent) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: '参数不完整'
+            }));
+            return;
+          }
+          // 查找消息
+          const editTarget = store.findMessageById(message.messageId, userInfo.room);
+          if (!editTarget) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: '消息不存在'
+            }));
+            return;
+          }
+          // 权限校验
+          const isEditAuthor = editTarget.username === userInfo.username;
+          const isEditAdmin = ['admin', 'sys', 'host'].includes(userInfo.role);
+          if (!isEditAuthor && !isEditAdmin) {
+            ws.send(JSON.stringify({
+              type: 'error',
+              message: '没有权限编辑此消息'
+            }));
+            return;
+          }
+          // 处理表情
+          const newProcessedContent = await processEmojiMessage(message.newContent.trim());
+          editTarget.content = newProcessedContent;
+          editTarget.edited = true;
+          editTarget.editTime = new Date().toISOString();
+          editTarget.editBy = userInfo.username;
+          // 日志
+          if (store.addMessageLog) {
+            store.addMessageLog({
+              action: 'edit',
+              messageId: editTarget.id,
+              originalContent: editTarget.content,
+              newContent: newProcessedContent,
+              editedBy: userInfo.username,
+              roomId: editTarget.room
+            });
+          }
+          // 广播编辑
+          broadcastMessage({
+            type: 'messageEdited',
+            messageId: editTarget.id,
+            newContent: newProcessedContent,
+            editedBy: userInfo.username,
+            editTime: editTarget.editTime,
+            room: editTarget.room
+          });
+          ws.send(JSON.stringify({
+            type: 'messageEdited',
+            messageId: editTarget.id,
+            success: true
+          }));
+          break;
+          
         case 'revokeMessage':
           // 处理消息撤回
           if (!userInfo) {
@@ -405,7 +470,6 @@ wss.on('connection', (ws, req) => {
             }));
             return;
           }
-          
           if (!message.messageId) {
             ws.send(JSON.stringify({
               type: 'error',
@@ -413,9 +477,8 @@ wss.on('connection', (ws, req) => {
             }));
             return;
           }
-          
           // 查找消息
-          const targetMessage = store.findMessageById(message.messageId);
+          const targetMessage = store.findMessageById(message.messageId, userInfo.room);
           if (!targetMessage) {
             ws.send(JSON.stringify({
               type: 'error',
@@ -423,11 +486,9 @@ wss.on('connection', (ws, req) => {
             }));
             return;
           }
-          
           // 检查权限：消息作者或管理员角色可以撤回
           const isAuthor = targetMessage.username === userInfo.username;
           const isAdmin = ['admin', 'sys', 'host'].includes(userInfo.role);
-          
           if (!isAuthor && !isAdmin) {
             ws.send(JSON.stringify({
               type: 'error',
@@ -435,13 +496,28 @@ wss.on('connection', (ws, req) => {
             }));
             return;
           }
-          
           // 撤回消息
           targetMessage.revoked = true;
           targetMessage.revokeTime = new Date().toISOString();
           targetMessage.revokedBy = userInfo.username;
-          
-          // 广播撤回状态，补全所有字段
+          // 日志
+          if (store.addMessageLog) {
+            store.addMessageLog({
+              action: 'revoke',
+              messageId: targetMessage.id,
+              content: targetMessage.content,
+              revokedBy: userInfo.username,
+              roomId: targetMessage.room
+            });
+          }
+          // 1. 单独发原内容给撤回人（回填输入框）
+          ws.send(JSON.stringify({
+            type: 'revokeMessage',
+            messageId: message.messageId,
+            content: targetMessage.content,
+            success: true
+          }));
+          // 2. 广播撤回提示给所有人
           broadcastMessage({
             type: 'messageRevoked',
             messageId: message.messageId,
@@ -454,13 +530,6 @@ wss.on('connection', (ws, req) => {
             timestamp: new Date().toISOString(),
             room: userInfo.room
           });
-          
-          // 发送成功响应
-          ws.send(JSON.stringify({
-            type: 'messageRevoked',
-            messageId: message.messageId,
-            success: true
-          }));
           break;
           
         case 'updateUserStatus':
@@ -572,7 +641,8 @@ wss.on('connection', (ws, req) => {
             revoked: false,
             edited: false,
             deleted: false,
-            avatarUrl: userInfo.avatarUrl || AvatarService.getUserAvatarUrl(userInfo.userId, userInfo.username, userInfo.role)
+            avatarUrl: userInfo.avatarUrl || AvatarService.getUserAvatarUrl(userInfo.userId, userInfo.username, userInfo.role),
+            ...(message.quote ? { quote: message.quote } : {}) // 支持图片引用
           };
           // 保存到历史记录
           chatHistory.group.push(imageMessage);
@@ -593,7 +663,8 @@ wss.on('connection', (ws, req) => {
             timestamp: imageMessage.timestamp,
             edited: false,
             deleted: false,
-            revoked: false
+            revoked: false,
+            ...(message.quote ? { quote: message.quote } : {})
           });
           // 广播消息
           broadcastMessage(imageMessage);

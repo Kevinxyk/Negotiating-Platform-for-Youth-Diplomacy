@@ -688,5 +688,55 @@
     "edited": false,
     "deleted": false,
     "revoked": false
+  },
+  {
+    "id": "e30d89eb-95e5-4cdd-a7d5-894269ee1a48",
+    "room": "test-room",
+    "sender": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "role": "admin",
+    "country": "中国",
+    "content": {
+      "url": "/uploads/images/1751110171777______________2024-11-18_105812.png",
+      "imageId": "1751110171788",
+      "alt": "å±å¹æªå¾ 2024-11-18 105812.png"
+    },
+    "text": "å±å¹æªå¾ 2024-11-18 105812.png",
+    "type": "image",
+    "timestamp": "2025-06-28T11:29:31.799Z",
+    "edited": false,
+    "deleted": false,
+    "revoked": false
+  },
+  {
+    "id": "cc4c5840-2b85-48c2-9baf-88f56a00859f",
+    "room": "test-room",
+    "sender": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "role": "admin",
+    "country": "中国",
+    "content": "fdsfdsf",
+    "text": "fdsfdsf",
+    "timestamp": "2025-06-30T06:54:39.662Z",
+    "edited": false,
+    "deleted": false,
+    "revoked": false
+  },
+  {
+    "id": "0648ef6b-a9f4-4fed-b356-2946fc856c22",
+    "room": "test-room",
+    "sender": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "role": "admin",
+    "country": "中国",
+    "content": "fdsafdsa",
+    "text": "fdsafdsa",
+    "timestamp": "2025-06-30T06:57:26.790Z",
+    "edited": false,
+    "deleted": false,
+    "revoked": false
   }
 ]

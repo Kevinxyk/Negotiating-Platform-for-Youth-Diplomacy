@@ -28,5 +28,75 @@
     "avatar": null,
     "createdAt": "2025-06-28T07:17:12.319Z",
     "updatedAt": "2025-06-28T07:17:12.319Z"
+  },
+  {
+    "userId": "b1e1e1e1-1111-1111-1111-111111111111",
+    "username": "admin",
+    "role": "admin",
+    "email": "admin@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
+  },
+  {
+    "userId": "b2e2e2e2-2222-2222-2222-222222222222",
+    "username": "host",
+    "role": "host",
+    "email": "host@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
+  },
+  {
+    "userId": "b3e3e3e3-3333-3333-3333-333333333333",
+    "username": "sys",
+    "role": "sys",
+    "email": "sys@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
+  },
+  {
+    "userId": "b4e4e4e4-4444-4444-4444-444444444444",
+    "username": "student",
+    "role": "student",
+    "email": "student@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
+  },
+  {
+    "userId": "b5e5e5e5-5555-5555-5555-555555555555",
+    "username": "observer",
+    "role": "observer",
+    "email": "observer@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
+  },
+  {
+    "userId": "b6e6e6e6-6666-6666-6666-666666666666",
+    "username": "judge",
+    "role": "judge",
+    "email": "judge@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
+  },
+  {
+    "userId": "b7e7e7e7-7777-7777-7777-777777777777",
+    "username": "delegate",
+    "role": "delegate",
+    "email": "delegate@example.com",
+    "country": "中国",
+    "avatar": null,
+    "createdAt": "2025-06-28T11:28:46.671Z",
+    "updatedAt": "2025-06-28T11:28:46.671Z"
   }
 ]
