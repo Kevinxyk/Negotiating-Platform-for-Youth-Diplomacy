@@ -33,7 +33,7 @@ body {
   color: #555;
 }
 #chatMessages:not(.simple-mode) .message-bubble {
-  max-width: 33vw;
+  max-width: 33%;
   padding: 0.6rem 1rem;
   border-radius: 1rem;
   word-wrap: break-word;
@@ -214,7 +214,7 @@ body {
 
 /* === patched 2025‑06‑27c === */
 .emoji-picker {
-  width: fit-content !important;
+  width: auto !important;
   max-width: 220px !important;
   max-height: 200px !important;
   overflow-y: auto !important;
@@ -237,7 +237,7 @@ body {
 .message-bubble {
   display: inline-block !important;
   width: auto !important;
-  max-width: 33vw !important;
+  max-width: 33% !important;
   min-width: 0 !important;
   padding: 6px 10px !important;
   white-space: pre-wrap !important;
@@ -250,7 +250,7 @@ body {
   flex-direction: column;
   align-items: flex-start;
   width: fit-content;
-  max-width: 33vw;
+  max-width: 33%;
 }
 .message-header {
   display: flex;
@@ -259,7 +259,7 @@ body {
 }
 .message-bubble {
   width: fit-content;
-  max-width: 33vw;
+  max-width: 33%;
   min-width: 0;
 }
 
@@ -298,7 +298,7 @@ body {
 }
 .message-bubble {
   width: fit-content;
-  max-width: 33vw;
+  max-width: 33%;
   min-width: 0;
   word-break: break-word;
   white-space: pre-wrap;
