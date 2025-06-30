@@ -41,7 +41,7 @@ async function getHistory(room, limit = 50, offset = 0) {
 }
 
 // 保存消息
-async function saveMessage(room, { username, country, role, text, userId }) {
+async function saveMessage(room, { username, country, role, text, userId, quoteId }) {
   const entry = {
     id:        uuidv4(),
     room,
@@ -51,8 +51,20 @@ async function saveMessage(room, { username, country, role, text, userId }) {
     role: role || 'user',
     text: sanitizeString(text),
     timestamp: new Date().toISOString(),
-    revoked:   false
+    revoked:   false,
+    quote: null
   };
+
+  if (quoteId) {
+    const target = messages.find(m => m.id === quoteId);
+    if (target) {
+      entry.quote = {
+        id: target.id,
+        username: target.username,
+        text: target.text
+      };
+    }
+  }
   
   messages.push(entry);
   
@@ -117,5 +129,11 @@ module.exports = {
   clearRoomMessages,
   getUserSummary,
   getTimeSummary,
-  searchMessages
+  searchMessages,
+  exportHistory
 };
+
+// 导出历史记录
+function exportHistory(room) {
+  return messages.filter(m => m.room === room);
+}
