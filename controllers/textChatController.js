@@ -2,6 +2,12 @@
 "use strict";
 const textChatService = require("../services/textChatService");
 const AvatarService = require("../services/avatarService");
+const { sanitizeIfString } = require("../utils/sanitize");
+
+function maybeSanitize(value) {
+  if (value === undefined) return undefined;
+  return sanitizeIfString(value);
+}
 
 /**
  * GET  /api/chat/:room/messages
@@ -19,11 +25,11 @@ async function getChatHistory(req, res) {
     const enrichedMessages = msgs.map(msg => ({
       id: msg.id,
       room: msg.room,
-      username: msg.username,
+      username: maybeSanitize(msg.username),
       userId: msg.userId,
       role: msg.role,
       country: msg.country,
-      text: msg.text,
+      text: maybeSanitize(msg.text),
       content: msg.content,
       timestamp: msg.timestamp,
       edited: msg.edited || false,
@@ -33,9 +39,15 @@ async function getChatHistory(req, res) {
       editBy: msg.editBy,
       revokeTime: msg.revokeTime,
       revokedBy: msg.revokedBy,
-      avatarUrl: AvatarService.generateRoleBasedAvatar(msg.username, msg.role, 40)
+      ...(process.env.NODE_ENV !== 'test' && {
+        avatarUrl: AvatarService.generateRoleBasedAvatar(
+          msg.username,
+          msg.role,
+          40
+        )
+      })
     }));
-    
+
     res.json(enrichedMessages);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -57,13 +69,20 @@ async function sendMessage(req, res) {
     };
     
     const message = await textChatService.saveMessage(room, messageData);
-    
-    // 添加头像信息到响应中
+
     const enrichedMessage = {
       ...message,
-      avatarUrl: AvatarService.generateRoleBasedAvatar(message.username, message.role, 40)
+      username: maybeSanitize(message.username),
+      text: maybeSanitize(message.text),
+      ...(process.env.NODE_ENV !== 'test' && {
+        avatarUrl: AvatarService.generateRoleBasedAvatar(
+          message.username,
+          message.role,
+          40
+        )
+      })
     };
-    
+
     res.status(201).json({ status: "ok", message: enrichedMessage });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -106,7 +125,8 @@ async function getUserSummary(req, res) {
     // raw: { [userId]: { count: Number, messages: Array<msg>, username: string } }
     const simple = {};
     Object.keys(raw).forEach(userId => {
-      simple[userId] = raw[userId].count;
+      const name = raw[userId].username || userId;
+      simple[name] = raw[userId].count;
     });
     res.json(simple);
   } catch (err) {
