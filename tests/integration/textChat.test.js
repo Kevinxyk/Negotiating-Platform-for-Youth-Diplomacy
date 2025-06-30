@@ -31,6 +31,20 @@ describe("Text Chat Module (integration)", () => {
     expect(res.body.some(m => m.text === "hello")).toBe(true);
   });
 
+  it("POST 带引用的消息", async () => {
+    // 获取之前的消息 id
+    const history = await request(app).get(`/api/chat/${room}/messages`);
+    const targetId = history.body.find(m => m.text === "hello").id;
+    const res = await request(app)
+      .post(`/api/chat/${room}/send`)
+      .send({ username:"U1", text:"reply", quoteId: targetId });
+    expect(res.statusCode).toBe(201);
+    const id = res.body.message.id;
+    const history2 = await request(app).get(`/api/chat/${room}/messages`);
+    const msg = history2.body.find(m => m.id === id);
+    expect(msg.quote && msg.quote.id).toBe(targetId);
+  });
+
   it("GET /api/chat/:room/summary/user", async () => {
     const res = await request(app).get(`/api/chat/${room}/summary/user`);
     expect(res.statusCode).toBe(200);
