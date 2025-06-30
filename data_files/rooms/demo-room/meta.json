@@ -1,0 +1,26 @@
+{
+  "id": "demo-room",
+  "name": "示例研讨室",
+  "description": "展示所有功能和角色的样板房间",
+  "maxParticipants": 20,
+  "isPrivate": false,
+  "createdBy": "b1e1e1e1-1111-1111-1111-111111111111",
+  "participants": [
+    { "userId": "b1e1e1e1-1111-1111-1111-111111111111", "role": "admin", "joinedAt": "2025-06-30T10:00:00.000Z" },
+    { "userId": "b2e2e2e2-2222-2222-2222-222222222222", "role": "host", "joinedAt": "2025-06-30T10:00:10.000Z" },
+    { "userId": "b3e3e3e3-3333-3333-3333-333333333333", "role": "sys", "joinedAt": "2025-06-30T10:00:20.000Z" },
+    { "userId": "b4e4e4e4-4444-4444-4444-444444444444", "role": "student", "joinedAt": "2025-06-30T10:00:30.000Z" },
+    { "userId": "b5e5e5e5-5555-5555-5555-555555555555", "role": "observer", "joinedAt": "2025-06-30T10:00:40.000Z" },
+    { "userId": "b6e6e6e6-6666-6666-6666-666666666666", "role": "judge", "joinedAt": "2025-06-30T10:00:50.000Z" },
+    { "userId": "b7e7e7e7-7777-7777-7777-777777777777", "role": "delegate", "joinedAt": "2025-06-30T10:01:00.000Z" }
+  ],
+  "schedule": [],
+  "settings": {
+    "allowMessageEdit": true,
+    "allowMessageDelete": true,
+    "allowRaiseHand": true,
+    "allowVoiceChat": true
+  },
+  "createdAt": "2025-06-30T10:00:00.000Z",
+  "updatedAt": "2025-06-30T10:00:00.000Z"
+}
