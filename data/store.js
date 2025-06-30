@@ -208,6 +208,10 @@ store.updateMessage = (message) => {
   if (idx !== -1) {
     msgs[idx] = { ...msgs[idx], ...message };
     persistence.rooms.setRoomData(message.room, 'messages', msgs);
+    const memIdx = store.messages.findIndex(m => m.id === message.id);
+    if (memIdx !== -1) {
+      store.messages[memIdx] = { ...store.messages[memIdx], ...message };
+    }
     return msgs[idx];
   }
   return null;
@@ -219,6 +223,10 @@ store.removeMessage = (messageId, roomId) => {
   if (idx !== -1) {
     msgs.splice(idx, 1);
     persistence.rooms.setRoomData(roomId, 'messages', msgs);
+    const memIdx = store.messages.findIndex(m => m.id === messageId);
+    if (memIdx !== -1) {
+      store.messages.splice(memIdx, 1);
+    }
     return true;
   }
   return false;
@@ -448,6 +456,10 @@ store.updateMessage = function(message) {
     if (idx !== -1) {
       msgs[idx] = updatedMessage;
       persistence.rooms.setRoomData(message.room, 'messages', msgs);
+      const memIdx = store.messages.findIndex(m => m.id === message.id);
+      if (memIdx !== -1) {
+        store.messages[memIdx] = updatedMessage;
+      }
     }
   }
   return updatedMessage;
@@ -462,6 +474,10 @@ store.removeMessage = function(messageId, roomId) {
     if (idx !== -1) {
       msgs.splice(idx, 1);
       persistence.rooms.setRoomData(roomId, 'messages', msgs);
+      const memIdx = store.messages.findIndex(m => m.id === messageId);
+      if (memIdx !== -1) {
+        store.messages.splice(memIdx, 1);
+      }
     }
   }
   return result;
