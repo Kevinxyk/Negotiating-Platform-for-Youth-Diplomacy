@@ -2,6 +2,12 @@
 "use strict";
 const textChatService = require("../services/textChatService");
 const AvatarService = require("../services/avatarService");
+const { sanitizeIfString } = require("../utils/sanitize");
+
+function maybeSanitize(value) {
+  if (value === undefined) return undefined;
+  return sanitizeIfString(value);
+}
 
 /**
  * GET  /api/chat/:room/messages
@@ -19,11 +25,11 @@ async function getChatHistory(req, res) {
     const enrichedMessages = msgs.map(msg => ({
       id: msg.id,
       room: msg.room,
-      username: msg.username,
+      username: maybeSanitize(msg.username),
       userId: msg.userId,
       role: msg.role,
       country: msg.country,
-      text: msg.text,
+      text: maybeSanitize(msg.text),
       content: msg.content,
       timestamp: msg.timestamp,
       edited: msg.edited || false,
@@ -63,9 +69,10 @@ async function sendMessage(req, res) {
     };
     
     const message = await textChatService.saveMessage(room, messageData);
-    
     const enrichedMessage = {
       ...message,
+      username: maybeSanitize(message.username),
+      text: maybeSanitize(message.text),
       ...(process.env.NODE_ENV !== 'test' && {
         avatarUrl: AvatarService.generateRoleBasedAvatar(
           message.username,

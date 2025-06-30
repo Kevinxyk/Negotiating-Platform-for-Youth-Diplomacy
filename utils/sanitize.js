@@ -7,4 +7,14 @@ function sanitizeString(input) {
     .replace(/"/g, "&quot;")
     .replace(/'/g, "&#39;");
 }
-module.exports = { sanitizeString };
+/**
+ * Sanitize the value only if it is a non-empty string. Otherwise return
+ * the value unchanged so objects like image payloads remain intact.
+ * @param {*} value
+ * @returns {*}
+ */
+function sanitizeIfString(value) {
+  return typeof value === "string" ? sanitizeString(value) : value;
+}
+
+module.exports = { sanitizeString, sanitizeIfString };
