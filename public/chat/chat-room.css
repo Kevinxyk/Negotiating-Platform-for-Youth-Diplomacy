@@ -214,7 +214,9 @@ body {
 
 /* === patched 2025‑06‑27c === */
 .emoji-picker {
-  width: auto !important;
+  width: fit-content !important;
+  max-width: 220px !important;
+
   max-height: 200px !important;
   overflow-y: auto !important;
   overflow-x: hidden !important;
@@ -222,14 +224,21 @@ body {
 }
 .emoji-grid {
   display: grid !important;
-  grid-template-columns: repeat(8, 1fr) !important;
+  grid-template-columns: repeat(8, 28px) !important;
   gap: 4px !important;
   padding: 8px !important;
+}
+.emoji-item {
+  width: 28px !important;
+  height: 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 .message-bubble {
   display: inline-block !important;
   width: auto !important;
-  max-width: 280px !important;
+  max-width: 33vw !important;
   min-width: 0 !important;
   padding: 6px 10px !important;
   white-space: pre-wrap !important;

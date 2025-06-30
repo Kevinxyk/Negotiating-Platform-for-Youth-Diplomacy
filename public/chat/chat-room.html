@@ -59,7 +59,7 @@
         }
         .message-bubble.revoked { background: #f1f3f4; color: #666; font-style: italic; }
         .chat-input { background: white; padding: 20px; border-top: 1px solid #e1e5e9; }
-        .input-container { display: flex; gap: 10px; }
+        .input-container { display: flex; gap: 10px; align-items: flex-end; }
         .message-input { 
             flex: 1; 
             padding: 8px 12px; 
@@ -112,7 +112,7 @@
             max-height: 200px;
             overflow-y: auto;
         }
-        .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 4px; }
+        .emoji-item { cursor: pointer; padding: 5px; text-align: center; border-radius: 4px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
         .emoji-item:hover { background: #f0f0f0; }
         .system-message { text-align: center; color: #666; font-style: italic; margin: 10px 0; }
         .raise-hand-btn { padding: 8px 16px; background: #ff9800; color: white; border: none; border-radius: 16px; cursor: pointer; margin-right: 10px; }
@@ -393,9 +393,17 @@
                         case 'revokeMessage':
                             // 自己撤回后收到，保存内容供重新编辑
                             revokedCache[message.messageId] = message.content;
-                            handleMessageRevoked(message.messageId, message.revokedBy, true);
+                            handleMessageRevoked(
+                                message.messageId,
+                                currentUser ? currentUser.username : '',
+                                true
+                            );
                             break;
                         case 'messageRevoked':
+                            if (currentUser && message.revokedBy === currentUser.username) {
+                                // 自己撤回的消息已处理
+                                break;
+                            }
                             handleMessageRevoked(message.messageId, message.revokedBy, false);
                             break;
                         case 'raiseHand':
@@ -582,14 +590,11 @@
         function handleMessageRevoked(messageId, by, isSelf) {
             const messageElement = document.getElementById('msg-' + messageId);
             if (messageElement) {
-                const bubble = messageElement.querySelector('.message-bubble');
-                if (bubble && !bubble.classList.contains('revoked')) {
-                    bubble.classList.add('revoked');
-                    bubble.textContent = '此消息已被撤回';
-                }
+                messageElement.remove();
             }
 
-            let tip = `${by} 撤回了一条消息`;
+            const name = by || '某人';
+            let tip = `${name} 撤回了一条消息`;
             if (isSelf) {
                 tip += `，<span class="re-edit" data-id="${messageId}">重新编辑</span>`;
             }
@@ -620,6 +625,8 @@
                 quote: currentQuote
             }));
             input.value = '';
+            input.style.height = '20px';
+            adjustTextareaHeight();
             currentQuote = null;
             hideQuoteBar();
         }
@@ -897,11 +904,7 @@ emojiPanel.addEventListener('click', function(e) {
                 alert('图片上传失败: ' + err.message);
             }
         }
-        document.addEventListener('click', function(e) {
-            if (!imagePreviewPanel.contains(e.target) && e.target !== imageBtn) {
-                imagePreviewPanel.style.display = 'none';
-            }
-        });
+
 
         // ========== 引用对话功能 ==========
         // 监听引用按钮点击
