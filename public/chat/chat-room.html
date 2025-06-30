@@ -27,11 +27,13 @@
         .message-item.own .message-bubble { background-color: #0084ff; color: white; }
         .message-item.own .message-bubble.own { background-color: #0084ff; color: white; }
         .message-avatar { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; }
-        .message-content { 
-            display: flex; 
-            flex-direction: column; 
-            max-width: 70%; 
-            margin-left: 12px; 
+        .message-content {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            width: fit-content;
+            max-width: 33vw;
+            margin-left: 12px;
         }
         .message-header { display: flex; align-items: center; margin-bottom: 2px; }
         .message-name { font-weight: bold; color: #1a1a1a; margin-right: 8px; }
@@ -100,7 +102,7 @@
             padding: 8px;
             display: none;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-            width: 280px;
+            width: auto;
 
         }
         .emoji-grid {
@@ -143,17 +145,6 @@
         .image-icon {
             color: white;
             font-size: 24px;
-        }
-        .image-caption {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 5px;
-            border-radius: 0 0 8px 8px;
-            text-align: center;
         }
         .message-image {
             max-width: 160px;
@@ -256,6 +247,7 @@
         let currentUser = null;
         let users = [];
         let messages = [];
+        let revokedCache = {};
         let isRaisingHand = false;
         let currentQuote = null;
 
@@ -398,8 +390,13 @@
                         case 'system':
                             addSystemMessage(message.message);
                             break;
+                        case 'revokeMessage':
+                            // 自己撤回后收到，保存内容供重新编辑
+                            revokedCache[message.messageId] = message.content;
+                            handleMessageRevoked(message.messageId, message.revokedBy, true);
+                            break;
                         case 'messageRevoked':
-                            handleMessageRevoked(message.messageId);
+                            handleMessageRevoked(message.messageId, message.revokedBy, false);
                             break;
                         case 'raiseHand':
                             handleRaiseHand(message);
@@ -541,7 +538,6 @@
                              onclick='openImageModal(this.src, "${message.content.alt || '图片'}")'
                              onerror='this.parentElement.innerHTML="<div class=\\"image-error\\"><span>📷 图片加载失败</span></div>"'>
                     </div>
-                    ${message.content.alt ? `<div class="image-caption">${message.content.alt}</div>` : ''}
                 </div>
             `;
         }
@@ -583,16 +579,21 @@
         }
 
         // 处理消息撤回
-        function handleMessageRevoked(messageId) {
-            const messageElements = document.querySelectorAll('.message-item');
-            messageElements.forEach(element => {
-                const messageBubble = element.querySelector('.message-bubble');
-                if (messageBubble && !messageBubble.classList.contains('revoked')) {
-                    // 这里可以通过消息ID来精确定位，简化处理
-                    messageBubble.classList.add('revoked');
-                    messageBubble.textContent = '此消息已被撤回';
+        function handleMessageRevoked(messageId, by, isSelf) {
+            const messageElement = document.getElementById('msg-' + messageId);
+            if (messageElement) {
+                const bubble = messageElement.querySelector('.message-bubble');
+                if (bubble && !bubble.classList.contains('revoked')) {
+                    bubble.classList.add('revoked');
+                    bubble.textContent = '此消息已被撤回';
                 }
-            });
+            }
+
+            let tip = `${by} 撤回了一条消息`;
+            if (isSelf) {
+                tip += `，<span class="re-edit" data-id="${messageId}">重新编辑</span>`;
+            }
+            addSystemMessage(tip);
         }
 
         // 处理举手
@@ -936,6 +937,13 @@ emojiPanel.addEventListener('click', function(e) {
                         sendEdit(id, newText);
                     }
                 }
+            }
+            if (e.target.classList.contains('re-edit')) {
+                const id = e.target.getAttribute('data-id');
+                const content = revokedCache[id] || '';
+                const input = document.getElementById('messageInput');
+                input.value = content;
+                input.focus();
             }
         });
         // 显示引用条
