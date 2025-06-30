@@ -1011,6 +1011,13 @@ emojiPanel.addEventListener('click', function(e) {
             if (imagePreviewPanel.style.display === 'block' && !imagePreviewPanel.contains(e.target) && e.target !== imageBtn) {
                 hideImagePreview();
             }
+            if (e.target.classList.contains('re-edit')) {
+                const id = e.target.getAttribute('data-id');
+                const content = revokedCache[id] || '';
+                const input = document.getElementById('messageInput');
+                input.value = content;
+                input.focus();
+            }
         });
         // 显示引用条
         function showQuoteBar() {
