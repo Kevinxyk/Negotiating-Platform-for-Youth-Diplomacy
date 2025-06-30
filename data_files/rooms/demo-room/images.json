@@ -1,0 +1,12 @@
+[
+  {
+    "id": "demo-img-1",
+    "filename": "sample.png",
+    "originalname": "sample.png",
+    "uploader": "admin",
+    "uploadTime": "2025-06-30T10:01:30.000Z",
+    "mimetype": "image/png",
+    "size": 12345,
+    "roomId": "demo-room"
+  }
+]

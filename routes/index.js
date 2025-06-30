@@ -9,6 +9,8 @@ const textChatCtrl  = require("../controllers/textChatController");
 const scoreCtrl     = require("../controllers/scoreController");
 const timeCtrl      = require("../controllers/timeController");
 const audioCtrl     = require("../controllers/audioController");
+const settingsRoutes = require("./settingsRoutes");
+const docRoutes = require("./docRoutes");
 
 // Chat 模块
 router.get(  "/chat/:room/messages",                       verifyToken, textChatCtrl.getChatHistory);
@@ -19,6 +21,8 @@ router.post( "/chat/:room/message/:messageId/revoke",
 router.get(  "/chat/:room/summary/user",                   verifyToken, textChatCtrl.getUserSummary);
 router.get(  "/chat/:room/summary/time",                   verifyToken, textChatCtrl.getTimeSummary);
 router.get(  "/chat/:room/search",                         verifyToken, textChatCtrl.searchChat);
+router.get(  "/chat/:room/export",                        verifyToken, textChatCtrl.exportHistory);
+router.post( "/chat/:room/clear",                         verifyToken, requireRoles(['admin']), textChatCtrl.clearHistory);
 router.get("/chat/:room/summary/user/details", verifyToken, textChatCtrl.getUserSummaryDetail);
 router.get("/chat/:room/summary/time/details", verifyToken, textChatCtrl.getTimeSummaryDetail);
 
@@ -74,10 +78,16 @@ router.get("/audio/:room/recordings",
   audioCtrl.getRecordings
 );
 
-router.delete("/audio/:room/recording/:recordingId", 
-  verifyToken, 
+router.delete("/audio/:room/recording/:recordingId",
+  verifyToken,
   audioCtrl.deleteRecording
 );
+
+// Settings module
+router.use('/settings', verifyToken, settingsRoutes);
+
+// Document collaboration
+router.use('/docs', verifyToken, docRoutes);
 
 // Voice Chat 模块
 router.post("/voice/chat/:room", 
