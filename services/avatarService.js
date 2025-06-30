@@ -43,7 +43,7 @@ class AvatarService {
    * @param {number} size - 头像尺寸
    * @returns {string} 头像URL
    */
-  generateRoleBasedAvatar(username, role, size = 40) {
+  generateRoleBasedAvatar(username = 'U', role = 'delegate', size = 40) {
     const roleColors = {
       'admin': '#ff4757',
       'host': '#2ed573',
@@ -55,7 +55,8 @@ class AvatarService {
     };
     
     const color = roleColors[role] || '#747d8c';
-    const initials = username.substring(0, 2).toUpperCase();
+    const safeName = (username || 'U').toString();
+    const initials = safeName.substring(0, 2).toUpperCase();
     
     // 生成SVG头像
     const svg = `
