@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const { messages: defaults } = require("../data/messages");
 const store = require('../data/store');
 const persistence = require('../data/persistence');
+const { sanitizeString } = require('../utils/sanitize');
 
 // 直接使用 store.messages，避免引用失效
 function getMessagesArray() {

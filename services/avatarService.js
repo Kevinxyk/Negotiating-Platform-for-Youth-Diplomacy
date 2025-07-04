@@ -6,7 +6,8 @@ const { v4: uuidv4 } = require('uuid');
 class AvatarService {
   constructor() {
     this.avatarDir = path.join(__dirname, '../uploads/avatars');
-    this.defaultAvatarDir = path.join(__dirname, '../public/assets/avatars');
+    // Default avatars are now stored under the new frontcode folder
+    this.defaultAvatarDir = path.join(__dirname, '../frontcode/assets/avatars');
     
     // 确保目录存在
     if (!fs.existsSync(this.avatarDir)) {

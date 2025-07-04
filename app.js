@@ -948,7 +948,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 // 静态资源服务，必须最先注册
-app.use(express.static(path.join(__dirname, "public")));
+// Serve static files from the new frontcode directory
+app.use(express.static(path.join(__dirname, "frontcode")));
 // 允许直接访问上传的文件，如 /uploads/images/xxx.png
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -962,26 +963,25 @@ app.use('/api', requireAuth, routes);
 
 // 研讨室列表与创建页面
 app.get('/rooms', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'rooms', 'rooms.html'));
+  // Redirect to the new livehome page
+  res.sendFile(path.join(__dirname, 'frontcode', 'livehome', 'index.html'));
 });
 app.get('/rooms/create', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'rooms', 'create-room.html'));
+  // Temporary redirect to the demo page
+  res.sendFile(path.join(__dirname, 'frontcode', 'demo', 'index.html'));
 });
 app.get('/rooms/:roomId', (req, res) => {
-  const template = req.query.template;
-  if (template === 'classic') {
-    res.sendFile(path.join(__dirname, 'public', 'chat', 'room.html'));
-  } else {
-    // 默认模板为新版 chat-room.html
-    res.sendFile(path.join(__dirname, 'public', 'chat', 'chat-room.html'));
-  }
+  // Use the demo page as the new room UI
+  res.sendFile(path.join(__dirname, 'frontcode', 'demo', 'index.html'));
 });
 
+// Allow access to the original frontend directory if needed
 app.use('/frontend', express.static(path.join(__dirname, "..", "frontend")));
 
 // 在 /api 之前加一个根路由
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index', 'index.html'));
+  // Serve the new homepage from frontcode
+  res.sendFile(path.join(__dirname, 'frontcode', 'home', 'index.html'));
 });
 
 // 认证路由
@@ -1010,36 +1010,36 @@ app.use('/api/debug', require('./routes/debugRoutes'));
 
 // 保留原 /test 路由，指向原始 API 测试页面
 app.get('/test', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'test.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'demo', 'index.html'));
 });
 
 // 新增测试路由 /test-room，指向前端研讨室登录测试页面
 app.get('/test-room', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'test-room.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'demo', 'index.html'));
 });
 
 // 用户列表页面
 app.get('/user-list', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'user-list.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'neighborhood', 'index.html'));
 });
 
 // 聊天室页面
 app.get('/chat-room', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'chat-room.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'demo', 'index.html'));
 });
 
 // 登录/注册相关路由
 app.get('/login', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'auth', 'login.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'login', 'index.html'));
 });
 app.get('/register', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'auth', 'register.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'register', 'index.html'));
 });
 app.get('/forgot-password', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'auth', 'forgot-password.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'login', 'index.html'));
 });
 app.get('/reset-password', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'auth', 'reset-password.html'));
+  res.sendFile(path.join(__dirname, 'frontcode', 'login', 'index.html'));
 });
 
 // 404 & 错误中间件
