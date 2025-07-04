@@ -39,18 +39,11 @@ async function getChatHistory(req, res) {
       editBy: msg.editBy,
       revokeTime: msg.revokeTime,
       revokedBy: msg.revokedBy,
-      quote: msg.quote
-        ? {
-            id: msg.quote.id,
-            username: maybeSanitize(msg.quote.username),
-            text: maybeSanitize(msg.quote.text)
-          }
-        : undefined,
-        ...(process.env.NODE_ENV !== 'test' && {
-          avatarUrl: AvatarService.generateRoleBasedAvatar(
-            msg.username,
-            msg.role,
-            40
+      ...(process.env.NODE_ENV !== 'test' && {
+        avatarUrl: AvatarService.generateRoleBasedAvatar(
+          msg.username,
+          msg.role,
+          40
         )
       })
     }));
@@ -76,19 +69,9 @@ async function sendMessage(req, res) {
       quoteId: req.body.quoteId
     };
     
-    const message = await textChatService.saveMessage(room, messageData);
-
+    const message = await textChatService.saveMessage(room, messageData); 
     const enrichedMessage = {
       ...message,
-      username: maybeSanitize(message.username),
-      text: maybeSanitize(message.text),
-      quote: message.quote
-        ? {
-            id: message.quote.id,
-            username: maybeSanitize(message.quote.username),
-            text: maybeSanitize(message.quote.text)
-          }
-        : undefined,
       ...(process.env.NODE_ENV !== 'test' && {
         avatarUrl: AvatarService.generateRoleBasedAvatar(
           message.username,
