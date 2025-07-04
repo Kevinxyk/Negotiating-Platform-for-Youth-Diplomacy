@@ -2,6 +2,12 @@
 "use strict";
 const textChatService = require("../services/textChatService");
 const AvatarService = require("../services/avatarService");
+const { sanitizeIfString } = require("../utils/sanitize");
+
+function maybeSanitize(value) {
+  if (value === undefined) return undefined;
+  return sanitizeIfString(value);
+}
 
 /**
  * GET  /api/chat/:room/messages
@@ -19,11 +25,11 @@ async function getChatHistory(req, res) {
     const enrichedMessages = msgs.map(msg => ({
       id: msg.id,
       room: msg.room,
-      username: msg.username,
+      username: maybeSanitize(msg.username),
       userId: msg.userId,
       role: msg.role,
       country: msg.country,
-      text: msg.text,
+      text: maybeSanitize(msg.text),
       content: msg.content,
       timestamp: msg.timestamp,
       edited: msg.edited || false,
@@ -59,11 +65,11 @@ async function sendMessage(req, res) {
       username: req.user.username === 'test' ? req.body.username : req.user.username,
       userId: req.user.userId,
       role: req.user.role,
-      country: req.body.country || ''
+      country: req.body.country || '',
+      quoteId: req.body.quoteId
     };
     
-    const message = await textChatService.saveMessage(room, messageData);
-    
+    const message = await textChatService.saveMessage(room, messageData); 
     const enrichedMessage = {
       ...message,
       ...(process.env.NODE_ENV !== 'test' && {
@@ -187,6 +193,27 @@ async function searchChat(req, res) {
   }
 }
 
+// GET /api/chat/:room/export
+async function exportHistory(req, res) {
+  try {
+    const room = req.params.room;
+    const history = textChatService.exportHistory(room);
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+// POST /api/chat/:room/clear
+async function clearHistory(req, res) {
+  try {
+    await textChatService.clearRoomMessages(req.params.room);
+    res.json({ status: 'cleared' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
 module.exports = {
   getChatHistory,
   sendMessage,
@@ -195,5 +222,7 @@ module.exports = {
   getTimeSummary,
   getUserSummaryDetail,
   getTimeSummaryDetail,
-  searchChat
+  searchChat,
+  exportHistory,
+  clearHistory
 };

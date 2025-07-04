@@ -2,29 +2,33 @@
 const { v4: uuidv4 } = require("uuid");
 const { messages: defaults } = require("../data/messages");
 const store = require('../data/store');
+const persistence = require('../data/persistence');
 
-// 全局消息存储
-const messages = store.messages;
-module.exports.messages = messages;
-
-// 记录哪些 room 已经清空过
+// 直接使用 store.messages，避免引用失效
+function getMessagesArray() {
+  return store.messages;
+}
 const _clearedRooms = new Set();
 async function clearRoomMessages(room) {
-  if (!_clearedRooms.has(room)) {
-    // 只在第一次调用时，移除所有该 room 的历史消息
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].room === room) messages.splice(i, 1);
-    }
-    _clearedRooms.add(room);
+  if (_clearedRooms.has(room)) return;
+  const arr = getMessagesArray();
+  for (let i = arr.length - 1; i >= 0; i--) {
+    if (arr[i].room === room) arr.splice(i, 1);
   }
+  const persisted = store.getMessages(room);
+  if (persisted.length > 0) {
+    persistence.rooms.setRoomData(room, 'messages', []);
+  }
+  _clearedRooms.add(room);
 }
 
 // 获取／种子系统消息
 async function getHistory(room, limit = 50, offset = 0) {
-  let roomMsgs = messages.filter(m => m.room === room);
+  const arr = getMessagesArray();
+  let roomMsgs = arr.filter(m => m.room === room);
   if (roomMsgs.length === 0) {
     defaults.forEach(dm => {
-      messages.push({
+      arr.push({
         id:        dm.id || uuidv4(),
         room,
         username:  dm.username,
@@ -34,46 +38,59 @@ async function getHistory(room, limit = 50, offset = 0) {
         revoked:   false
       });
     });
-    roomMsgs = messages.filter(m => m.room === room);
+    roomMsgs = arr.filter(m => m.room === room);
   }
   return roomMsgs.slice(offset, offset + limit);
 }
 
 // 保存消息
-async function saveMessage(room, { username, country, role, text, userId }) {
+async function saveMessage(room, { username, country, role, text, userId, quoteId }) {
   const entry = {
     id:        uuidv4(),
     room,
-    username,
+    username: sanitizeString(username),
     userId: userId || null, // 用户ID
     country: country || '',
     role: role || 'user',
-    text,
+    text: sanitizeString(text),
     timestamp: new Date().toISOString(),
-    revoked:   false
+    revoked:   false,
+    quote: null
   };
+
+  if (quoteId) {
+    const target = getMessagesArray().find(m => m.id === quoteId);
+    if (target) {
+      entry.quote = {
+        id: target.id,
+        username: target.username,
+        text: target.text
+      };
+    }
+  }
   
-  messages.push(entry);
-  
+  store.addMessage(entry);
   return entry;
 }
 
 // 撤回
 async function revokeMessage(id) {
-  const msg = messages.find(m => m.id === id);
+  const msg = getMessagesArray().find(m => m.id === id);
   if (!msg) return false;
   msg.revoked = true;
+  // persist the change so reloads keep the revoke status
+  store.updateMessage(msg);
   return true;
 }
 
 // 添加：根据消息 ID 获取消息
 async function getMessageById(id) {
-  return messages.find(m => m.id === id);
+  return getMessagesArray().find(m => m.id === id);
 }
 
 // 按用户汇总：不仅返回数量，也返回消息列表
 async function getUserSummary(room) {
-  const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
+  const roomMsgs = getMessagesArray().filter(m => m.room === room && !m.revoked);
   const byUser = {};
   roomMsgs.forEach(m => {
     if (!byUser[m.userId]) {
@@ -87,7 +104,7 @@ async function getUserSummary(room) {
 
 // 按小时汇总
 async function getTimeSummary(room) {
-  const roomMsgs = messages.filter(m => m.room === room && !m.revoked);
+  const roomMsgs = getMessagesArray().filter(m => m.room === room && !m.revoked);
   const byHour = {};
   roomMsgs.forEach(m => {
     const h = new Date(m.timestamp).getHours();
@@ -102,13 +119,13 @@ async function getTimeSummary(room) {
 
 // 搜索
 async function searchMessages(room, keyword) {
-  return messages.filter(
+  return getMessagesArray().filter(
     m => m.room === room && !m.revoked && m.text.includes(keyword)
   );
 }
 
 module.exports = {
-  messages,
+  get messages() { return store.messages; },
   getHistory,
   saveMessage,
   revokeMessage,
@@ -116,5 +133,11 @@ module.exports = {
   clearRoomMessages,
   getUserSummary,
   getTimeSummary,
-  searchMessages
+  searchMessages,
+  exportHistory
 };
+
+// 导出历史记录
+function exportHistory(room) {
+  return getMessagesArray().filter(m => m.room === room);
+}
