@@ -35,6 +35,7 @@ async function getChatHistory(req, res) {
       edited: msg.edited || false,
       deleted: msg.deleted || false,
       revoked: msg.revoked || false,
+      quote: msg.quote,
       editTime: msg.editTime,
       editBy: msg.editBy,
       revokeTime: msg.revokeTime,
