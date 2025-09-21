@@ -3,96 +3,454 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>研讨系统 - 首页</title>
+  <title>青年外交研讨平台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="assets/global.css" rel="stylesheet" />
-  <link href="index.css" rel="stylesheet" />
-  <script>
-    window.location.replace('/login');
-  </script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/assets/global.css" rel="stylesheet" />
+  <link href="/index/index.css" rel="stylesheet" />
 </head>
 <body>
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
     <div class="container">
-      <a class="navbar-brand" href="/">研讨系统</a>
+      <a class="navbar-brand" href="/">Youth Diplomacy</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link active" href="/">首页</a></li>
           <li class="nav-item"><a class="nav-link" href="/rooms">研讨室</a></li>
-          <li class="nav-item"><a class="nav-link" href="/login">登录</a></li>
-          <li class="nav-item"><a class="nav-link" href="/register">注册</a></li>
-          <li class="nav-item"><a class="nav-link" href="/help">帮助</a></li>
+          <li class="nav-item"><a class="nav-link" href="/help">帮助中心</a></li>
+        </ul>
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item nav-guest"><a class="nav-link" href="/login">登录</a></li>
+          <li class="nav-item nav-guest"><a class="nav-link" href="/register">注册</a></li>
+          <li class="nav-item dropdown d-none" id="navUserMenu">
+            <a class="nav-link dropdown-toggle" href="#" id="navUserDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle me-1"></i>
+              <span id="navUserName"></span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navUserDropdown">
+              <li><a class="dropdown-item" href="/profile">个人资料</a></li>
+              <li><a class="dropdown-item" href="/rooms">我的研讨室</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" id="navLogout">退出登录</a></li>
+            </ul>
+          </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- Carousel -->
-  <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-    <div class="carousel-indicators">
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active"></button>
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"></button>
-      <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"></button>
+  <!-- Hero Section -->
+  <section class="hero-section text-center text-lg-start">
+    <div class="hero-decoration"></div>
+    <div class="container hero-content">
+      <div class="tag mx-auto mx-lg-0">面向全球青年的外交实践课堂</div>
+      <h1 class="hero-title mt-4">构建下一代外交人才的协作与研讨平台</h1>
+      <p class="hero-description mt-3">
+        青年外交研讨平台帮助学生与青年学者沉浸式体验多边谈判与公共外交场景，
+        通过实时协作、角色扮演、智能记录与会后复盘工具，重塑你对国际议题研究与表达的想象。
+      </p>
+      <div class="hero-cta">
+        <div class="quick-access-card">
+          <div class="d-flex flex-column flex-lg-row align-items-lg-center gap-3">
+            <div class="flex-grow-1">
+              <label for="joinRoomId" class="form-label text-white-50 mb-2">快速加入研讨室</label>
+              <div class="input-group">
+                <input type="text" id="joinRoomId" class="form-control" placeholder="输入房间号或邀请码">
+                <button id="joinBtn" class="btn btn-primary">加入研讨</button>
+              </div>
+            </div>
+            <div>
+              <a href="/rooms/create" class="btn btn-outline-light px-4">
+                <i class="bi bi-plus-circle me-2"></i>创建研讨室
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="hero-badges justify-content-center justify-content-lg-start">
+          <span class="badge-item"><i class="bi bi-people-fill"></i> 多角色协同</span>
+          <span class="badge-item"><i class="bi bi-graph-up"></i> 智能数据复盘</span>
+          <span class="badge-item"><i class="bi bi-broadcast"></i> 实时音视频沟通</span>
+          <span class="badge-item"><i class="bi bi-shield-check"></i> 全程权限管控</span>
+        </div>
+      </div>
     </div>
-    <div class="carousel-inner">
-      <div class="carousel-item active">
-        <img src="/images/slide1.jpg" class="d-block w-100" alt="Slide 1">
-      </div>
-      <div class="carousel-item">
-        <img src="/images/slide2.jpg" class="d-block w-100" alt="Slide 2">
-      </div>
-      <div class="carousel-item">
-        <img src="/images/slide3.jpg" class="d-block w-100" alt="Slide 3">
-      </div>
-    </div>
-    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-      <span class="carousel-control-prev-icon"></span>
-    </button>
-    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-      <span class="carousel-control-next-icon"></span>
-    </button>
-  </div>
+  </section>
 
-  <!-- Quick Entry -->
-  <div class="container my-5 text-center">
-    <h1>欢迎使用研讨系统</h1>
-    <p>快速加入或创建研讨室，开始讨论</p>
-    <div class="row justify-content-center">
-      <div class="col-md-4">
-        <input type="text" id="joinRoomId" class="form-control" placeholder="输入房间号或邀请码">
+  <!-- Stats -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="row justify-content-center mb-4">
+        <div class="col-lg-8 text-center">
+          <h2 class="section-title">平台最新动态</h2>
+          <p class="section-subtitle">实时掌握研讨平台活跃度，洞察青年外交实践的节奏。</p>
+        </div>
       </div>
-      <div class="col-md-2">
-        <button id="joinBtn" class="btn btn-primary">加入研讨室</button>
+      <div class="stats-grid">
+        <div class="stat-card shadow-hover">
+          <div class="stat-value" id="statTotalRooms">0</div>
+          <div class="stat-label">累计研讨室</div>
+          <p class="mb-0 text-muted-soft small mt-2">涵盖模拟联合国、双边谈判、公共外交路演等不同议程形式。</p>
+        </div>
+        <div class="stat-card shadow-hover">
+          <div class="stat-value" id="statActiveRooms">0</div>
+          <div class="stat-label">本周活跃</div>
+          <p class="mb-0 text-muted-soft small mt-2">最近 7 天内持续开展会议、工作坊或成果讨论的房间。</p>
+        </div>
+        <div class="stat-card shadow-hover">
+          <div class="stat-value" id="statParticipants">0</div>
+          <div class="stat-label">参与青年</div>
+          <p class="mb-0 text-muted-soft small mt-2">真实注册的青年代表、观察员、主持人等多元身份参与者。</p>
+        </div>
+        <div class="stat-card shadow-hover">
+          <div class="stat-value" id="statPrivateRooms">0</div>
+          <div class="stat-label">私密议程</div>
+          <p class="mb-0 text-muted-soft small mt-2">需邀请码进入的闭门磋商，保障敏感议题的安全与秩序。</p>
+        </div>
       </div>
     </div>
-    <div class="mt-4">
-      <a href="/rooms/create" class="btn btn-success">创建新研讨室</a>
+  </section>
+
+  <!-- Feature Highlights -->
+  <section id="features">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-8">
+          <h2 class="section-title">全流程数字化外交训练</h2>
+          <p class="section-subtitle">我们结合多媒体交互与权限体系，让每一位参与者都能快速融入议题、贡献洞见，并留下可追溯的学习足迹。</p>
+        </div>
+      </div>
+      <div class="row g-4 mt-2">
+        <div class="col-md-4">
+          <div class="feature-card shadow-hover h-100">
+            <div class="d-flex align-items-center mb-3">
+              <div class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">会前</div>
+              <i class="bi bi-calendar-event ms-2 text-primary"></i>
+            </div>
+            <h5>智能议程与角色分配</h5>
+            <p>预设联合国、地区组织及外交沙龙等模板，自动生成议程时间线与角色权限，支持自定义签到与议题资料包。</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card shadow-hover h-100">
+            <div class="d-flex align-items-center mb-3">
+              <div class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">会中</div>
+              <i class="bi bi-chat-dots ms-2 text-success"></i>
+            </div>
+            <h5>实时协作沟通工具</h5>
+            <p>提供文本、表情、语音留言与音视频转播，多房间同步白板和文稿协同，举手发言与发言顺序自动排队。</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-card shadow-hover h-100">
+            <div class="d-flex align-items-center mb-3">
+              <div class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2">会后</div>
+              <i class="bi bi-bar-chart-line ms-2 text-warning"></i>
+            </div>
+            <h5>成果复盘与成长档案</h5>
+            <p>自动汇总发言数据、情绪热度与协作记录，一键导出研讨纪要，沉淀个人成长档案与团体评估报告。</p>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
+  </section>
+
+  <!-- Platform Introduction -->
+  <section id="introduction" class="intro-section gradient-bg">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-9">
+          <h2 class="section-title">平台功能总览</h2>
+          <p class="section-subtitle">青年外交研讨平台旨在为各类青年外交项目、模拟联合国、国际公共演讲等活动提供一站式技术支持。从报名、筹备到执行、评估，每一步都可在线完成。</p>
+        </div>
+      </div>
+      <div class="intro-grid">
+        <div class="intro-highlight">
+          <i class="bi bi-collection-play"></i>
+          <div>
+            <h5>多模式会议空间</h5>
+            <p class="mb-1">支持开放式论坛、闭门磋商、专题分组等多类型房间结构，并可自由切换主持、代表、观察员等角色权限。</p>
+            <ul class="mb-0 text-muted-soft small ps-3">
+              <li>内置议题模板与流程时序</li>
+              <li>支持自定义投票与表决机制</li>
+              <li>自动生成会议资料袋与参考链接</li>
+            </ul>
+          </div>
+        </div>
+        <div class="intro-highlight">
+          <i class="bi bi-diagram-3"></i>
+          <div>
+            <h5>协作式工作流管理</h5>
+            <p class="mb-1">通过任务面板、举手队列、发言计时与评分系统，保障会议节奏与成果产出。关键节点支持自动提醒与主持人手动介入。</p>
+            <ul class="mb-0 text-muted-soft small ps-3">
+              <li>跨房间协同与权限同步</li>
+              <li>实时同步发言记录和附件</li>
+              <li>与会成员行为日志全程可追溯</li>
+            </ul>
+          </div>
+        </div>
+        <div class="intro-highlight">
+          <i class="bi bi-award"></i>
+          <div>
+            <h5>成长评估与成果呈现</h5>
+            <p class="mb-1">内置多维度评价表，自定义权重与评委角色。生成个人成长图谱、团队成果报告与媒体化展示页面。</p>
+            <ul class="mb-0 text-muted-soft small ps-3">
+              <li>AI 辅助的发言分析与情绪识别</li>
+              <li>研讨纪要自动排版、支持导出</li>
+              <li>个人履历与荣誉证书在线管理</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section id="journey">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-9">
+          <h2 class="section-title">青年外交项目全旅程</h2>
+          <p class="section-subtitle">我们将平台的核心模块串联成可重复执行的学习旅程，帮助指导教师与项目管理者快速搭建课程。</p>
+        </div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <h5>1. 议题策划与报名</h5>
+            <p class="text-muted-soft mb-2">通过模板导入议题、设计角色与报名表，快速搭建一次国际议题实训。</p>
+            <small class="text-muted">议题库、报名审批、自动分组与导师指派</small>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <h5>2. 资料研读与会议预热</h5>
+            <p class="text-muted-soft mb-2">推送背景资料、案例库与政策建议，学员在线答疑与小组共创草案。</p>
+            <small class="text-muted">资料包管理、学习打卡、问答互动</small>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <h5>3. 会场协作与表达</h5>
+            <p class="text-muted-soft mb-2">同步计时、举手排队、分角色发言权限，沉浸式模拟真实外交桌面场景。</p>
+            <small class="text-muted">实时字幕、语音备忘、场景切换与权限控制</small>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-marker"></div>
+          <div class="timeline-content">
+            <h5>4. 成果发布与评估</h5>
+            <p class="text-muted-soft mb-2">评委打分、自动生成研讨纪要与媒体化展示页，助力成果传播与反思总结。</p>
+            <small class="text-muted">评分体系、报告导出、个人成长档案</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workflow Steps -->
+  <section>
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-4">
+          <div class="workflow-step h-100">
+            <h6><i class="bi bi-lightning-charge-fill me-2 text-primary"></i>项目级管理后台</h6>
+            <p>支持多项目并行管理，实时查看报名人数、研讨进度与会议动态，构建可视化的教学仪表盘。</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="workflow-step h-100">
+            <h6><i class="bi bi-headset me-2 text-primary"></i>跨地域实时连接</h6>
+            <p>浏览器即可开启语音及视频协作，并支持低带宽模式和录制回放，保障全球伙伴共同参与。</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="workflow-step h-100">
+            <h6><i class="bi bi-lock-fill me-2 text-primary"></i>多层级安全机制</h6>
+            <p>通过 JWT 登录认证、端到端加密与操作日志留存，保障敏感议题与青少年数据的安全可控。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section>
+    <div class="container">
+      <div class="cta-section text-center text-lg-start">
+        <div class="row align-items-center g-4">
+          <div class="col-lg-8">
+            <h3>准备好开启一场影响世界的青年外交研讨了吗？</h3>
+            <p>即刻注册账号，邀请伙伴共同加入，与全球青年代表在真实议题中碰撞思想、形成方案、影响未来。</p>
+          </div>
+          <div class="col-lg-4 text-lg-end">
+            <a href="/register" class="btn btn-light btn-lg px-4">立即注册</a>
+            <a href="/rooms" class="btn btn-outline-light btn-lg px-4 ms-2">浏览研讨室</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <h5 class="text-white">青年外交研讨平台 Youth Diplomacy</h5>
+          <p class="mb-0 small">致力于打造链接全球青年、学校及社会组织的外交实训网络，让协商与共识的能力走进每一间教室。</p>
+        </div>
+        <div class="col-md-6 text-md-end mt-3 mt-md-0">
+          <a href="mailto:hello@youthdiplomacy.org" class="me-3">联系我们</a>
+          <a href="/help">使用指南</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    document.getElementById('joinBtn').addEventListener('click', () => {
-      const roomId = document.getElementById('joinRoomId').value.trim();
-      if (roomId) {
-        window.location.href = `/rooms/${encodeURIComponent(roomId)}`;
-      } else {
-        alert('请输入房间号或邀请码');
-      }
-    });
-  </script>
   <script src="/js/auth.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      if (window.auth && window.auth.checkAuth()) {
-        document.querySelectorAll('a[href="/login"], a[href="/register"]').forEach(el => el.style.display = 'none');
+    (function() {
+      const joinInput = document.getElementById('joinRoomId');
+      const joinBtn = document.getElementById('joinBtn');
+      const statsTargets = {
+        total: { el: document.getElementById('statTotalRooms'), fallback: 32 },
+        active: { el: document.getElementById('statActiveRooms'), fallback: 12 },
+        participants: { el: document.getElementById('statParticipants'), fallback: 280 },
+        privateRooms: { el: document.getElementById('statPrivateRooms'), fallback: 9 }
+      };
+
+      function safeParseUser() {
+        const token = localStorage.getItem('token');
+        const userRaw = localStorage.getItem('user');
+        if (!token || !userRaw) return null;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          if (payload.exp && payload.exp * 1000 < Date.now()) {
+            return null;
+          }
+          return JSON.parse(userRaw);
+        } catch (err) {
+          console.warn('无法解析用户信息:', err);
+          return null;
+        }
       }
-    });
+
+      function updateNav() {
+        const user = safeParseUser();
+        const guestItems = document.querySelectorAll('.nav-guest');
+        const menu = document.getElementById('navUserMenu');
+        if (user) {
+          guestItems.forEach(item => item.classList.add('d-none'));
+          menu.classList.remove('d-none');
+          document.getElementById('navUserName').textContent = user.username || '已登录用户';
+        } else {
+          guestItems.forEach(item => item.classList.remove('d-none'));
+          menu.classList.add('d-none');
+        }
+      }
+
+      function animateNumber(el, finalValue) {
+        const duration = 1200;
+        const start = performance.now();
+        const initial = 0;
+
+        function step(currentTime) {
+          const progress = Math.min((currentTime - start) / duration, 1);
+          const value = Math.floor(progress * (finalValue - initial) + initial);
+          el.textContent = value.toLocaleString();
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      async function fetchStats() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          Object.values(statsTargets).forEach(target => animateNumber(target.el, target.fallback));
+          return;
+        }
+
+        try {
+          const response = await fetch('/api/rooms', {
+            headers: {
+              'Authorization': 'Bearer ' + token
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error('无法获取数据');
+          }
+
+          const rooms = await response.json();
+          const total = rooms.length;
+          const active = rooms.filter(room => {
+            const updatedAt = new Date(room.updatedAt || room.createdAt || Date.now());
+            const diffDays = Math.floor((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays < 7;
+          }).length;
+          const participants = rooms.reduce((acc, room) => acc + ((room.participants && room.participants.length) || 0), 0);
+          const privateCount = rooms.filter(room => room.isPrivate).length;
+
+          animateNumber(statsTargets.total.el, total || statsTargets.total.fallback);
+          animateNumber(statsTargets.active.el, active || statsTargets.active.fallback);
+          animateNumber(statsTargets.participants.el, participants || statsTargets.participants.fallback);
+          animateNumber(statsTargets.privateRooms.el, privateCount || statsTargets.privateRooms.fallback);
+        } catch (error) {
+          console.warn('使用默认统计数据，因为无法访问API:', error);
+          Object.values(statsTargets).forEach(target => animateNumber(target.el, target.fallback));
+        }
+      }
+
+      function handleJoinRoom() {
+        const roomId = joinInput.value.trim();
+        if (roomId) {
+          window.location.href = `/rooms/${encodeURIComponent(roomId)}`;
+        } else {
+          const toast = document.createElement('div');
+          toast.className = 'toast align-items-center text-white bg-danger border-0 position-fixed top-0 end-0 m-4';
+          toast.style.zIndex = '1100';
+          toast.innerHTML = `<div class="d-flex"><div class="toast-body">请输入有效的房间号或邀请码。</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+          document.body.appendChild(toast);
+          const toastInstance = new bootstrap.Toast(toast);
+          toastInstance.show();
+          toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+      }
+
+      joinBtn.addEventListener('click', handleJoinRoom);
+      joinInput.addEventListener('keyup', (event) => {
+        if (event.key === 'Enter') {
+          handleJoinRoom();
+        }
+      });
+
+      const logoutBtn = document.getElementById('navLogout');
+      logoutBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (window.auth && typeof window.auth.logout === 'function') {
+          window.auth.logout();
+        } else {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          window.location.reload();
+        }
+      });
+
+      updateNav();
+      fetchStats();
+    })();
   </script>
 </body>
-</html> 
 </html>
