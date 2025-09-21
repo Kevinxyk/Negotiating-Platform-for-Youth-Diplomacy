@@ -1,1 +1,105 @@
-/* 全局通用样式，可在此扩展 */ 
+/* 全局通用样式，可在此扩展 */
+
+:root {
+  --brand-primary: #5168ff;
+  --brand-secondary: #7f52ff;
+  --brand-accent: #30cfd0;
+  --brand-dark: #0f172a;
+  --brand-muted: #6b7280;
+  --brand-light: #f8f9ff;
+  --section-spacing: clamp(3rem, 6vw, 6rem);
+  --card-radius: 18px;
+  --shadow-soft: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+body {
+  font-family: 'Noto Sans SC', 'Microsoft YaHei', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--brand-light);
+  color: var(--brand-dark);
+  min-height: 100vh;
+}
+
+.navbar-brand {
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  border: none;
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  filter: brightness(1.05);
+}
+
+.btn-outline-primary {
+  color: var(--brand-primary);
+  border-color: rgba(81, 104, 255, 0.4);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: rgba(81, 104, 255, 0.08);
+  border-color: var(--brand-primary);
+  color: var(--brand-primary);
+}
+
+section {
+  padding-top: var(--section-spacing);
+  padding-bottom: var(--section-spacing);
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.section-subtitle {
+  color: var(--brand-muted);
+  text-align: center;
+  max-width: 720px;
+  margin: 0 auto 2.5rem auto;
+  line-height: 1.6;
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  border-radius: var(--card-radius);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-soft);
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 999px;
+  background-color: rgba(81, 104, 255, 0.1);
+  color: var(--brand-primary);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.text-muted-soft {
+  color: var(--brand-muted);
+}
+
+.shadow-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shadow-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-soft);
+}
+
+.gradient-bg {
+  background: linear-gradient(120deg, rgba(81, 104, 255, 0.12), rgba(48, 207, 208, 0.12));
+}

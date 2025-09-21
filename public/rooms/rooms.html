@@ -3,35 +3,34 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>研讨室列表 - 研讨系统</title>
+  <title>研讨室列表 - 青年外交研讨平台</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet" />
   <link href="../assets/global.css" rel="stylesheet" />
   <link href="rooms.css" rel="stylesheet" />
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+  <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow-sm">
     <div class="container">
-      <a class="navbar-brand" href="/">研讨系统</a>
+      <a class="navbar-brand" href="/">Youth Diplomacy</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link active" href="/rooms">研讨室列表</a>
-          </li>
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="/">首页</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/rooms">研讨室</a></li>
         </ul>
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item" id="userInfoNav">
-            <span class="nav-link" id="userDisplayName"></span>
-          </li>
-          <li class="nav-item dropdown" id="userDropdown">
+          <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="userDropdownLink" data-bs-toggle="dropdown">
               <i class="bi bi-person-circle"></i>
+              <span id="userDisplayName" class="ms-1"></span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="/profile">个人资料</a></li>
+              <li><a class="dropdown-item" href="/rooms/create">创建研讨室</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#" id="logoutBtn">退出登录</a></li>
             </ul>
@@ -41,159 +40,216 @@
     </div>
   </nav>
 
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2>研讨室列表</h2>
-      <div>
-        <button id="createRoomBtn" class="btn btn-primary host-only">
-          <i class="bi bi-plus-circle"></i> 创建研讨室
-        </button>
-      </div>
-    </div>
-
-    <!-- 搜索/过滤 -->
-    <div class="card mb-4">
-      <div class="card-body">
-        <div class="row">
-          <div class="col-md-8">
-            <div class="input-group">
-              <input type="text" id="searchRoom" class="form-control" placeholder="搜索研讨室...">
-              <button class="btn btn-outline-secondary" type="button" id="searchBtn">
-                <i class="bi bi-search"></i>
-              </button>
-            </div>
+  <header class="rooms-hero">
+    <div class="container">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <div class="tag">我的外交课堂</div>
+          <h1 class="mt-3 mb-3">浏览并管理你的青年外交研讨室</h1>
+          <p class="lead text-muted-soft">集中查看你创建或参与的房间，实时掌握议程进度、报名成员和活跃程度。为每一次谈判与协作做好准备。</p>
+          <div class="rooms-hero-actions">
+            <button id="createRoomBtn" class="btn btn-primary host-only">
+              <i class="bi bi-plus-circle me-2"></i>新建研讨室
+            </button>
+            <a href="#roomsList" class="btn btn-outline-primary">
+              <i class="bi bi-lightning-charge me-2"></i>快速浏览
+            </a>
           </div>
-          <div class="col-md-4">
-            <select id="filterRooms" class="form-select">
-              <option value="all">所有研讨室</option>
-              <option value="my">我参与的研讨室</option>
-              <option value="created">我创建的研讨室</option>
-              <option value="active">活跃研讨室</option>
-            </select>
+        </div>
+        <div class="col-lg-5">
+          <div class="rooms-hero-card glass-card">
+            <h5>智能提示</h5>
+            <ul class="list-unstyled mb-0 text-muted-soft small">
+              <li class="mb-2"><i class="bi bi-bell me-2 text-primary"></i>收藏常用研讨室，下次从“收藏夹”快速访问。</li>
+              <li class="mb-2"><i class="bi bi-hourglass-split me-2 text-primary"></i>系统会记录最近访问的房间，方便继续推进议程。</li>
+              <li><i class="bi bi-shield-check me-2 text-primary"></i>使用邀请码加入私密房间，保障敏感话题安全。</li>
+            </ul>
           </div>
         </div>
       </div>
     </div>
+  </header>
 
-    <!-- 分类标签 -->
-    <ul class="nav nav-tabs room-tabs mb-3">
-      <li class="nav-item">
-        <a class="nav-link active" data-tab="all">全部</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-tab="public">公开研讨室</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-tab="private">私有研讨室</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" data-tab="my">我的研讨室</a>
-      </li>
+  <section class="rooms-stats gradient-bg">
+    <div class="container">
+      <div class="row text-center g-3" id="roomStats">
+        <div class="col-md-3">
+          <div class="stat-card shadow-hover">
+            <div class="stat-value" id="totalRooms">0</div>
+            <div class="stat-label">研讨室总数</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card shadow-hover">
+            <div class="stat-value" id="activeRooms">0</div>
+            <div class="stat-label">近期活跃</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card shadow-hover">
+            <div class="stat-value" id="participantCount">0</div>
+            <div class="stat-label">参与成员</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card shadow-hover">
+            <div class="stat-value" id="favoriteCount">0</div>
+            <div class="stat-label">已收藏</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="container rooms-container">
+    <div class="filter-card glass-card">
+      <div class="row g-3 align-items-center">
+        <div class="col-lg-4">
+          <label for="searchRoom" class="form-label text-muted">搜索研讨室</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" id="searchRoom" class="form-control" placeholder="输入房间名称、编号或描述关键词">
+          </div>
+        </div>
+        <div class="col-lg-3">
+          <label for="filterRooms" class="form-label text-muted">筛选条件</label>
+          <select id="filterRooms" class="form-select">
+            <option value="all">所有研讨室</option>
+            <option value="my">我参与的研讨室</option>
+            <option value="created">我创建的研讨室</option>
+            <option value="active">最近活跃</option>
+            <option value="favorite">收藏夹</option>
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label for="sortRooms" class="form-label text-muted">排序方式</label>
+          <select id="sortRooms" class="form-select">
+            <option value="latest">最新创建</option>
+            <option value="popular">参与人数最多</option>
+            <option value="alphabetical">名称 A-Z</option>
+          </select>
+        </div>
+        <div class="col-lg-2 text-lg-end">
+          <label class="form-label text-muted">私有研讨室</label>
+          <button class="btn btn-outline-primary w-100" data-bs-toggle="modal" data-bs-target="#joinPrivateRoomModal">
+            <i class="bi bi-key me-1"></i> 输入邀请码
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nav nav-pills room-tabs mb-4">
+      <li class="nav-item"><a class="nav-link active" data-tab="all">全部</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="public">公开研讨室</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="private">私密研讨室</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="my">我的研讨室</a></li>
+      <li class="nav-item"><a class="nav-link" data-tab="favorite">收藏夹</a></li>
     </ul>
 
-    <!-- 房间列表 -->
-    <div id="roomsList" class="row"></div>
+    <div id="roomsList" class="row g-4"></div>
+  </main>
 
-    <!-- 加入私有房间模态框 -->
-    <div class="modal fade" id="joinPrivateRoomModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">加入私有研讨室</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="joinPrivateRoomForm">
-              <div class="mb-3">
-                <label class="form-label">邀请码</label>
-                <input type="text" class="form-control" id="inviteCode" required>
-              </div>
-              <div id="joinError" class="text-danger"></div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-            <button type="button" class="btn btn-primary" id="joinPrivateRoomBtn">加入</button>
-          </div>
+  <!-- Join private room modal -->
+  <div class="modal fade" id="joinPrivateRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">加入私有研讨室</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="joinPrivateRoomForm">
+            <div class="mb-3">
+              <label class="form-label">邀请码</label>
+              <input type="text" class="form-control" id="inviteCode" required>
+            </div>
+            <div id="joinError" class="text-danger small"></div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="joinPrivateRoomBtn">加入</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- 创建房间模态框 -->
-    <div class="modal fade" id="createRoomModal" tabindex="-1">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">创建新研讨室</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <form id="createRoomForm">
-              <!-- 基本设置 -->
-              <div class="mb-3">
-                <label class="form-label">房间名称 <span class="text-danger">*</span></label>
-                <input type="text" class="form-control" id="roomName" required>
-              </div>
-              <div class="mb-3">
-                <label class="form-label">房间描述</label>
-                <textarea class="form-control" id="roomDescription" rows="3"></textarea>
-              </div>
-              <div class="mb-3">
+  <!-- Create room modal -->
+  <div class="modal fade" id="createRoomModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">创建新研讨室</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="createRoomForm">
+            <div class="mb-3">
+              <label class="form-label">房间名称 <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="roomName" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">房间描述</label>
+              <textarea class="form-control" id="roomDescription" rows="3"></textarea>
+            </div>
+            <div class="row g-3">
+              <div class="col-md-6">
                 <label class="form-label">最大参与人数</label>
                 <input type="number" class="form-control" id="maxParticipants" min="1" value="10">
               </div>
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="isPrivate">
-                <label class="form-check-label">私密房间（需要邀请码加入）</label>
+              <div class="col-md-6">
+                <div class="form-check mt-4 pt-1">
+                  <input class="form-check-input" type="checkbox" id="isPrivate">
+                  <label class="form-check-label" for="isPrivate">私密房间（需要邀请码加入）</label>
+                </div>
               </div>
+            </div>
 
-              <!-- 日程设置 -->
-              <h5 class="mt-4 mb-3">日程安排</h5>
-              <div class="mb-3">
-                <button type="button" class="btn btn-sm btn-outline-primary" id="addScheduleItemCreate">
-                  <i class="bi bi-plus"></i> 添加日程项
-                </button>
-              </div>
-              <div id="scheduleListCreate" class="list-group mb-3"></div>
-              <div class="form-check mb-3">
-                <input class="form-check-input" type="checkbox" id="autoScheduleCreate">
-                <label class="form-check-label">自动执行日程</label>
-              </div>
+            <h5 class="mt-4 mb-3">日程安排</h5>
+            <div class="mb-3">
+              <button type="button" class="btn btn-sm btn-outline-primary" id="addScheduleItemCreate">
+                <i class="bi bi-plus"></i> 添加日程项
+              </button>
+            </div>
+            <div id="scheduleListCreate" class="list-group mb-3"></div>
+            <div class="form-check mb-3">
+              <input class="form-check-input" type="checkbox" id="autoScheduleCreate">
+              <label class="form-check-label" for="autoScheduleCreate">自动执行日程</label>
+            </div>
 
-              <!-- 高级设置 -->
-              <h5 class="mt-4 mb-3">高级设置</h5>
-              <div class="mb-3">
+            <h5 class="mt-4 mb-3">高级设置</h5>
+            <div class="row g-3">
+              <div class="col-md-6">
                 <label class="form-label">消息管理</label>
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="allowMessageDeleteCreate" checked>
-                  <label class="form-check-label">允许撤回消息</label>
+                  <label class="form-check-label" for="allowMessageDeleteCreate">允许撤回消息</label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="allowMessageEditCreate" checked>
-                  <label class="form-check-label">允许编辑消息</label>
+                  <label class="form-check-label" for="allowMessageEditCreate">允许编辑消息</label>
                 </div>
               </div>
-              <div class="mb-3">
+              <div class="col-md-6">
                 <label class="form-label">权限设置</label>
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="allowRaiseHandCreate" checked>
-                  <label class="form-check-label">允许举手功能</label>
+                  <label class="form-check-label" for="allowRaiseHandCreate">允许举手功能</label>
                 </div>
                 <div class="form-check">
                   <input class="form-check-input" type="checkbox" id="allowVoiceChatCreate" checked>
-                  <label class="form-check-label">允许语音聊天</label>
+                  <label class="form-check-label" for="allowVoiceChatCreate">允许语音聊天</label>
                 </div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-            <button type="button" class="btn btn-primary" id="createRoomSubmitBtn">创建</button>
-          </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+          <button type="button" class="btn btn-primary" id="createRoomSubmitBtn">创建</button>
         </div>
       </div>
     </div>
-
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -201,272 +257,78 @@
   <script src="/js/auth.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // 检查用户是否已登录
       if (!window.auth.checkAuth()) {
         return;
       }
 
-      // 获取用户信息
       const user = window.auth.getUserInfo();
-      // 显示用户信息
-      document.getElementById('userDisplayName').textContent = user.username;
+      document.getElementById('userDisplayName').textContent = user.username || '';
 
-      // 退出登录
-      document.getElementById('logoutBtn').addEventListener('click', (e) => {
+      const logoutBtn = document.getElementById('logoutBtn');
+      logoutBtn.addEventListener('click', (e) => {
         e.preventDefault();
         window.auth.logout();
       });
 
-      // 更新UI基于用户角色
       window.auth.updateUIByRole();
 
-      // 加载研讨室列表
-      loadRooms('all');
+      const state = {
+        rooms: [],
+        filter: 'all',
+        tabFilter: 'all',
+        search: '',
+        sort: 'latest',
+        favorites: new Set(loadFavorites())
+      };
 
-      // 标签切换
-      document.querySelectorAll('.room-tabs .nav-link').forEach(tab => {
-        tab.addEventListener('click', (e) => {
-          e.preventDefault();
-          document.querySelectorAll('.room-tabs .nav-link').forEach(t => t.classList.remove('active'));
-          e.target.classList.add('active');
-          loadRooms(e.target.dataset.tab);
-        });
-      });
+      const roomsListEl = document.getElementById('roomsList');
+      const filterSelect = document.getElementById('filterRooms');
+      const sortSelect = document.getElementById('sortRooms');
+      const searchInput = document.getElementById('searchRoom');
+      const tabLinks = document.querySelectorAll('.room-tabs .nav-link');
 
-      // 筛选变化
-      document.getElementById('filterRooms').addEventListener('change', (e) => {
-        loadRooms(e.target.value);
-      });
-
-      // 搜索
-      document.getElementById('searchBtn').addEventListener('click', () => {
-        const searchTerm = document.getElementById('searchRoom').value.trim();
-        loadRooms('all', searchTerm);
-      });
-      document.getElementById('searchRoom').addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') {
-          const searchTerm = e.target.value.trim();
-          loadRooms('all', searchTerm);
+      function loadFavorites() {
+        try {
+          const stored = JSON.parse(localStorage.getItem('favoriteRooms') || '[]');
+          return Array.isArray(stored) ? stored : [];
+        } catch (error) {
+          console.warn('无法解析收藏数据:', error);
+          return [];
         }
-      });
-
-      // 创建研讨室按钮
-      document.getElementById('createRoomBtn').addEventListener('click', () => {
-        const modal = new bootstrap.Modal(document.getElementById('createRoomModal'));
-        modal.show();
-      });
-
-      // 初始化创建房间的日程排序
-      new Sortable(document.getElementById('scheduleListCreate'), {
-        animation: 150,
-        handle: '.schedule-item',
-        ghostClass: 'schedule-item-ghost'
-      });
-
-      // 添加日程项（创建房间）
-      document.getElementById('addScheduleItemCreate').addEventListener('click', () => {
-        const scheduleList = document.getElementById('scheduleListCreate');
-        const item = document.createElement('div');
-        item.className = 'list-group-item schedule-item';
-        item.draggable = true;
-        item.dataset.id = `schedule-${Date.now()}`;
-        
-        item.innerHTML = `
-          <div class="d-flex justify-content-between align-items-center">
-            <div class="flex-grow-1">
-              <input type="text" class="form-control form-control-sm mb-2" placeholder="日程名称">
-              <div class="input-group input-group-sm">
-                <input type="number" class="form-control" placeholder="时" min="0" max="23" value="0">
-                <span class="input-group-text">:</span>
-                <input type="number" class="form-control" placeholder="分" min="0" max="59" value="30">
-                <span class="input-group-text">:</span>
-                <input type="number" class="form-control" placeholder="秒" min="0" max="59" value="0">
-              </div>
-            </div>
-            <div class="ms-3">
-              <button class="btn btn-sm btn-outline-danger delete-schedule">
-                <i class="bi bi-trash"></i>
-              </button>
-            </div>
-          </div>
-        `;
-        
-        scheduleList.appendChild(item);
-        
-        // 删除按钮
-        item.querySelector('.delete-schedule').addEventListener('click', () => {
-          item.remove();
-        });
-      });
-
-      // 收集创建房间的表单数据
-      function collectCreateRoomData() {
-        // 基本设置
-        const basicData = {
-          name: document.getElementById('roomName').value.trim(),
-          description: document.getElementById('roomDescription').value.trim(),
-          maxParticipants: parseInt(document.getElementById('maxParticipants').value, 10) || 10,
-          isPrivate: document.getElementById('isPrivate').checked
-        };
-        
-        // 日程设置
-        const scheduleItems = Array.from(document.getElementById('scheduleListCreate').children).map(item => {
-          const nameInput = item.querySelector('input[placeholder="日程名称"]');
-          const hoursInput = item.querySelector('input[placeholder="时"]');
-          const minutesInput = item.querySelector('input[placeholder="分"]');
-          const secondsInput = item.querySelector('input[placeholder="秒"]');
-          
-          const hours = parseInt(hoursInput.value, 10) || 0;
-          const minutes = parseInt(minutesInput.value, 10) || 0;
-          const seconds = parseInt(secondsInput.value, 10) || 0;
-          
-          // 计算总秒数用于存储
-          const totalSeconds = hours * 3600 + minutes * 60 + seconds;
-          
-          return {
-            id: item.dataset.id,
-            name: nameInput.value.trim() || '未命名日程',
-            duration: totalSeconds,
-            completed: false
-          };
-        });
-        
-        // 高级设置
-        const settings = {
-          autoSchedule: document.getElementById('autoScheduleCreate').checked,
-          allowMessageDelete: document.getElementById('allowMessageDeleteCreate').checked,
-          allowMessageEdit: document.getElementById('allowMessageEditCreate').checked,
-          allowRaiseHand: document.getElementById('allowRaiseHandCreate').checked,
-          allowVoiceChat: document.getElementById('allowVoiceChatCreate').checked
-        };
-        
-        return {
-          ...basicData,
-          schedule: scheduleItems,
-          settings: settings
-        };
       }
 
-      // 创建研讨室
-      document.getElementById('createRoomSubmitBtn').addEventListener('click', async () => {
-        try {
-          const formData = collectCreateRoomData();
-          
-          if (!formData.name) {
-            alert('请输入房间名称');
-          return;
-          }
-          
-          const response = await fetch('/api/rooms', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + localStorage.getItem('token')
-            },
-            body: JSON.stringify(formData)
-          });
-          
-          if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.error || '创建研讨室失败');
-          }
-          
-          const room = await response.json();
-          
-          // 关闭模态框并转到新创建的房间
-          bootstrap.Modal.getInstance(document.getElementById('createRoomModal')).hide();
-          window.location.href = `/rooms/${room.id}`;
-        } catch (error) {
-          console.error('创建研讨室失败:', error);
-          alert('创建研讨室失败: ' + error.message);
-        }
-      });
+      function saveFavorites() {
+        localStorage.setItem('favoriteRooms', JSON.stringify(Array.from(state.favorites)));
+        updateStats(state.rooms);
+      }
 
-      // 加入私有研讨室
-      document.getElementById('joinPrivateRoomBtn').addEventListener('click', async () => {
+      async function loadRooms(initial = false) {
         try {
-          const inviteCode = document.getElementById('inviteCode').value.trim();
-          if (!inviteCode) {
-            document.getElementById('joinError').textContent = '请输入邀请码';
-            return;
-          }
-          
-          const response = await fetch('/api/rooms/join-by-invite', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + localStorage.getItem('token')
-            },
-            body: JSON.stringify({ inviteCode })
-          });
-          
-          if (!response.ok) {
-            const error = await response.json();
-            document.getElementById('joinError').textContent = error.error || '加入研讨室失败';
-          return;
-          }
-          
-          const room = await response.json();
-          
-          // 关闭模态框并转到新加入的房间
-          bootstrap.Modal.getInstance(document.getElementById('joinPrivateRoomModal')).hide();
-          window.location.href = `/rooms/${room.id}`;
-        } catch (error) {
-          console.error('加入研讨室失败:', error);
-          document.getElementById('joinError').textContent = '加入研讨室失败: ' + error.message;
-        }
-      });
-
-      // 加载研讨室列表
-      async function loadRooms(filter = 'all', search = '') {
-        try {
-          const userId = user.userId;
-          let url = '/api/rooms';
-          if (search) {
-            url += `?search=${encodeURIComponent(search)}`;
-          }
-          
+          const url = state.search ? `/api/rooms?search=${encodeURIComponent(state.search)}` : '/api/rooms';
           const response = await fetch(url, {
             headers: {
               'Authorization': 'Bearer ' + localStorage.getItem('token')
             }
           });
-          
+
           if (!response.ok) {
             throw new Error('获取研讨室列表失败');
           }
-          
-          let rooms = await response.json();
-          
-          // 调试输出：打印研讨室数据结构
-          console.log('API返回的研讨室数据:', rooms);
-          if (rooms.length > 0) {
-            console.log('第一个研讨室的结构:', rooms[0]);
-            console.log('participants字段:', rooms[0].participants);
+
+          const rooms = await response.json();
+          state.rooms = rooms.map(room => ({
+            ...room,
+            participants: Array.isArray(room.participants) ? room.participants : [],
+            schedule: Array.isArray(room.schedule) ? room.schedule : []
+          }));
+          updateStats(state.rooms);
+          applyFilters();
+          if (initial) {
+            updateFavoriteBadge();
           }
-          
-          // 根据筛选条件过滤
-          if (filter === 'my') {
-            rooms = rooms.filter(room => room.participants && room.participants.some(p => p.userId === userId));
-          } else if (filter === 'created') {
-            rooms = rooms.filter(room => room.createdBy === userId);
-          } else if (filter === 'public') {
-            rooms = rooms.filter(room => !room.isPrivate);
-          } else if (filter === 'private') {
-            rooms = rooms.filter(room => room.isPrivate);
-          } else if (filter === 'active') {
-            rooms = rooms.filter(room => {
-              const updatedAt = new Date(room.updatedAt || room.createdAt);
-              const now = new Date();
-              const diffDays = Math.floor((now - updatedAt) / (1000 * 60 * 60 * 24));
-              return diffDays < 7; // 最近7天活跃
-            });
-          }
-          
-          renderRooms(rooms);
         } catch (error) {
           console.error('加载研讨室列表失败:', error);
-          document.getElementById('roomsList').innerHTML = `
+          roomsListEl.innerHTML = `
             <div class="col-12">
               <div class="alert alert-danger">
                 加载研讨室列表失败: ${error.message}
@@ -476,74 +338,177 @@
         }
       }
 
-      // 渲染研讨室列表
+      function applyFilters() {
+        const filter = state.filter === 'favorite' ? 'favorite' : state.filter;
+        const tabFilter = state.tabFilter === 'favorite' ? 'favorite' : state.tabFilter;
+        let filtered = [...state.rooms];
+
+        const filterValue = tabFilter !== 'all' ? tabFilter : filter;
+        if (filterValue === 'my') {
+          filtered = filtered.filter(room => room.participants.some(p => p.userId === user.userId));
+        } else if (filterValue === 'created') {
+          filtered = filtered.filter(room => room.createdBy === user.userId);
+        } else if (filterValue === 'public') {
+          filtered = filtered.filter(room => !room.isPrivate);
+        } else if (filterValue === 'private') {
+          filtered = filtered.filter(room => room.isPrivate);
+        } else if (filterValue === 'active') {
+          filtered = filtered.filter(room => {
+            const updatedAt = new Date(room.updatedAt || room.createdAt);
+            const diffDays = Math.floor((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
+            return diffDays < 7;
+          });
+        } else if (filterValue === 'favorite') {
+          filtered = filtered.filter(room => state.favorites.has(room.id));
+        }
+
+        if (state.search) {
+          const term = state.search.toLowerCase();
+          filtered = filtered.filter(room => {
+            return [room.name, room.description, room.id]
+              .filter(Boolean)
+              .some(text => text.toLowerCase().includes(term));
+          });
+        }
+
+        filtered = sortRooms(filtered, state.sort);
+        renderRooms(filtered);
+      }
+
+      function sortRooms(rooms, sort) {
+        const sorted = [...rooms];
+        switch (sort) {
+          case 'popular':
+            return sorted.sort((a, b) => (b.participants.length || 0) - (a.participants.length || 0));
+          case 'alphabetical':
+            return sorted.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+          case 'latest':
+          default:
+            return sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+        }
+      }
+
+      function updateStats(rooms) {
+        const total = rooms.length;
+        const active = rooms.filter(room => {
+          const updatedAt = new Date(room.updatedAt || room.createdAt);
+          const diffDays = Math.floor((Date.now() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
+          return diffDays < 7;
+        }).length;
+        const participants = rooms.reduce((sum, room) => sum + (room.participants ? room.participants.length : 0), 0);
+        const favorite = Array.from(state.favorites).filter(id => rooms.some(room => room.id === id)).length;
+
+        document.getElementById('totalRooms').textContent = total;
+        document.getElementById('activeRooms').textContent = active;
+        document.getElementById('participantCount').textContent = participants;
+        document.getElementById('favoriteCount').textContent = favorite;
+      }
+
+      function updateFavoriteBadge() {
+        const favoriteTab = document.querySelector('[data-tab="favorite"]');
+        if (favoriteTab) {
+          const count = state.favorites.size;
+          favoriteTab.querySelector('.badge-count')?.remove();
+          if (count > 0) {
+            const badge = document.createElement('span');
+            badge.className = 'badge bg-warning text-dark ms-2 badge-count';
+            badge.textContent = count;
+            favoriteTab.appendChild(badge);
+          }
+        }
+      }
+
+      function createFavoriteButton(roomId) {
+        const button = document.createElement('button');
+        button.className = 'btn btn-light btn-sm favorite-toggle';
+        button.type = 'button';
+        button.innerHTML = `<i class="bi ${state.favorites.has(roomId) ? 'bi-star-fill text-warning' : 'bi-star'}"></i>`;
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (state.favorites.has(roomId)) {
+            state.favorites.delete(roomId);
+          } else {
+            state.favorites.add(roomId);
+          }
+          saveFavorites();
+          updateFavoriteBadge();
+          applyFilters();
+        });
+        return button;
+      }
+
       function renderRooms(rooms) {
-        const container = document.getElementById('roomsList');
-        container.innerHTML = '';
-        
+        roomsListEl.innerHTML = '';
+
         if (rooms.length === 0) {
-          container.innerHTML = `
+          roomsListEl.innerHTML = `
             <div class="col-12">
-              <div class="alert alert-info">
-                没有找到符合条件的研讨室
+              <div class="empty-state glass-card text-center p-5">
+                <i class="bi bi-emoji-smile mb-3 text-primary" style="font-size:2.5rem;"></i>
+                <h5 class="mb-2">没有找到符合条件的研讨室</h5>
+                <p class="text-muted mb-3">尝试调整筛选条件或立即创建一个新的研讨空间。</p>
+                <button class="btn btn-primary host-only" id="emptyCreateRoom">新建研讨室</button>
               </div>
             </div>
           `;
+
+          const emptyCreateBtn = document.getElementById('emptyCreateRoom');
+          if (emptyCreateBtn) {
+            emptyCreateBtn.addEventListener('click', () => {
+              const modal = new bootstrap.Modal(document.getElementById('createRoomModal'));
+              modal.show();
+            });
+          }
           return;
         }
-        
+
         rooms.forEach(room => {
           const col = document.createElement('div');
-          col.className = 'col-md-4 mb-4';
-          
-          // 确定用户在房间中的角色
-          let userRole = '';
-          let isInRoom = false;
-          let userBadge = '';
-          
+          col.className = 'col-md-6 col-xl-4';
+
           const participant = room.participants.find(p => p.userId === user.userId);
-          if (participant) {
-            isInRoom = true;
-            userRole = participant.role;
-            userBadge = getRoleBadge(userRole);
-          }
-          
-          // 判断是否为创建者
+          const isInRoom = Boolean(participant);
           const isCreator = room.createdBy === user.userId;
-          
+          const userRole = participant ? participant.role : '';
+          const roleBadge = getRoleBadge(userRole);
+          const scheduleInfo = getScheduleInfo(room.schedule || []);
+
           const card = document.createElement('div');
-          card.className = 'card h-100';
+          card.className = 'card room-card h-100 shadow-hover';
           card.innerHTML = `
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">${room.name}</h5>
-              ${room.isPrivate ? '<span class="badge bg-warning">私有</span>' : '<span class="badge bg-success">公开</span>'}
+            <div class="card-header d-flex justify-content-between align-items-start">
+              <div>
+                <h5 class="card-title mb-1">${room.name || '未命名研讨室'}</h5>
+                <div class="d-flex align-items-center flex-wrap gap-2 small">
+                  ${room.isPrivate ? '<span class="badge bg-warning text-dark">私密</span>' : '<span class="badge bg-success bg-opacity-10 text-success">公开</span>'}
+                  <span class="text-muted"><i class="bi bi-clock-history me-1"></i>${new Date(room.createdAt).toLocaleString()}</span>
+                </div>
+              </div>
             </div>
-            <div class="card-body room-card-body">
-              <p class="card-text">${room.description || '无描述'}</p>
-              <div class="mt-2">
-                <small class="text-muted">创建于: ${new Date(room.createdAt).toLocaleString()}</small>
+            <div class="card-body">
+              <p class="room-description">${room.description || '创建者暂未提供描述。'}</p>
+              <div class="room-meta">
+                <div><i class="bi bi-people me-1 text-primary"></i>${room.participants.length}/${room.maxParticipants || '∞'} 人</div>
+                ${isInRoom ? `<div><i class="bi bi-person-badge me-1 text-primary"></i>您的角色：${roleBadge}</div>` : ''}
               </div>
-              <div class="mt-2">
-                <small class="text-muted">参与人数: ${room.participants.length}/${room.maxParticipants}</small>
-              </div>
-              ${isInRoom ? `<div class="mt-2">您的角色: ${userBadge}</div>` : ''}
-              <div class="room-card-footer">
-                ${isInRoom 
-                  ? `<a href="/rooms/${room.id}" class="btn btn-primary">进入研讨室</a>`
-                  : `<button class="btn btn-outline-primary join-room" data-id="${room.id}">加入研讨室</button>`
-                }
-                ${isCreator 
-                  ? `<button class="btn btn-outline-danger delete-room ms-2" data-id="${room.id}">删除</button>` 
-                  : ''
-                }
+              ${scheduleInfo}
+            </div>
+            <div class="card-footer d-flex flex-wrap gap-2 justify-content-between align-items-center">
+              <div class="d-flex gap-2">
+                ${isInRoom ? `<a href="/rooms/${room.id}" class="btn btn-primary btn-sm">进入研讨室</a>` : `<button class="btn btn-outline-primary btn-sm join-room" data-id="${room.id}">加入研讨室</button>`}
+                ${isCreator ? `<button class="btn btn-outline-danger btn-sm delete-room" data-id="${room.id}"><i class="bi bi-trash"></i></button>` : ''}
               </div>
             </div>
           `;
-          
+
+          const header = card.querySelector('.card-header');
+          const favoriteBtn = createFavoriteButton(room.id);
+          header.appendChild(favoriteBtn);
+
           col.appendChild(card);
-          container.appendChild(col);
-          
-          // 添加加入房间事件
+          roomsListEl.appendChild(col);
+
           if (!isInRoom) {
             col.querySelector('.join-room').addEventListener('click', async () => {
               try {
@@ -553,12 +518,12 @@
                     'Authorization': 'Bearer ' + localStorage.getItem('token')
                   }
                 });
-                
+
                 if (!response.ok) {
                   const error = await response.json();
                   throw new Error(error.error || '加入研讨室失败');
                 }
-                
+
                 window.location.href = `/rooms/${room.id}`;
               } catch (error) {
                 console.error('加入研讨室失败:', error);
@@ -566,8 +531,7 @@
               }
             });
           }
-          
-          // 添加删除房间事件
+
           if (isCreator) {
             col.querySelector('.delete-room').addEventListener('click', async () => {
               if (confirm('确定要删除此研讨室吗？此操作不可恢复。')) {
@@ -578,14 +542,13 @@
                       'Authorization': 'Bearer ' + localStorage.getItem('token')
                     }
                   });
-                  
+
                   if (!response.ok) {
                     const error = await response.json();
                     throw new Error(error.error || '删除研讨室失败');
                   }
-                  
-                  // 重新加载列表
-                  loadRooms('all');
+
+                  await loadRooms();
                 } catch (error) {
                   console.error('删除研讨室失败:', error);
                   alert('删除研讨室失败: ' + error.message);
@@ -596,7 +559,29 @@
         });
       }
 
-      // 根据角色获取徽章
+      function getScheduleInfo(scheduleItems) {
+        if (!scheduleItems || scheduleItems.length === 0) {
+          return '';
+        }
+
+        const upcoming = scheduleItems.find(item => !item.completed) || scheduleItems[0];
+        if (!upcoming) return '';
+
+        const durationMinutes = Math.max(1, Math.round((upcoming.duration || 0) / 60));
+        return `
+          <div class="schedule-highlight mt-3">
+            <div class="small text-muted mb-1">下一阶段</div>
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-flag text-primary"></i>
+              <div>
+                <strong>${upcoming.name || '未命名日程'}</strong>
+                <div class="small text-muted">预计 ${durationMinutes} 分钟</div>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
       function getRoleBadge(role) {
         const badges = {
           'host': '<span class="badge bg-primary">主持人</span>',
@@ -605,10 +590,182 @@
           'delegate': '<span class="badge bg-info">代表</span>',
           'observer': '<span class="badge bg-secondary">观察者</span>'
         };
-        
-        return badges[role] || `<span class="badge bg-secondary">${role}</span>`;
+        return badges[role] || `<span class="badge bg-secondary">${role || '成员'}</span>`;
       }
+
+      filterSelect.addEventListener('change', (event) => {
+        state.filter = event.target.value;
+        if (event.target.value !== 'favorite') {
+          tabLinks.forEach(link => link.classList.remove('active'));
+          document.querySelector('[data-tab="all"]').classList.add('active');
+          state.tabFilter = 'all';
+        }
+        applyFilters();
+      });
+
+      sortSelect.addEventListener('change', (event) => {
+        state.sort = event.target.value;
+        applyFilters();
+      });
+
+      searchInput.addEventListener('keyup', (event) => {
+        state.search = event.target.value.trim();
+        applyFilters();
+      });
+
+      tabLinks.forEach(tab => {
+        tab.addEventListener('click', (event) => {
+          event.preventDefault();
+          tabLinks.forEach(t => t.classList.remove('active'));
+          event.target.classList.add('active');
+          state.tabFilter = event.target.dataset.tab;
+          if (state.tabFilter === 'favorite') {
+            filterSelect.value = 'favorite';
+          }
+          applyFilters();
+        });
+      });
+
+      document.getElementById('joinPrivateRoomBtn').addEventListener('click', async () => {
+        try {
+          const inviteCode = document.getElementById('inviteCode').value.trim();
+          if (!inviteCode) {
+            document.getElementById('joinError').textContent = '请输入邀请码';
+            return;
+          }
+
+          const response = await fetch('/api/rooms/join-by-invite', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify({ inviteCode })
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            document.getElementById('joinError').textContent = error.error || '加入研讨室失败';
+            return;
+          }
+
+          const room = await response.json();
+          bootstrap.Modal.getInstance(document.getElementById('joinPrivateRoomModal')).hide();
+          window.location.href = `/rooms/${room.id}`;
+        } catch (error) {
+          console.error('加入研讨室失败:', error);
+          document.getElementById('joinError').textContent = '加入研讨室失败: ' + error.message;
+        }
+      });
+
+      document.getElementById('createRoomBtn').addEventListener('click', () => {
+        const modal = new bootstrap.Modal(document.getElementById('createRoomModal'));
+        modal.show();
+      });
+
+      new Sortable(document.getElementById('scheduleListCreate'), {
+        animation: 150,
+        handle: '.schedule-item',
+        ghostClass: 'schedule-item-ghost'
+      });
+
+      document.getElementById('addScheduleItemCreate').addEventListener('click', () => {
+        const scheduleList = document.getElementById('scheduleListCreate');
+        const item = document.createElement('div');
+        item.className = 'list-group-item schedule-item';
+        item.dataset.id = `schedule-${Date.now()}`;
+        item.innerHTML = `
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="flex-grow-1 pe-3">
+              <input type="text" class="form-control form-control-sm mb-2" placeholder="日程名称">
+              <div class="input-group input-group-sm">
+                <input type="number" class="form-control" placeholder="时" min="0" max="23" value="0">
+                <span class="input-group-text">:</span>
+                <input type="number" class="form-control" placeholder="分" min="0" max="59" value="30">
+                <span class="input-group-text">:</span>
+                <input type="number" class="form-control" placeholder="秒" min="0" max="59" value="0">
+              </div>
+            </div>
+            <button class="btn btn-sm btn-outline-danger delete-schedule"><i class="bi bi-trash"></i></button>
+          </div>
+        `;
+        scheduleList.appendChild(item);
+        item.querySelector('.delete-schedule').addEventListener('click', () => item.remove());
+      });
+
+      function collectCreateRoomData() {
+        const basicData = {
+          name: document.getElementById('roomName').value.trim(),
+          description: document.getElementById('roomDescription').value.trim(),
+          maxParticipants: parseInt(document.getElementById('maxParticipants').value, 10) || 10,
+          isPrivate: document.getElementById('isPrivate').checked
+        };
+
+        const scheduleItems = Array.from(document.getElementById('scheduleListCreate').children).map(item => {
+          const nameInput = item.querySelector('input[placeholder="日程名称"]');
+          const hoursInput = item.querySelector('input[placeholder="时"]');
+          const minutesInput = item.querySelector('input[placeholder="分"]');
+          const secondsInput = item.querySelector('input[placeholder="秒"]');
+          const hours = parseInt(hoursInput.value, 10) || 0;
+          const minutes = parseInt(minutesInput.value, 10) || 0;
+          const seconds = parseInt(secondsInput.value, 10) || 0;
+          const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+          return {
+            id: item.dataset.id,
+            name: nameInput.value.trim() || '未命名日程',
+            duration: totalSeconds,
+            completed: false
+          };
+        });
+
+        const settings = {
+          autoSchedule: document.getElementById('autoScheduleCreate').checked,
+          allowMessageDelete: document.getElementById('allowMessageDeleteCreate').checked,
+          allowMessageEdit: document.getElementById('allowMessageEditCreate').checked,
+          allowRaiseHand: document.getElementById('allowRaiseHandCreate').checked,
+          allowVoiceChat: document.getElementById('allowVoiceChatCreate').checked
+        };
+
+        return {
+          ...basicData,
+          schedule: scheduleItems,
+          settings: settings
+        };
+      }
+
+      document.getElementById('createRoomSubmitBtn').addEventListener('click', async () => {
+        try {
+          const formData = collectCreateRoomData();
+          if (!formData.name) {
+            alert('请输入房间名称');
+            return;
+          }
+
+          const response = await fetch('/api/rooms', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            body: JSON.stringify(formData)
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || '创建研讨室失败');
+          }
+
+          const room = await response.json();
+          bootstrap.Modal.getInstance(document.getElementById('createRoomModal')).hide();
+          window.location.href = `/rooms/${room.id}`;
+        } catch (error) {
+          console.error('创建研讨室失败:', error);
+          alert('创建研讨室失败: ' + error.message);
+        }
+      });
+
+      loadRooms(true);
     });
   </script>
 </body>
-</html> 
+</html>
